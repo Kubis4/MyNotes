@@ -1,6 +1,7 @@
 package sk.kubdev.selfnote
 
 import androidx.room.TypeConverter
+import sk.kubdev.selfnote.data.remote.local.entities.NoteType
 
 class Converters {
     @TypeConverter

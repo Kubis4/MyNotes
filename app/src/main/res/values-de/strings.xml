@@ -1,0 +1,485 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Name -->
+    <string name="app_name">SelfNote</string>
+
+    <!-- Main Navigation -->
+    <string name="nav_notes">Notizen</string>
+    <string name="nav_archive">Archiv</string>
+    <string name="nav_bin">Papierkorb</string>
+    <string name="nav_settings">Einstellungen</string>
+    <string name="nav_backup">Sicherung</string>
+    <string name="nav_about">Über</string>
+
+    <!-- Common Actions -->
+    <string name="action_back">Zurück</string>
+    <string name="action_save">Speichern</string>
+    <string name="action_cancel">Abbrechen</string>
+    <string name="action_delete">Löschen</string>
+    <string name="action_archive">Archivieren</string>
+    <string name="action_restore">Wiederherstellen</string>
+    <string name="action_ok">OK</string>
+    <string name="action_close">Schließen</string>
+    <string name="action_search">Suchen</string>
+    <string name="action_add">Hinzufügen</string>
+    <string name="action_edit">Bearbeiten</string>
+    <string name="action_undo">Rückgängig</string>
+
+    <!-- Note Management -->
+    <string name="note_title_hint">Notiztitel</string>
+    <string name="note_content_hint">Beginnen Sie mit dem Schreiben Ihrer Notiz...</string>
+    <string name="note_search_hint">Notizen suchen...</string>
+    <string name="note_empty_title">Unbenannte Notiz</string>
+    <string name="notes_empty_message">Noch keine Notizen. Tippen Sie auf die +-Taste, um Ihre erste Notiz zu erstellen!</string>
+    <string name="archive_empty_message">Keine archivierten Notizen</string>
+    <string name="bin_empty_message">Papierkorb ist leer</string>
+
+    <!-- Archive Screen -->
+    <string name="archive_title">Archiv</string>
+    <string name="archive_empty_hint">Archivierte Notizen werden hier angezeigt</string>
+    <string name="archive_restore_all">Alle wiederherstellen</string>
+    <string name="archive_all_restored">Alle Notizen wurden wiederhergestellt</string>
+
+    <!-- Bin Screen -->
+    <string name="bin_title">Papierkorb</string>
+    <string name="bin_empty_hint">Gelöschte Notizen werden hier angezeigt</string>
+    <string name="bin_auto_delete_info">Notizen werden nach 30 Tagen automatisch gelöscht</string>
+    <string name="bin_clean_expired">Abgelaufene bereinigen</string>
+    <string name="bin_empty_action">Papierkorb leeren</string>
+    <string name="bin_restore_all">Alle wiederherstellen</string>
+    <string name="bin_all_restored">Alle Notizen wurden wiederhergestellt</string>
+    <string name="bin_empty_dialog_title">Papierkorb leeren</string>
+    <string name="bin_empty_dialog_message">Sind Sie sicher, dass Sie alle Notizen im Papierkorb dauerhaft löschen möchten? Diese Aktion kann nicht rückgängig gemacht werden.</string>
+    <string name="bin_delete_all">Alle löschen</string>
+    <string name="bin_emptied">Papierkorb geleert</string>
+    <string name="bin_cleanup_dialog_title">Abgelaufene Notizen bereinigen</string>
+    <string name="bin_cleanup_dialog_message">Dies wird alle Notizen dauerhaft löschen, die seit mehr als 30 Tagen im Papierkorb sind. Diese Aktion kann nicht rückgängig gemacht werden.</string>
+    <string name="bin_cleanup_action">Bereinigen</string>
+    <string name="bin_expired_status">Abgelaufen - wird automatisch gelöscht</string>
+    <string name="bin_expires_today">Läuft heute ab</string>
+    <string name="bin_expires_days">Läuft in %d Tagen ab</string>
+    <string name="bin_deleted_time">Gelöscht %s</string>
+
+    <!-- Time Format -->
+    <string name="time_just_now">gerade eben</string>
+    <string name="time_just_now_capitalized">Gerade eben</string>
+    <string name="time_minutes_ago">vor %d Min</string>
+    <string name="time_hours_ago">vor %d Stunden</string>
+    <string name="time_days_ago">vor %d Tagen</string>
+
+    <!-- Date Format -->
+    <string name="date_format_full">d. MMM yyyy</string>
+    <string name="date_format_note">d. MMM yyyy</string>
+    <string name="time_format_note">HH:mm</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Einstellungen</string>
+    <string name="settings_appearance">Erscheinungsbild</string>
+    <string name="settings_language">Sprache</string>
+    <string name="settings_security">Sicherheit</string>
+    <string name="settings_note_interactions">Notizinteraktionen</string>
+
+    <!-- Theme Settings -->
+    <string name="theme_title">Design</string>
+    <string name="theme_light">Hell</string>
+    <string name="theme_dark">Dunkel</string>
+    <string name="theme_system">Systemstandard</string>
+
+    <!-- Color Settings -->
+    <string name="color_title">Farbschema</string>
+    <string name="color_view_all">Alle Farben anzeigen</string>
+    <string name="color_choose_title">Farbe wählen</string>
+    <string name="color_selected">Ausgewählt: %s</string>
+
+    <!-- Language Settings -->
+    <string name="language_title">Sprache</string>
+    <string name="language_english">Englisch</string>
+    <string name="language_slovak">Slowakisch</string>
+    <string name="language_french">Französisch</string>
+    <string name="language_german">Deutsch</string>
+    <string name="language_italian">Italienisch</string>
+    <string name="language_spanish">Spanisch</string>
+    <string name="language_czech">Tschechisch</string>
+    <string name="language_system">Systemstandard</string>
+    <string name="language_system_description">Gerätesprache verwenden</string>
+    <string name="language_restart_info">Die App wird neu gestartet, um die Sprachänderung anzuwenden</string>
+    <string name="language_changed_title">Sprache geändert</string>
+    <string name="language_changed_message">Die Sprache wurde erfolgreich geändert. Bitte starten Sie die App neu, um die Änderungen vollständig anzuwenden.</string>
+
+    <!-- Security Settings -->
+    <string name="security_title">App-Sperre</string>
+    <string name="security_biometric">Biometrische Sperre</string>
+    <string name="security_password">Passwortsperre</string>
+    <string name="security_biometric_unavailable">Auf diesem Gerät nicht verfügbar</string>
+    <string name="security_password_recommended">Für dieses Gerät empfohlen</string>
+    <string name="security_status_biometric">🔒 App mit biometrischer Authentifizierung geschützt</string>
+    <string name="security_status_password">🔒 App mit Passwort-Authentifizierung geschützt</string>
+    <string name="security_status_warning">⚠️ App erfordert Authentifizierung beim Öffnen</string>
+    <string name="security_tip_biometric">💡 Biometrische Authentifizierung ist nicht verfügbar. Verwenden Sie ein Passwort für die Sicherheit.</string>
+
+    <!-- Swipe Settings -->
+    <string name="swipe_title">Wischaktionen</string>
+    <string name="swipe_enable">Wischaktionen aktivieren</string>
+    <string name="swipe_left_action">Nach links wischen</string>
+    <string name="swipe_right_action">Nach rechts wischen</string>
+    <string name="swipe_action_delete">Löschen</string>
+    <string name="swipe_action_delete_desc">Notiz in den Papierkorb verschieben</string>
+    <string name="swipe_action_archive">Archivieren</string>
+    <string name="swipe_action_archive_desc">Notiz für später archivieren</string>
+    <string name="swipe_action_none">Keine</string>
+    <string name="swipe_action_none_desc">Keine Aktion</string>
+    <string name="swipe_release_to">Loslassen zum %s</string>
+    <string name="swipe_almost_there">Fast geschafft...</string>
+    <string name="swipe_keep_swiping">Weiter wischen...</string>
+    <string name="swipe_to">Wischen zum %s</string>
+
+    <!-- Password Dialog -->
+    <string name="password_setup_title">Passwort festlegen</string>
+    <string name="password_hint">Passwort</string>
+    <string name="password_confirm_hint">Passwort bestätigen</string>
+    <string name="password_mismatch">Passwörter stimmen nicht überein</string>
+    <string name="password_set">Passwort festlegen</string>
+
+    <!-- Auth Change Dialogs -->
+    <string name="auth_switch_to_biometric_title">Zu Biometrie wechseln</string>
+    <string name="auth_switch_to_biometric_message">Geben Sie Ihr aktuelles Passwort ein, um zur biometrischen Authentifizierung zu wechseln:</string>
+    <string name="auth_switch_to_biometric_button">Zu Biometrie wechseln</string>
+    <string name="auth_switch_to_password_title">Zu Passwort wechseln</string>
+    <string name="auth_switch_to_password_message">Verwenden Sie Ihren Fingerabdruck, um den Wechsel zur Passwort-Authentifizierung zu bestätigen:</string>
+    <string name="auth_disable_biometric_title">Biometrische Sperre deaktivieren</string>
+    <string name="auth_disable_biometric_message">Verwenden Sie Ihren Fingerabdruck, um die Deaktivierung der biometrischen Authentifizierung zu bestätigen:</string>
+    <string name="auth_disable_password_title">Passwortsperre deaktivieren</string>
+    <string name="auth_disable_password_message">Geben Sie Ihr aktuelles Passwort ein, um die Passwort-Authentifizierung zu deaktivieren:</string>
+    <string name="auth_current_password">Aktuelles Passwort</string>
+    <string name="auth_verify_and_switch">Überprüfen und wechseln</string>
+    <string name="auth_verify_and_disable">Überprüfen und deaktivieren</string>
+    <string name="auth_show_password">Passwort anzeigen</string>
+    <string name="auth_hide_password">Passwort verbergen</string>
+
+    <!-- Authentication -->
+    <string name="auth_title">SelfNote</string>
+    <string name="auth_subtitle">Authentifizieren Sie sich, um auf Ihre Notizen zuzugreifen</string>
+    <string name="auth_biometric_unavailable">Biometrische Authentifizierung nicht verfügbar</string>
+    <string name="auth_biometric_not_available">Biometrische Authentifizierung nicht verfügbar</string>
+    <string name="auth_password_required_for_setup">Passwort für Passwort-Authentifizierung erforderlich</string>
+    <string name="auth_biometric_verification_failed">Biometrische Überprüfung fehlgeschlagen</string>
+    <string name="auth_invalid_password">Ungültiges Passwort</string>
+    <string name="auth_password_required">Passwort erforderlich</string>
+    <string name="auth_biometric_prompt_title">Authentifizieren Sie sich für den Zugriff auf SelfNote</string>
+    <string name="auth_biometric_prompt_subtitle">Verwenden Sie Ihre biometrischen Daten, um die App zu entsperren</string>
+    <string name="auth_authentication_failed">Authentifizierung fehlgeschlagen</string>
+    <string name="auth_password_label">Passwort</string>
+    <string name="auth_unlock">Entsperren</string>
+    <string name="auth_or">oder</string>
+    <string name="auth_use_biometric">Biometrie verwenden</string>
+
+    <!-- Backup Screen -->
+    <string name="backup_title">Sicherung &amp; Wiederherstellung</string>
+    <string name="backup_description">Halten Sie Ihre Notizen sicher, indem Sie Sicherungen erstellen. Exportieren Sie Ihre Daten oder stellen Sie sie aus früheren Sicherungen wieder her.</string>
+    <string name="backup_current_data">Aktuelle Daten</string>
+    <string name="backup_active_notes">Aktive Notizen</string>
+    <string name="backup_archived">Archiviert</string>
+    <string name="backup_total">Gesamt</string>
+    <string name="backup_export_title">Daten exportieren</string>
+    <string name="backup_export_description">Erstellen Sie eine Sicherungsdatei mit all Ihren Notizen und Einstellungen.</string>
+    <string name="backup_export_all">Alle Notizen exportieren</string>
+    <string name="backup_export_active">Nur aktive Notizen exportieren</string>
+    <string name="backup_import_title">Daten importieren</string>
+    <string name="backup_import_description">Notizen aus einer Sicherungsdatei wiederherstellen. Dies wird zu Ihren bestehenden Notizen hinzugefügt.</string>
+    <string name="backup_import_select">Sicherungsdatei auswählen</string>
+    <string name="backup_tips_title">💡 Sicherungstipps</string>
+    <string name="backup_tips_content">• Regelmäßige Sicherungen schützen vor Datenverlust\n• Exportieren Sie vor größeren App-Updates\n• Speichern Sie Sicherungsdateien in der Cloud\n• Import fügt zu bestehenden Notizen hinzu (ersetzt nicht)</string>
+
+    <!-- About Screen -->
+    <string name="about_title">Über</string>
+    <string name="about_subtitle">Ihr persönlicher Notizbegleiter</string>
+    <string name="about_version">Version %s</string>
+    <string name="about_description">SelfNote ist eine leistungsstarke, intuitive Notiz-App, die entwickelt wurde, um Ihnen zu helfen, Ihre Gedanken, Ideen und Aufgaben mühelos zu erfassen, zu organisieren und zu verwalten. Mit Funktionen wie anpassbaren Farben, Wischaktionen und automatischer Organisation macht SelfNote das Notizenmachen zu einem angenehmen Erlebnis.</string>
+    <string name="about_features_title">Hauptfunktionen</string>
+    <string name="about_support_title">SelfNote unterstützen</string>
+    <string name="about_support_description">SelfNote wird mit Leidenschaft als unabhängiges Projekt entwickelt. Wenn Ihnen die App gefällt und Sie sie hilfreich finden, erwägen Sie, ihre Entwicklung zu unterstützen!</string>
+    <string name="about_coffee_button">Spendieren Sie mir einen Kaffee</string>
+    <string name="about_support_message">Ihre Unterstützung hilft, SelfNote kostenlos zu halten und motiviert zur weiteren Entwicklung!</string>
+    <string name="about_contact_title">Kontakt &amp; Feedback</string>
+    <string name="about_contact_send">Feedback senden</string>
+    <string name="about_contact_email">kubisdev1@gmail.com</string>
+    <string name="about_feedback_tips">💡 Was Sie in Ihr Feedback einbeziehen sollten:</string>
+    <string name="about_feedback_content">• Fehlerberichte mit Schritten zur Reproduktion\n• Funktionsanfragen und Vorschläge\n• Allgemeines Feedback zu Ihrer Erfahrung\n• Fragen zur App-Funktionalität</string>
+    <string name="about_contact_message">Ich lese jede E-Mail und schätze jedes Feedback! Ihre Eingabe hilft, SelfNote für alle besser zu machen.</string>
+    <string name="about_developer">Erstellt mit ❤️ von KubDev</string>
+    <string name="about_copyright">© 2025 SelfNote. Alle Rechte vorbehalten.</string>
+    <string name="about_tagline">Ein unabhängiges Projekt, das mit Leidenschaft für Produktivität und Einfachheit entwickelt wurde.</string>
+
+    <!-- Features -->
+    <string name="feature_colors_title">Anpassbare Farben</string>
+    <string name="feature_colors_desc">Personalisieren Sie Ihre Notizen mit schönen Farbschemata</string>
+    <string name="feature_swipe_title">Wischaktionen</string>
+    <string name="feature_swipe_desc">Schnelles Archivieren und Löschen mit anpassbaren Wischgesten</string>
+    <string name="feature_security_title">Sicherer Zugriff</string>
+    <string name="feature_security_desc">Schützen Sie Ihre Notizen mit biometrischer und Passwort-Authentifizierung</string>
+    <string name="feature_organization_title">Intelligente Organisation</string>
+    <string name="feature_organization_desc">Automatische Archivierung und 30-tägige Aufbewahrung im Papierkorb</string>
+    <string name="feature_search_title">Leistungsstarke Suche</string>
+    <string name="feature_search_desc">Finden Sie Ihre Notizen schnell mit erweiterter Suche</string>
+    <string name="feature_themes_title">Adaptive Designs</string>
+    <string name="feature_themes_desc">Helle, dunkle und Systemdesigns mit dynamischen Farben</string>
+
+    <!-- Error Messages -->
+    <string name="error_generic">Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.</string>
+    <string name="error_network">Netzwerkfehler. Überprüfen Sie Ihre Verbindung.</string>
+    <string name="error_no_email_app">Bitte installieren Sie eine E-Mail-App oder kontaktieren Sie %s direkt.</string>
+
+    <!-- Success Messages -->
+    <string name="success_note_saved">Notiz gespeichert</string>
+    <string name="success_note_deleted">Notiz gelöscht</string>
+    <string name="success_note_archived">Notiz archiviert</string>
+    <string name="success_note_restored">Notiz wiederhergestellt</string>
+    <string name="success_export_complete">Export abgeschlossen! Überprüfen Sie Ihren Downloads-Ordner.</string>
+    <string name="success_import_complete">Import abgeschlossen! %d Notizen wiederhergestellt.</string>
+
+    <!-- Accessibility -->
+    <string name="selected_indicator">Ausgewählt</string>
+
+    <!-- Note Detail Screen -->
+    <string name="note_new_title">Neue Notiz</string>
+    <string name="note_edit_title">Notiz bearbeiten</string>
+    <string name="note_toggle_toolbar">Symbolleiste umschalten</string>
+    <string name="note_delete">Notiz löschen</string>
+    <string name="note_save">Notiz speichern</string>
+    <string name="note_add_line">Textzeile hinzufügen</string>
+    <string name="note_delete_separator">Trennzeichen löschen</string>
+    <string name="note_delete_checkbox">Kontrollkästchen löschen</string>
+    <string name="note_bullet">Aufzählungszeichen</string>
+
+    <!-- Note Image -->
+    <string name="note_image">Notizbild</string>
+    <string name="image_zoom_out">Verkleinern</string>
+    <string name="image_zoom_in">Vergrößern</string>
+    <string name="image_resize">Größe ändern</string>
+    <string name="image_move_up">Nach oben verschieben</string>
+    <string name="image_move_down">Nach unten verschieben</string>
+    <string name="image_reset">Bild zurücksetzen</string>
+    <string name="image_delete">Bild löschen</string>
+    <string name="image_position">Position: %1$d/%2$d</string>
+    <string name="image_drag_release_up">Loslassen zum Nach-oben-Verschieben ↑</string>
+    <string name="image_drag_release_down">Loslassen zum Nach-unten-Verschieben ↓</string>
+    <string name="image_drag_reorder">Nach oben/unten ziehen zum Umordnen</string>
+    <string name="image_height">Höhe: %ddp</string>
+
+    <!-- Note Formatting -->
+    <string name="formatting_bold">Fett</string>
+    <string name="formatting_italic">Kursiv</string>
+    <string name="formatting_underline">Unterstrichen</string>
+    <string name="formatting_font_size">Schriftgröße</string>
+    <string name="formatting_text_color">Textfarbe</string>
+    <string name="formatting_clear_color">Farbe löschen</string>
+    <string name="formatting_bullet_mode">Aufzählungsmodus</string>
+    <string name="formatting_checklist_mode">Checklistenmodus</string>
+    <string name="formatting_add_separator">Trennzeichen hinzufügen</string>
+    <string name="formatting_add_image">Bild hinzufügen</string>
+    <string name="formatting_default_size">Standardgröße</string>
+    <string name="font_size_sp">%dsp</string>
+
+    <!-- Note Item -->
+    <string name="note_pin">Notiz anheften</string>
+    <string name="note_unpin">Notiz lösen</string>
+    <string name="note_type_text">Textnotiz</string>
+    <string name="note_type_checklist">Checkliste</string>
+    <string name="note_checklist_preview">%1$s • %2$d/%3$d erledigt</string>
+    <string name="note_checklist_empty">Leere Checkliste</string>
+    <string name="note_pin_action">Anheften</string>
+    <string name="note_unpin_action">Lösen</string>
+    <string name="note_title_placeholder">Notiztitel</string>
+
+    <!-- Note List Screen -->
+    <string name="search_notes_hint">Notizen suchen...</string>
+    <string name="clear_search">Suche löschen</string>
+    <string name="open_drawer">Navigationsmenü öffnen</string>
+    <string name="filter_notes">Notizen filtern</string>
+    <string name="change_layout">Layout ändern</string>
+
+    <!-- Filter Menu -->
+    <string name="filter_section">Filtern</string>
+    <string name="filter_all_notes">Alle Notizen</string>
+    <string name="filter_text_only">Nur Textnotizen</string>
+    <string name="filter_checklist_only">Nur Checklisten</string>
+
+    <!-- Sort Menu -->
+    <string name="sort_section">Sortieren</string>
+    <string name="sort_manual">Manuelle Reihenfolge</string>
+    <string name="sort_newest">Neueste zuerst</string>
+    <string name="sort_oldest">Älteste zuerst</string>
+    <string name="sort_az">A → Z</string>
+    <string name="sort_za">Z → A</string>
+
+    <!-- FAB Items -->
+    <string name="fab_todo_list">Aufgabenliste</string>
+    <string name="fab_note">Notiz</string>
+    <string name="fab_new_category">Neue Kategorie</string>
+
+    <!-- Empty States -->
+    <string name="no_notes_found">Keine Notizen für \"%s\" gefunden</string>
+    <string name="no_notes_filter">Keine Notizen entsprechen dem aktuellen Filter</string>
+    <string name="no_notes_yet">Noch keine Notizen.\nTippen Sie auf die \'+\'-Taste, um eine zu erstellen.</string>
+    <string name="no_notes_in_category">Keine Notizen in dieser Kategorie</string>
+
+    <!-- Sections -->
+    <string name="section_pinned">Angeheftet</string>
+    <string name="section_others">Andere</string>
+
+    <!-- Snackbar Messages -->
+    <string name="snackbar_note_deleted">Notiz gelöscht</string>
+    <string name="snackbar_note_archived">Notiz archiviert</string>
+
+    <!-- Note Options Bottom Sheet -->
+    <string name="untitled_note">Unbenannte Notiz</string>
+    <string name="edit_title">Titel bearbeiten</string>
+    <string name="move_to_category">In Kategorie verschieben</string>
+    <string name="change_color">Farbe ändern</string>
+
+    <!-- Section Header -->
+    <string name="collapse_section">Einklappen</string>
+    <string name="expand_section">Ausklappen</string>
+    <string name="category_options">Kategorieoptionen</string>
+
+    <!-- Category Dialog -->
+    <string name="new_category">Neue Kategorie</string>
+    <string name="edit_category">Kategorie bearbeiten</string>
+    <string name="category_name_label">Kategoriename</string>
+    <string name="move_to_category_title">In Kategorie verschieben</string>
+
+    <!-- ViewModel Messages -->
+    <string name="untitled_todo">Unbenannte Aufgabe</string>
+
+    <!-- Cleanup Messages -->
+    <string name="msg_expired_notes_deleted">%d abgelaufene Notizen automatisch gelöscht</string>
+    <string name="msg_expired_notes_cleaned">%d abgelaufene Notizen bereinigt</string>
+    <string name="msg_no_expired_notes">Keine abgelaufenen Notizen zum Bereinigen</string>
+
+    <!-- Note Operation Messages -->
+    <string name="msg_note_color_updated">Notizfarbe aktualisiert</string>
+    <string name="msg_notes_color_updated">Farbe von %d Notizen aktualisiert</string>
+    <string name="msg_note_restored_from_archive">Notiz aus dem Archiv wiederhergestellt</string>
+    <string name="msg_note_permanently_deleted">Notiz dauerhaft gelöscht</string>
+    <string name="msg_note_restored">Notiz wiederhergestellt</string>
+    <string name="msg_notes_moved_to_bin">%d Notizen in den Papierkorb verschoben</string>
+    <string name="msg_notes_archived">%d Notizen archiviert</string>
+    <string name="msg_notes_permanently_deleted">%d Notizen dauerhaft gelöscht</string>
+    <string name="msg_note_pinned">Notiz angeheftet</string>
+    <string name="msg_note_unpinned">Notiz gelöst</string>
+
+    <!-- Category Messages -->
+    <string name="msg_category_created">Kategorie \'%s\' erstellt</string>
+    <string name="msg_category_updated">Kategorie aktualisiert</string>
+    <string name="msg_category_deleted">Kategorie gelöscht</string>
+    <string name="msg_note_moved_to_category">Notiz nach \'%s\' verschoben und gelöst</string>
+    <string name="msg_note_moved_to_uncategorized">Notiz zu unkategorisiert verschoben</string>
+
+    <!-- Import/Export Messages -->
+    <string name="msg_notes_imported">%d Notizen importiert</string>
+    <string name="msg_all_notes_reset_to_default_color">Alle Notizen auf Standardfarbe zurückgesetzt</string>
+    <string name="msg_note_duplicated">Notiz dupliziert</string>
+    <string name="msg_notes_restored_from_backup">%d Notizen aus Sicherung wiederhergestellt</string>
+
+    <!-- Note Copy Suffix -->
+    <string name="note_copy_suffix">%s (Kopie)</string>
+
+    <!-- Validation Messages -->
+    <string name="validation_empty_note">Leere Notiz (kein Titel oder Inhalt)</string>
+    <string name="validation_invalid_note_type">Ungültiger Notiztyp: %s</string>
+
+    <!-- ToDo List Screen -->
+    <string name="todo_toggle_formatting">Formatierung umschalten</string>
+    <string name="todo_add_item">Element hinzufügen</string>
+    <string name="todo_font_size_applied">Schriftgröße auf gesamte Zeile angewendet (%dsp)</string>
+    <string name="todo_section_divider">Abschnittsteiler</string>
+    <string name="todo_active_tasks">Aktive Aufgaben (%d)</string>
+    <string name="todo_completed_tasks">Erledigt (%d)</string>
+    <string name="todo_empty_state">Tippen Sie auf +, um Ihre erste Aufgabe hinzuzufügen</string>
+    <string name="todo_drag_to_reorder">Ziehen zum Umordnen</string>
+    <string name="todo_add_separator">Trennzeichen hinzufügen</string>
+
+    <!-- Backup ViewModel -->
+    <string name="backup_sign_in_failed">Anmeldung fehlgeschlagen: %s</string>
+    <string name="backup_sign_in_error">Anmeldefehler: %s</string>
+    <string name="backup_starting">Sicherung wird gestartet...</string>
+    <string name="backup_failed">Sicherung fehlgeschlagen: %s</string>
+    <string name="backup_error">Sicherungsfehler: %s</string>
+    <string name="backup_load_failed">Laden der Sicherungen fehlgeschlagen: %s</string>
+    <string name="backup_restore_starting">Wiederherstellung wird gestartet...</string>
+    <string name="backup_restore_success">%d Notizen erfolgreich wiederhergestellt</string>
+    <string name="backup_restore_failed">Wiederherstellung fehlgeschlagen: %s</string>
+    <string name="backup_delete_failed">Löschen fehlgeschlagen: %s</string>
+    <string name="backup_auto_disabled">Automatische Sicherung deaktiviert</string>
+    <string name="backup_manual_scheduled">Manuelle Sicherung geplant</string>
+
+    <!-- Backup Frequency -->
+    <string name="backup_frequency_daily">täglich</string>
+    <string name="backup_frequency_weekly">wöchentlich am %s</string>
+    <string name="backup_frequency_monthly">monatlich am %d. Tag</string>
+    <string name="backup_auto_enabled">Automatische Sicherung aktiviert %1$s um %2$s</string>
+
+    <!-- Days of Week -->
+    <string name="day_sunday">Sonntag</string>
+    <string name="day_monday">Montag</string>
+    <string name="day_tuesday">Dienstag</string>
+    <string name="day_wednesday">Mittwoch</string>
+    <string name="day_thursday">Donnerstag</string>
+    <string name="day_friday">Freitag</string>
+    <string name="day_saturday">Samstag</string>
+
+    <!-- Backup Worker Notifications -->
+    <string name="backup_notification_channel_name">Sicherungsbenachrichtigungen</string>
+    <string name="backup_notification_channel_description">Benachrichtigungen für automatischen Sicherungsstatus</string>
+    <string name="backup_notification_backing_up">Notizen werden gesichert</string>
+    <string name="backup_notification_in_progress">Ihre Notizen werden auf Google Drive gesichert...</string>
+    <string name="backup_notification_skipped">Sicherung übersprungen</string>
+    <string name="backup_notification_sign_in_required">Bitte melden Sie sich bei Google Drive an, um Sicherungen zu aktivieren</string>
+    <string name="backup_notification_backing_up_count">%d Notizen werden gesichert...</string>
+    <string name="backup_notification_success">Sicherung erfolgreich</string>
+    <string name="backup_notification_success_message">%d Notizen erfolgreich auf Google Drive gesichert</string>
+    <string name="backup_notification_failed">Sicherung fehlgeschlagen</string>
+    <string name="backup_notification_failed_message">Sicherung der Notizen fehlgeschlagen: %s</string>
+    <string name="backup_notification_error">Sicherungsfehler</string>
+    <string name="backup_notification_error_message">Während der Sicherung ist ein Fehler aufgetreten: %s</string>
+
+    <!-- Google Drive Manager -->
+    <string name="drive_sign_in_cancelled">Anmeldung abgebrochen</string>
+    <string name="drive_failed_get_account">Konto konnte nicht abgerufen werden</string>
+    <string name="drive_sign_in_success">Erfolgreich angemeldet als %s</string>
+    <string name="drive_sign_in_failed">Anmeldung fehlgeschlagen: %s</string>
+    <string name="drive_sign_out_success">Erfolgreich abgemeldet</string>
+    <string name="drive_not_signed_in">Nicht bei Google Drive angemeldet</string>
+    <string name="drive_service_not_initialized">Drive-Dienst nicht initialisiert</string>
+
+    <!-- Google Drive Progress Messages -->
+    <string name="drive_preparing_backup">Sicherungsdaten werden vorbereitet...</string>
+    <string name="drive_creating_backup_file">Sicherungsdatei wird erstellt...</string>
+    <string name="drive_uploading_to_drive">Wird auf Google Drive hochgeladen...</string>
+    <string name="drive_backup_completed">Sicherung erfolgreich abgeschlossen!</string>
+    <string name="drive_backup_created_success">Sicherung erfolgreich erstellt: %s</string>
+    <string name="drive_downloading_backup">Sicherungsdatei wird heruntergeladen...</string>
+    <string name="drive_processing_backup">Sicherungsdaten werden verarbeitet...</string>
+    <string name="drive_restore_completed">Wiederherstellung erfolgreich abgeschlossen!</string>
+    <string name="drive_backup_deleted_success">Sicherung erfolgreich gelöscht</string>
+
+    <!-- Google Drive Cleanup Messages -->
+    <string name="drive_no_backups_to_clean">Keine Sicherungen zum Bereinigen</string>
+    <string name="drive_deleted_old_backups">%d alte Sicherungen gelöscht</string>
+    <string name="drive_no_old_backups">Keine alten Sicherungen zum Löschen</string>
+    <string name="drive_failed_list_backups">Auflisten der Sicherungen fehlgeschlagen</string>
+
+    <!-- File Size Formatting -->
+    <string name="file_size_bytes">%d B</string>
+    <string name="file_size_kb">%d KB</string>
+    <string name="file_size_mb">%d MB</string>
+
+    <!-- Backup Date Format -->
+    <string name="backup_date_format">d. MMM yyyy HH:mm</string>
+
+    <!-- Color Picker Dialog -->
+    <string name="color_picker_title">Farbe wählen</string>
+    <string name="color_picker_current">Aktuell: %s</string>
+    <string name="color_picker_random">Zufällig</string>
+    <string name="color_picker_selected_desc">%s ausgewählt</string>
+</resources>
