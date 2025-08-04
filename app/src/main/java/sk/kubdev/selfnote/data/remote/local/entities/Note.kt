@@ -22,5 +22,6 @@ data class Note(
     val createdAt: Long = System.currentTimeMillis(),
     val isArchived: Boolean = false,
     val categoryId: Int? = null,
-    val orderIndex: Int = 0 // ADD THIS LINE
+    val orderIndex: Int = 0,
+    val collaborativeNoteId: String? = null,
 )

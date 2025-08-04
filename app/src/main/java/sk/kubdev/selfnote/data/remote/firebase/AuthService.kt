@@ -30,7 +30,7 @@ class AuthService @Inject constructor(
         private const val TAG = "AuthService"
         // You'll need to get this from your Firebase project settings
         // Go to Project Settings -> General -> Web API Key
-        private const val WEB_CLIENT_ID = "" // Replace with actual ID
+        private const val WEB_CLIENT_ID = "946751285218-hgm21vckspia4mf9a3bphjlqv32toib7.apps.googleusercontent.com" // Replace with actual ID
     }
 
     fun getCurrentUser(): FirebaseUser? = auth.currentUser

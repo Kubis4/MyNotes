@@ -4,7 +4,7 @@
     <selectionStates>
       <SelectionState runConfigName="SelfNote">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-07-20T20:14:42.095649300Z">
+        <DropdownSelection timestamp="2025-08-04T19:23:25.423304200Z">
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="PhysicalDevice" identifier="serial=47041FDAS00188" />

@@ -1,11 +1,15 @@
 package sk.kubdev.selfnote
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -17,6 +21,7 @@ import sk.kubdev.selfnote.settings.SettingsViewModel
 import sk.kubdev.selfnote.settings.SettingsScreen
 import sk.kubdev.selfnote.ui.screens.*
 import sk.kubdev.selfnote.ui.components.AppDrawer
+import sk.kubdev.selfnote.data.remote.local.entities.NoteType
 
 // A sealed class to define all our app's screens
 sealed class Screen(val route: String) {
@@ -135,24 +140,54 @@ fun AppNavigation(
                 )
             }
 
-            // ✅ FIXED: Collaborative Todo Screen with proper parameters
+            // ✅ FIXED: Collaborative Todo Screen with proper handling for "new"
             composable(
                 route = Screen.CollaborativeTodo.route,
                 arguments = listOf(navArgument("collaborativeNoteId") { type = NavType.StringType })
             ) { backStackEntry ->
                 val collaborativeNoteId = backStackEntry.arguments?.getString("collaborativeNoteId") ?: ""
-                ToDoListScreen(
-                    noteIdArg = 0, // Not used for collaborative
-                    navController = navController,
-                    viewModel = viewModel,
-                    isCollaborative = true,
-                    collaborativeNoteId = collaborativeNoteId
-                )
+
+                if (collaborativeNoteId == "new") {
+                    // Create new collaborative todo
+                    LaunchedEffect(Unit) {
+                        viewModel.createCollaborativeNote(
+                            title = "New Collaborative Todo",
+                            lines = emptyList(),
+                            noteType = NoteType.CHECKLIST
+                        ) { newId ->
+                            navController.navigate("collaborative_todo/$newId") {
+                                popUpTo("collaborative_todo/new") { inclusive = true }
+                            }
+                        }
+                    }
+
+                    // Show loading screen while creating
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            CircularProgressIndicator()
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text("Creating collaborative todo...")
+                        }
+                    }
+                } else {
+                    ToDoListScreen(
+                        noteIdArg = 0, // Not used for collaborative
+                        navController = navController,
+                        viewModel = viewModel,
+                        isCollaborative = true,
+                        collaborativeNoteId = collaborativeNoteId
+                    )
+                }
             }
 
             // Note Detail Screen
             composable(
-                route = "noteDetail/{noteId}",
+                route = Screen.NoteDetail.route,
                 arguments = listOf(navArgument("noteId") { type = NavType.IntType })
             ) { backStackEntry ->
                 val noteId = backStackEntry.arguments?.getInt("noteId") ?: 0
@@ -163,9 +198,9 @@ fun AppNavigation(
                 )
             }
 
-// ToDoList Screen (Local)
+            // ToDoList Screen (Local)
             composable(
-                route = "todoList/{noteId}",
+                route = Screen.ToDoList.route,
                 arguments = listOf(navArgument("noteId") { type = NavType.IntType })
             ) { backStackEntry ->
                 val noteId = backStackEntry.arguments?.getInt("noteId") ?: 0

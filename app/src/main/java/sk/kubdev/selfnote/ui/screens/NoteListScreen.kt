@@ -312,8 +312,19 @@ fun NoteListScreen(
     // Unified notes creation
     val allUnifiedNotes = remember(notes, collaborativeNotes) {
         try {
-            val regularNotes = notes.map { UnifiedNote.fromNote(it) }
+            // Get all collaborative note IDs that match local notes
+            val collaborativeTitles = collaborativeNotes.map { it.title.lowercase() }.toSet()
+
+            // Filter out local notes that have collaborative versions
+            val regularNotes = notes
+                .filter { localNote ->
+                    // Keep the note if it doesn't have a collaborative version
+                    !collaborativeTitles.contains(localNote.title.lowercase())
+                }
+                .map { UnifiedNote.fromNote(it) }
+
             val collabNotes = collaborativeNotes.map { UnifiedNote.fromCollaborativeNote(it) }
+
             (regularNotes + collabNotes).sortedByDescending { it.lastModifiedAt }
         } catch (e: Exception) {
             Log.e("NoteListScreen", "Error creating unified notes", e)
@@ -437,13 +448,8 @@ fun NoteListScreen(
                     label = "Collaborative Todo",
                     onClick = {
                         isFabExpanded = false
-                        viewModel.createCollaborativeNote(
-                            title = "New Collaborative Todo",
-                            lines = emptyList(),
-                            noteType = NoteType.CHECKLIST
-                        ) { collaborativeId ->
-                            navController.navigate("collaborative_todo/$collaborativeId")
-                        }
+                        // ✅ FIXED: Navigate to new collaborative todo
+                        navController.navigate("collaborative_todo/new")
                     }
                 ))
             }
@@ -557,8 +563,9 @@ fun NoteListScreen(
                 allUnifiedNotes.find { unifiedNote ->
                     when {
                         unifiedNote.isCollaborative -> {
-                            (currentNote!!.id < 0 && unifiedNote.collaborativeId != null) ||
-                                    (currentNote!!.title == unifiedNote.title && unifiedNote.collaborativeId != null)
+                            // Check if the note has collaborative info
+                            currentNote!!.collaborativeNoteId == unifiedNote.collaborativeId ||
+                                    (currentNote!!.id < 0 && currentNote!!.title == unifiedNote.title)
                         }
                         else -> {
                             unifiedNote.id == currentNote!!.id.toString()
@@ -967,9 +974,13 @@ fun NoteListScreen(
                                         val unifiedNote = remember(note, allUnifiedNotes) {
                                             allUnifiedNotes.find { unified ->
                                                 when {
+                                                    // For collaborative notes, check if this note matches
                                                     unified.isCollaborative -> {
-                                                        note.id < 0 && unified.collaborativeId != null
+                                                        // Match by negative ID or by title
+                                                        (note.id < 0 && unified.title == note.title) ||
+                                                                (note.collaborativeNoteId == unified.collaborativeId)
                                                     }
+                                                    // For regular notes, match by ID
                                                     else -> unified.id == note.id.toString()
                                                 }
                                             }
@@ -981,6 +992,7 @@ fun NoteListScreen(
                                                 settings = settings,
                                                 onNoteClick = {
                                                     if (unifiedNote?.isCollaborative == true) {
+                                                        Log.d("NoteListScreen", "Navigating to collaborative note: ${unifiedNote.collaborativeId}")
                                                         navController.navigate("collaborative_todo/${unifiedNote.collaborativeId}")
                                                     } else {
                                                         when (note.type) {
@@ -1078,9 +1090,13 @@ fun NoteListScreen(
                                                     val unifiedNote = remember(note, allUnifiedNotes) {
                                                         allUnifiedNotes.find { unified ->
                                                             when {
+                                                                // For collaborative notes, check if this note matches
                                                                 unified.isCollaborative -> {
-                                                                    note.id < 0 && unified.collaborativeId != null
+                                                                    // Match by negative ID or by title
+                                                                    (note.id < 0 && unified.title == note.title) ||
+                                                                            (note.collaborativeNoteId == unified.collaborativeId)
                                                                 }
+                                                                // For regular notes, match by ID
                                                                 else -> unified.id == note.id.toString()
                                                             }
                                                         }
