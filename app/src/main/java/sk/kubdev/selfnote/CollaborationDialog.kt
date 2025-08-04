@@ -20,13 +20,19 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import sk.kubdev.selfnote.ui.screens.getInitials
+
 import sk.kubdev.selfnote.data.remote.models.CollaboratorInfo
 import sk.kubdev.selfnote.data.remote.models.CollaboratorRole
 
-// ✅ REMOVED: Delete this duplicate data class
-// data class CollaboratorInfo(...)
 
+// Helper function to get user initials
+fun getInitials(name: String): String {
+    return name.split(" ")
+        .mapNotNull { it.firstOrNull()?.toString() }
+        .take(2)
+        .joinToString("")
+        .uppercase()
+}
 @Composable
 fun CollaborationDialog(
     onDismiss: () -> Unit,

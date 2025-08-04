@@ -12,7 +12,7 @@ import sk.kubdev.selfnote.data.remote.local.entities.Category
 import sk.kubdev.selfnote.data.remote.local.entities.Note
 
 // Add Category to entities and increment version
-@Database(entities = [Note::class, Category::class], version = 11, exportSchema = false)
+@Database(entities = [Note::class, Category::class], version = 12, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class NoteDatabase : RoomDatabase() {
 

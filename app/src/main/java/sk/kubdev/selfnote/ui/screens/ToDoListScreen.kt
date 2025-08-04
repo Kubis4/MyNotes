@@ -1,10 +1,14 @@
 package sk.kubdev.selfnote.ui.screens
 
 import android.content.Intent
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -16,15 +20,19 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
@@ -42,8 +50,10 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -56,6 +66,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.isActive
 import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.ui.text.style.TextDirection
 import com.google.firebase.auth.FirebaseAuth
 import sk.kubdev.selfnote.CollaborationDialog
 import sk.kubdev.selfnote.CollaboratorsDialog
@@ -73,6 +84,7 @@ import sk.kubdev.selfnote.toNoteLines
 import sk.kubdev.selfnote.data.remote.models.CollaboratorInfo
 import sk.kubdev.selfnote.data.remote.models.CollaboratorRole
 import sk.kubdev.selfnote.data.remote.models.InviteStatus
+import sk.kubdev.selfnote.ui.theme.NoteColorPalette
 
 // Active formatting for typing - using Int for fontSize
 data class ActiveFormatting(
@@ -81,13 +93,6 @@ data class ActiveFormatting(
     val isUnderline: Boolean = false,
     val color: Color? = null,
     val fontSize: Int? = null
-)
-
-// User info for collaboration
-data class UserInfo(
-    val email: String,
-    val displayName: String?,
-    val color: Color
 )
 
 // Helper function to get user initials
@@ -172,13 +177,64 @@ fun cleanupOverlappingSpans(spans: List<SerializableSpanStyle>): List<Serializab
     return result.sortedBy { it.start }
 }
 
+// Helper function to build annotated string with active formatting
+fun buildAnnotatedStringWithActiveFormatting(
+    text: String,
+    spans: List<SerializableSpanStyle>,
+    activeFormatting: ActiveFormatting,
+    cursorPosition: Int
+): AnnotatedString {
+    return buildAnnotatedString {
+        append(text)
+
+        // Apply existing spans
+        spans.forEach { span ->
+            if (span.start < text.length && span.end <= text.length && span.start < span.end) {
+                val spanStyle = SpanStyle(
+                    fontWeight = span.fontWeight?.let { FontWeight(it) },
+                    fontStyle = span.fontStyle?.let {
+                        if (it == "italic") FontStyle.Italic else FontStyle.Normal
+                    },
+                    textDecoration = span.textDecoration?.let {
+                        if (it == "underline") TextDecoration.Underline else null
+                    },
+                    color = span.color?.let { Color(it) } ?: Color.Unspecified,
+                    fontSize = span.fontSize?.sp ?: TextUnit.Unspecified
+                )
+                addStyle(spanStyle, span.start, span.end)
+            }
+        }
+
+        // Apply active formatting at cursor position for visual feedback
+        if (cursorPosition >= 0 && cursorPosition <= text.length) {
+            val previewStart = (cursorPosition - 1).coerceAtLeast(0)
+            val previewEnd = cursorPosition
+
+            if (previewStart < previewEnd) {
+                val activeStyle = SpanStyle(
+                    fontWeight = if (activeFormatting.isBold) FontWeight.Bold else null,
+                    fontStyle = if (activeFormatting.isItalic) FontStyle.Italic else null,
+                    textDecoration = if (activeFormatting.isUnderline) TextDecoration.Underline else null,
+                    color = activeFormatting.color ?: Color.Unspecified,
+                    fontSize = activeFormatting.fontSize?.sp ?: TextUnit.Unspecified
+                )
+                try {
+                    addStyle(activeStyle, previewStart, previewEnd)
+                } catch (e: Exception) {
+                    // Ignore if out of bounds
+                }
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ToDoListScreen(
     noteIdArg: Int,
     navController: NavController,
     viewModel: NoteViewModel = hiltViewModel(),
-    // ✅ NEW: Collaboration parameters
+    // Collaboration parameters
     isCollaborative: Boolean = false,
     collaborativeNoteId: String? = null
 ) {
@@ -188,21 +244,22 @@ fun ToDoListScreen(
     // Simple list of lines
     val lines = remember { mutableStateListOf<NoteLine>() }
 
-    // ✅ NEW: Collaboration states
+    // Collaboration states
     var showCollaborationDialog by remember { mutableStateOf(false) }
     var showInviteDialog by remember { mutableStateOf(false) }
     var showCollaboratorsDialog by remember { mutableStateOf(false) }
     var collaborators by remember { mutableStateOf<List<CollaboratorInfo>>(emptyList()) }
 
-    // ✅ NEW: Get collaboration data
-    val collaborativeNotes by viewModel.collaborativeNotes.collectAsStateWithLifecycle()
+    // Get collaboration data
     val pendingInvites by viewModel.pendingInvites.collectAsStateWithLifecycle()
     val collaborationError by viewModel.collaborationError.collectAsStateWithLifecycle()
 
-    // ✅ FIXED: Formatting states with proper active formatting tracking
-    var isToolbarVisible by remember { mutableStateOf(false) }
+    // FAB menu state
+    var fabMenuExpanded by remember { mutableStateOf(false) }
+
+    // Formatting states with proper active formatting tracking
+    var isToolbarVisible by remember { mutableStateOf(true) } // ✅ FIXED: Default to true
     var editingLineId by remember { mutableStateOf<String?>(null) }
-    var focusedLineIndex by remember { mutableStateOf<Int?>(null) }
     var selection by remember { mutableStateOf(TextRange.Zero) }
     var toggledStyles by remember { mutableStateOf<Set<String>>(emptySet()) }
     var activeColor by remember { mutableStateOf<Color?>(null) }
@@ -212,7 +269,7 @@ fun ToDoListScreen(
     var selectedLineId by remember { mutableStateOf<String?>(null) }
     var selectedTextRange by remember { mutableStateOf<TextRange?>(null) }
 
-    // ✅ NEW: Track cursor position for active formatting
+    // Track cursor position for active formatting
     var currentCursorPosition by remember { mutableStateOf(0) }
 
     // Title focus
@@ -220,7 +277,6 @@ fun ToDoListScreen(
     var isTitleFocused by remember { mutableStateOf(false) }
     val lineFocusRequesters = remember { mutableMapOf<String, FocusRequester>() }
 
-    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
     val lazyListState = rememberLazyListState()
@@ -236,6 +292,7 @@ fun ToDoListScreen(
     var draggedItemId by remember { mutableStateOf<String?>(null) }
     var dragOffset by remember { mutableStateOf(0f) }
     var dropTargetId by remember { mutableStateOf<String?>(null) }
+    var initialDragPosition by remember { mutableStateOf(0f) }
 
     // Auto-scroll state
     var autoScrollJob by remember { mutableStateOf<Job?>(null) }
@@ -246,6 +303,9 @@ fun ToDoListScreen(
     // DEBOUNCED AUTOSAVE STATES
     var autoSaveJob by remember { mutableStateOf<Job?>(null) }
     var isUserEditing by remember { mutableStateOf(false) }
+
+    // ✅ FIXED: Track if we should save on exit
+    var shouldSaveOnExit by remember { mutableStateOf(!isCollaborative) }
 
     // Performance: Use derivedStateOf for computed values
     val activeItems by remember {
@@ -273,7 +333,7 @@ fun ToDoListScreen(
         }
     }
 
-    // ✅ FIXED: Create computed activeFormatting that properly reflects current state
+    // Create computed activeFormatting that properly reflects current state
     val currentActiveFormatting = remember(toggledStyles, activeColor, activeFontSize, selectedLineId, selectedTextRange) {
         ActiveFormatting(
             isBold = toggledStyles.contains("BOLD"),
@@ -284,34 +344,15 @@ fun ToDoListScreen(
         )
     }
 
-
-    // ✅ NEW: Start collaborative sync
-    LaunchedEffect(isCollaborative, collaborativeNoteId) {
-        if (isCollaborative && collaborativeNoteId != null) {
-            viewModel.startCollaborativeSync()
-            // Listen for real-time updates
-            viewModel.getCollaborativeNoteFlow(collaborativeNoteId).collect { note ->
-                if (note != null && !isUserEditing) {
-                    title = note.title
-                    val newLines = note.content.toNoteLines()
-                    if (lines.map { it.content } != newLines.map { it.content }) {
-                        lines.clear()
-                        lines.addAll(newLines)
-                    }
-                }
-            }
-        }
-    }
-
-    // ✅ FIXED: Auto-save functions for both local and collaborative
+    // Auto-save functions for both local and collaborative
     fun triggerImmediateAutoSave() {
         autoSaveJob?.cancel()
         coroutineScope.launch {
             if (isCollaborative && collaborativeNoteId != null) {
                 // Update collaborative note
                 viewModel.updateCollaborativeNote(collaborativeNoteId, title, lines.toList())
-            } else {
-                // ✅ FIXED: Use triggerAutoSave for local notes
+            } else if (shouldSaveOnExit) { // ✅ FIXED: Only save if we should
+                // Use triggerAutoSave for local notes
                 viewModel.triggerAutoSave(
                     noteId = noteId,
                     title = title,
@@ -334,8 +375,8 @@ fun ToDoListScreen(
             delay(2000)
             if (isCollaborative && collaborativeNoteId != null) {
                 viewModel.updateCollaborativeNote(collaborativeNoteId, title, lines.toList())
-            } else {
-                // ✅ FIXED: Use triggerAutoSave for local notes
+            } else if (shouldSaveOnExit) { // ✅ FIXED: Only save if we should
+                // Use triggerAutoSave for local notes
                 viewModel.triggerAutoSave(
                     noteId = noteId,
                     title = title,
@@ -377,74 +418,64 @@ fun ToDoListScreen(
         autoScrollJob = null
     }
 
-    // Function to calculate drop target based on drag position
+    // Fixed calculateDropTarget function
     fun calculateDropTarget(currentDragOffset: Float): String? {
         val layoutInfo = lazyListState.layoutInfo
         val visibleItems = layoutInfo.visibleItemsInfo
 
         if (visibleItems.isEmpty() || draggedItem == null) return null
 
-        // Find the dragged item's current visual position
-        val draggedItemInfo = visibleItems.find { it.key == draggedItemId }
-        if (draggedItemInfo == null) return null
+        // Get the dragged item's current position
+        val draggedItemInfo = visibleItems.find { it.key == draggedItemId } ?: return null
+        val draggedItemY = draggedItemInfo.offset + currentDragOffset
+        val draggedItemCenter = draggedItemY + draggedItemInfo.size / 2
 
-        // Calculate the center position of the dragged item (convert to Float)
-        val draggedItemCenter = draggedItemInfo.offset.toFloat() + draggedItemInfo.size.toFloat() / 2 + currentDragOffset
+        // Find the best drop target
+        var bestTarget: String? = null
+        var bestDistance = Float.MAX_VALUE
 
-        // Find which item we're hovering over
-        for (itemInfo in visibleItems) {
-            // Skip non-content items (headers, etc.)
-            if (itemInfo.key !is String) continue
+        visibleItems.forEach { itemInfo ->
+            if (itemInfo.key is String && itemInfo.key != draggedItemId) {
+                val itemCenter = itemInfo.offset + itemInfo.size / 2
+                val distance = kotlin.math.abs(draggedItemCenter - itemCenter)
 
-            val itemTop = itemInfo.offset.toFloat()
-            val itemBottom = (itemInfo.offset + itemInfo.size).toFloat()
-
-            // Check if we're in the drop zone of this item
-            if (draggedItemCenter >= itemTop && draggedItemCenter <= itemBottom) {
-                // Return the ID of the item we're hovering over
-                return itemInfo.key as? String
-            }
-        }
-
-        return null
-    }
-
-    fun performDrop() {
-        if (draggedItem != null && dropTargetId != null && draggedItemId != dropTargetId) {
-            val fromItem = draggedItem!!
-            val toItem = lines.find { it.id == dropTargetId }
-
-            if (toItem != null) {
-                val fromIndex = lines.indexOf(fromItem)
-                val toIndex = lines.indexOf(toItem)
-
-                if (fromIndex != -1 && toIndex != -1 && fromIndex != toIndex) {
-                    // Calculate if we should place before or after based on drag offset
-                    val draggedItemActiveIndex = activeItems.indexOfFirst { it.id == draggedItemId }
-                    val targetItemActiveIndex = activeItems.indexOfFirst { it.id == dropTargetId }
-
-                    lines.removeAt(fromIndex)
-
-                    // Adjust target index after removal
-                    val adjustedToIndex = if (fromIndex < toIndex) toIndex - 1 else toIndex
-
-                    // Determine final position based on drag direction
-                    val finalIndex = when {
-                        draggedItemActiveIndex < targetItemActiveIndex -> adjustedToIndex + 1
-                        dragOffset > 0 -> adjustedToIndex + 1
-                        else -> adjustedToIndex
-                    }.coerceIn(0, lines.size)
-
-                    lines.add(finalIndex, fromItem)
-
-                    // Immediate save after reordering
-                    triggerImmediateAutoSave()
+                if (distance < bestDistance) {
+                    bestDistance = distance
+                    bestTarget = itemInfo.key as String
                 }
             }
         }
+
+        return bestTarget
+    }
+
+    // Fixed performDrop function
+    fun performDrop() {
+        if (draggedItem != null && dropTargetId != null && draggedItemId != dropTargetId) {
+            val fromIndex = lines.indexOfFirst { it.id == draggedItemId }
+            val toIndex = lines.indexOfFirst { it.id == dropTargetId }
+
+            if (fromIndex != -1 && toIndex != -1 && fromIndex != toIndex) {
+                val item = lines.removeAt(fromIndex)
+
+                // Calculate final position based on relative positions
+                val finalIndex = if (fromIndex < toIndex) {
+                    // Moving down
+                    toIndex
+                } else {
+                    // Moving up
+                    toIndex
+                }
+
+                lines.add(finalIndex.coerceIn(0, lines.size), item)
+                triggerImmediateAutoSave()
+            }
+        }
+
         draggedItemId = null
         dropTargetId = null
         dragOffset = 0f
+        initialDragPosition = 0f
         stopAutoScroll()
     }
 
@@ -462,7 +493,157 @@ fun ToDoListScreen(
         )
     }
 
-    // ✅ FIXED: Function to apply formatting to selected text with toggle
+    // ✅ FIXED: Handle text change to preserve formatting when deleting
+    fun handleTextChange(lineId: String, newText: String, cursorPos: Int) {
+        val lineIndex = lines.indexOfFirst { it.id == lineId }
+        if (lineIndex == -1) return
+
+        val line = lines[lineIndex]
+
+        // CRITICAL: Avoid processing if text hasn't changed
+        if (line.content == newText) return
+
+        // Mark user as editing
+        isUserEditing = true
+        currentCursorPosition = cursorPos
+
+        val existingSpans = line.spanStyles.toMutableList()
+        val lengthDiff = newText.length - line.content.length
+
+        // Handle text changes
+        if (lengthDiff < 0) {
+            // Text was deleted
+            val deleteStart = cursorPos
+            val deleteEnd = cursorPos - lengthDiff
+
+            // Adjust spans for deletion
+            val adjustedSpans = existingSpans.mapNotNull { span ->
+                when {
+                    // Span is completely before deletion
+                    span.end <= deleteStart -> span
+                    // Span is completely after deletion
+                    span.start >= deleteEnd -> {
+                        span.copy(
+                            start = (span.start + lengthDiff).coerceAtLeast(0),
+                            end = (span.end + lengthDiff).coerceAtLeast(0)
+                        )
+                    }
+                    // Span contains the deletion
+                    span.start < deleteStart && span.end > deleteEnd -> {
+                        span.copy(end = (span.end + lengthDiff).coerceAtLeast(span.start))
+                    }
+                    // Span starts in deletion range but ends after
+                    span.start >= deleteStart && span.start < deleteEnd && span.end > deleteEnd -> {
+                        span.copy(
+                            start = deleteStart,
+                            end = (span.end + lengthDiff).coerceAtLeast(deleteStart)
+                        )
+                    }
+                    // Span ends in deletion range but starts before
+                    span.end > deleteStart && span.end <= deleteEnd && span.start < deleteStart -> {
+                        span.copy(end = deleteStart)
+                    }
+                    // Span is completely within deletion range
+                    span.start >= deleteStart && span.end <= deleteEnd -> null
+                    else -> null
+                }
+            }.filter { it.start < newText.length && it.end <= newText.length && it.start < it.end }
+
+            existingSpans.clear()
+            existingSpans.addAll(adjustedSpans)
+
+        } else if (lengthDiff > 0) {
+            // Text was added
+            val insertStart = (cursorPos - lengthDiff).coerceAtLeast(0)
+            val insertEnd = cursorPos
+
+            // Adjust existing spans for insertion
+            val adjustedSpans = existingSpans.map { span ->
+                when {
+                    span.end <= insertStart -> span
+                    span.start >= insertStart -> {
+                        span.copy(
+                            start = span.start + lengthDiff,
+                            end = span.end + lengthDiff
+                        )
+                    }
+                    span.start < insertStart && span.end > insertStart -> {
+                        // Span contains insertion point - extend it
+                        span.copy(end = span.end + lengthDiff)
+                    }
+                    else -> span
+                }
+            }
+
+            existingSpans.clear()
+            existingSpans.addAll(adjustedSpans)
+
+            // Apply active formatting to newly typed characters
+            if (toggledStyles.isNotEmpty() || activeColor != null || activeFontSize != 16) {
+                if (insertStart < insertEnd && insertStart >= 0 && insertEnd <= newText.length) {
+                    if (toggledStyles.contains("BOLD")) {
+                        existingSpans.add(
+                            SerializableSpanStyle(
+                                start = insertStart,
+                                end = insertEnd,
+                                fontWeight = FontWeight.Bold.weight
+                            )
+                        )
+                    }
+
+                    if (toggledStyles.contains("ITALIC")) {
+                        existingSpans.add(
+                            SerializableSpanStyle(
+                                start = insertStart,
+                                end = insertEnd,
+                                fontStyle = "italic"
+                            )
+                        )
+                    }
+
+                    if (toggledStyles.contains("UNDERLINE")) {
+                        existingSpans.add(
+                            SerializableSpanStyle(
+                                start = insertStart,
+                                end = insertEnd,
+                                textDecoration = "underline"
+                            )
+                        )
+                    }
+
+                    activeColor?.let { color ->
+                        existingSpans.add(
+                            SerializableSpanStyle(
+                                start = insertStart,
+                                end = insertEnd,
+                                color = color.value
+                            )
+                        )
+                    }
+
+                    if (activeFontSize != 16) {
+                        existingSpans.add(
+                            SerializableSpanStyle(
+                                start = insertStart,
+                                end = insertEnd,
+                                fontSize = activeFontSize.toFloat()
+                            )
+                        )
+                    }
+                }
+            }
+        }
+
+        // Update the line
+        lines[lineIndex] = line.copy(
+            content = newText,
+            spanStyles = cleanupOverlappingSpans(mergeAdjacentSpans(existingSpans))
+        )
+
+        triggerDebouncedAutoSave()
+    }
+
+    // Function to apply formatting to selected text with toggle
     fun applyFormattingToSelection(
         toggleBold: Boolean = false,
         toggleItalic: Boolean = false,
@@ -679,12 +860,15 @@ fun ToDoListScreen(
         }
     }
 
-    // UPDATED: Delete with undo function with immediate save
+    // Delete with undo function with immediate save
     fun deleteLineWithUndo(line: NoteLine) {
         val index = lines.indexOf(line)
         if (index != -1) {
             deletedLine = Pair(index, line)
             lines.remove(line)
+
+            // Remove focus requester
+            lineFocusRequesters.remove(line.id)
 
             // Immediate save when deleting
             triggerImmediateAutoSave()
@@ -701,7 +885,6 @@ fun ToDoListScreen(
                         deletedLine?.let { (oldIndex, oldLine) ->
                             val insertIndex = minOf(oldIndex, lines.size)
                             lines.add(insertIndex, oldLine)
-                            // Immediate save when undoing delete
                             triggerImmediateAutoSave()
                         }
                     }
@@ -713,147 +896,7 @@ fun ToDoListScreen(
         }
     }
 
-    // ✅ FIXED: handleTextChange with proper active formatting application
-    fun handleTextChange(lineId: String, newText: String, cursorPos: Int, fontSizeMessage: String? = null) {
-        val lineIndex = lines.indexOfFirst { it.id == lineId }
-        if (lineIndex == -1) return
-
-        val line = lines[lineIndex]
-
-        // CRITICAL: Avoid processing if text hasn't changed
-        if (line.content == newText) return
-
-        // Mark user as editing
-        isUserEditing = true
-        currentCursorPosition = cursorPos
-
-        // Clear formatting buttons when text becomes empty
-        if (newText.isEmpty()) {
-            toggledStyles = emptySet()
-            activeColor = null
-            activeFontSize = 16
-            lines[lineIndex] = line.copy(content = newText, spanStyles = emptyList())
-            triggerImmediateAutoSave()
-            return
-        }
-
-        // ✅ FIXED: Better span handling for text changes
-        val existingSpans = line.spanStyles.toMutableList()
-
-        // Adjust existing spans based on text length changes
-        val lengthDiff = newText.length - line.content.length
-
-        if (lengthDiff != 0) {
-            // Text length changed, adjust spans
-            val adjustedSpans = existingSpans.mapNotNull { span ->
-                when {
-                    span.end <= cursorPos -> {
-                        // Span is before cursor, keep as is
-                        span
-                    }
-                    span.start >= cursorPos -> {
-                        // Span is after cursor, shift by length difference
-                        val newStart = (span.start + lengthDiff).coerceAtLeast(0)
-                        val newEnd = (span.end + lengthDiff).coerceAtLeast(newStart)
-                        if (newStart < newText.length && newEnd <= newText.length) {
-                            span.copy(start = newStart, end = newEnd)
-                        } else null
-                    }
-                    else -> {
-                        // Span crosses cursor position
-                        if (lengthDiff > 0) {
-                            // Text was added, extend the span
-                            val newEnd = (span.end + lengthDiff).coerceAtMost(newText.length)
-                            span.copy(end = newEnd)
-                        } else {
-                            // Text was removed, shrink the span
-                            val newEnd = (span.end + lengthDiff).coerceAtLeast(span.start)
-                            if (newEnd > span.start) {
-                                span.copy(end = newEnd)
-                            } else null
-                        }
-                    }
-                }
-            }
-
-            existingSpans.clear()
-            existingSpans.addAll(adjustedSpans)
-        }
-
-        // ✅ FIXED: Apply active formatting to newly typed text (only for additions)
-        if (lengthDiff > 0 && (toggledStyles.isNotEmpty() || activeColor != null || activeFontSize != 16)) {
-            val insertStart = cursorPos - lengthDiff
-            val insertEnd = cursorPos
-
-            if (insertStart >= 0 && insertStart < insertEnd) {
-                // Apply bold
-                if (toggledStyles.contains("BOLD")) {
-                    existingSpans.add(
-                        SerializableSpanStyle(
-                            start = insertStart,
-                            end = insertEnd,
-                            fontWeight = FontWeight.Bold.weight
-                        )
-                    )
-                }
-
-                // Apply italic
-                if (toggledStyles.contains("ITALIC")) {
-                    existingSpans.add(
-                        SerializableSpanStyle(
-                            start = insertStart,
-                            end = insertEnd,
-                            fontStyle = "italic"
-                        )
-                    )
-                }
-
-                // Apply underline
-                if (toggledStyles.contains("UNDERLINE")) {
-                    existingSpans.add(
-                        SerializableSpanStyle(
-                            start = insertStart,
-                            end = insertEnd,
-                            textDecoration = "underline"
-                        )
-                    )
-                }
-
-                // Apply color
-                activeColor?.let { color ->
-                    existingSpans.add(
-                        SerializableSpanStyle(
-                            start = insertStart,
-                            end = insertEnd,
-                            color = color.value
-                        )
-                    )
-                }
-
-                // Apply font size
-                if (activeFontSize != 16) {
-                    existingSpans.add(
-                        SerializableSpanStyle(
-                            start = insertStart,
-                            end = insertEnd,
-                            fontSize = activeFontSize.toFloat()
-                        )
-                    )
-                }
-            }
-        }
-
-        // Update the line
-        lines[lineIndex] = line.copy(
-            content = newText,
-            spanStyles = cleanupOverlappingSpans(mergeAdjacentSpans(existingSpans))
-        )
-
-        // Trigger debounced autosave for continuous typing
-        triggerDebouncedAutoSave()
-    }
-
-    // UPDATED: Memoized checkbox handler with immediate save
+    // Memoized checkbox handler with immediate save
     val handleCheckChange = remember<(NoteLine, Boolean) -> Unit> {
         { line, isChecked ->
             val index = lines.indexOf(line)
@@ -870,7 +913,6 @@ fun ToDoListScreen(
                         if (currentIndex != -1) {
                             val item = lines.removeAt(currentIndex)
                             lines.add(item)
-                            // Another immediate save after reordering
                             triggerImmediateAutoSave()
                         }
                     }
@@ -879,7 +921,7 @@ fun ToDoListScreen(
         }
     }
 
-    // ✅ FIXED: Load existing note - only when NOT editing and NOT collaborative
+    // Load existing note - only when NOT editing and NOT collaborative
     LaunchedEffect(noteIdArg) {
         if (noteIdArg != 0 && !isCollaborative) {
             viewModel.getNoteById(noteIdArg).collectLatest { note ->
@@ -913,26 +955,90 @@ fun ToDoListScreen(
         }
     }
 
-    // ✅ FIXED: Load collaborative note
+    // Load collaborative note - FIXED to load properly
     LaunchedEffect(collaborativeNoteId) {
         if (isCollaborative && collaborativeNoteId != null) {
+            // First, clear any existing content
+            lines.clear()
+            title = ""
+
+            // Load the collaborative note
             viewModel.getCollaborativeNoteById(collaborativeNoteId) { result ->
                 result.onSuccess { note ->
                     if (note != null) {
                         title = note.title
                         val loadedLines = note.content.toNoteLines()
-                        lines.clear()
+
+                        lines.clear() // Clear again to be safe
                         if (loadedLines.isNotEmpty()) {
                             lines.addAll(loadedLines)
                         } else {
+                            // Only add empty line if there's truly no content
                             lines.add(NoteLine(type = LineType.CHECKLIST, content = ""))
                         }
 
-                        // ✅ FIXED: Create CollaboratorInfo objects with correct parameter names
+                        // Load collaborator information
                         collaborators = note.collaborators.mapIndexed { index, userId ->
                             CollaboratorInfo(
                                 userId = userId,
-                                email = if (userId == note.ownerId) note.lastEditedByEmail else "collaborator${index + 1}@email.com",
+                                email = if (userId == FirebaseAuth.getInstance().currentUser?.uid) {
+                                    FirebaseAuth.getInstance().currentUser?.email ?: "user@email.com"
+                                } else {
+                                    "User ${index + 1}"
+                                },
+                                displayName = if (userId == note.ownerId) "Owner" else "Collaborator ${index + 1}",
+                                role = if (userId == note.ownerId) CollaboratorRole.OWNER else CollaboratorRole.EDITOR,
+                                invitedAt = note.createdAt,
+                                status = InviteStatus.ACCEPTED
+                            )
+                        }
+
+                        if (lines.any { it.content.isNotEmpty() }) {
+                            isToolbarVisible = true
+                        }
+
+                        // Start real-time sync after initial load
+                        viewModel.startCollaborativeSync()
+                    }
+                }
+                result.onFailure { error ->
+                    // Handle error - maybe show a snackbar
+                    coroutineScope.launch {
+                        snackbarHostState.showSnackbar("Failed to load collaborative note: ${error.message}")
+                    }
+                }
+            }
+        }
+    }
+
+    // Real-time updates - separate LaunchedEffect
+    LaunchedEffect(isCollaborative, collaborativeNoteId) {
+        if (isCollaborative && collaborativeNoteId != null) {
+            // Small delay to ensure initial load completes first
+            delay(500)
+
+            // Listen for real-time updates
+            viewModel.getCollaborativeNoteFlow(collaborativeNoteId).collect { note ->
+                if (note != null && !isUserEditing) {
+                    // Only update if content has actually changed
+                    val newLines = note.content.toNoteLines()
+                    val currentContent = lines.map { it.content }
+                    val newContent = newLines.map { it.content }
+
+                    if (currentContent != newContent || title != note.title) {
+                        title = note.title
+                        lines.clear()
+                        lines.addAll(newLines)
+
+                        // Update collaborators
+                        collaborators = note.collaborators.mapIndexed { index, userId ->
+                            CollaboratorInfo(
+                                userId = userId,
+                                email = if (userId == FirebaseAuth.getInstance().currentUser?.uid) {
+                                    FirebaseAuth.getInstance().currentUser?.email ?: "user@email.com"
+                                } else {
+                                    "User ${index + 1}"
+                                },
                                 displayName = if (userId == note.ownerId) "Owner" else "Collaborator ${index + 1}",
                                 role = if (userId == note.ownerId) CollaboratorRole.OWNER else CollaboratorRole.EDITOR,
                                 invitedAt = note.createdAt,
@@ -945,34 +1051,52 @@ fun ToDoListScreen(
         }
     }
 
-    // Initialize with empty line for new notes
-    LaunchedEffect(noteIdArg, isCollaborative) {
+    // Initialize with empty line for new notes - FIXED condition
+    LaunchedEffect(noteIdArg, isCollaborative, collaborativeNoteId) {
         if (noteIdArg == 0 && !isCollaborative && lines.isEmpty()) {
             lines.add(NoteLine(type = LineType.CHECKLIST, content = ""))
-            delay(100)
+            delay(300)
             titleFocusRequester.requestFocus()
         }
     }
 
-    // ✅ NEW: Collaboration dialogs
+    // Collaboration dialogs
     if (showCollaborationDialog) {
         CollaborationDialog(
             onDismiss = { showCollaborationDialog = false },
             onCreateCollaborative = {
-                viewModel.createCollaborativeNote(
-                    title = title.ifBlank { "Collaborative Todo" },
-                    lines = lines,
-                    noteType = NoteType.CHECKLIST
-                ) { newCollaborativeId ->
-                    // Navigate to the new collaborative note
-                    navController.navigate("todo_list/0?isCollaborative=true&collaborativeNoteId=$newCollaborativeId") {
-                        popUpTo("todo_list/$noteIdArg") { inclusive = true }
+                coroutineScope.launch {
+                    // Create collaborative note with CURRENT content
+                    val currentTitle = title.ifBlank { "Collaborative Todo" }
+                    val currentLines = lines.toList()
+
+                    // ✅ FIXED: Set flag to not save empty note when exiting
+                    shouldSaveOnExit = false
+
+                    // If this is an existing note, delete the local version
+                    if (noteId != 0) {
+                        viewModel.deleteNoteById(noteId)
+                    } else {
+                        // ✅ FIXED: For new notes, just navigate without saving
+                        // Don't create an empty local note
+                    }
+
+                    viewModel.createCollaborativeNote(
+                        title = currentTitle,
+                        lines = currentLines,
+                        noteType = NoteType.CHECKLIST
+                    ) { newCollaborativeId: String ->
+                        // Navigate using the collaborative route
+                        navController.navigate("collaborative_todo/$newCollaborativeId") {
+                            popUpTo(navController.graph.id) {
+                                inclusive = false
+                            }
+                        }
                     }
                 }
                 showCollaborationDialog = false
             },
             onJoinExisting = {
-                // Show pending invites or allow manual joining
                 showInviteDialog = true
                 showCollaborationDialog = false
             }
@@ -1035,7 +1159,7 @@ fun ToDoListScreen(
                     Column(
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        // ✅ NEW: Show collaboration indicator
+                        // Collaboration indicator
                         if (isCollaborative) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -1069,8 +1193,7 @@ fun ToDoListScreen(
                                 value = title,
                                 onValueChange = {
                                     title = it
-                                    // Immediate save for title changes
-                                    triggerImmediateAutoSave()
+                                    triggerDebouncedAutoSave()
                                 },
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -1087,12 +1210,9 @@ fun ToDoListScreen(
                                 singleLine = true,
                                 cursorBrush = SolidColor(MaterialTheme.colorScheme.onPrimary)
                             )
-                            if (title.isEmpty() && !isTitleFocused) {
+                            if (title.isEmpty()) {
                                 Text(
-                                    text = if (isCollaborative)
-                                        "Enter collaborative title..."
-                                    else
-                                        "Enter title...",
+                                    text = if (isCollaborative) "Enter collaborative title..." else "Enter title...",
                                     style = MaterialTheme.typography.titleLarge,
                                     color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
                                 )
@@ -1101,58 +1221,29 @@ fun ToDoListScreen(
                     }
                 },
                 navigationIcon = {
-                    IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                    IconButton(onClick = {
+                        // ✅ FIXED: Don't create empty note when going back
+                        if (!isCollaborative || collaborativeNoteId == null || collaborativeNoteId == "new") {
+                            navController.navigateUp()
+                        } else {
+                            navController.navigateUp()
+                        }
+                    }) {
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack,
+                            "Back",
+                            tint = MaterialTheme.colorScheme.onPrimary
+                        )
                     }
                 },
                 actions = {
-                    // ✅ FIXED: Only show collaboration actions if already collaborative
-                    if (isCollaborative && collaborativeNoteId != null) {
-                        // Show collaborators
-                        IconButton(onClick = { showCollaboratorsDialog = true }) {
-                            Icon(Icons.Default.Group, "View Collaborators")
-                        }
-
-                        // Invite others
-                        IconButton(onClick = { showInviteDialog = true }) {
-                            Icon(Icons.Default.PersonAdd, "Invite Others")
-                        }
-
-                        // Leave collaboration
-                        IconButton(onClick = {
-                            viewModel.leaveCollaborativeNote(collaborativeNoteId)
-                            navController.navigateUp()
-                        }) {
-                            Icon(Icons.Default.ExitToApp, "Leave Collaboration")
-                        }
-                    }
-
-                    // Toggle toolbar visibility
+                    // Toggle toolbar visibility - FIXED ICON COLOR
                     IconButton(onClick = { isToolbarVisible = !isToolbarVisible }) {
-                        Icon(Icons.Default.TextFields, "Toggle Toolbar")
-                    }
-
-                    // ✅ FIXED: Only show regular share for non-collaborative notes
-                    if (!isCollaborative) {
-                        IconButton(onClick = {
-                            val shareText = buildString {
-                                appendLine(title.ifBlank { "My Todo List" })
-                                appendLine()
-                                lines.filter { it.type != LineType.SEPARATOR }.forEach { line ->
-                                    val prefix = if (line.isChecked) "☑" else "☐"
-                                    appendLine("$prefix ${line.content}")
-                                }
-                            }
-
-                            val intent = Intent().apply {
-                                action = Intent.ACTION_SEND
-                                putExtra(Intent.EXTRA_TEXT, shareText)
-                                type = "text/plain"
-                            }
-                            context.startActivity(Intent.createChooser(intent, "Share Todo List"))
-                        }) {
-                            Icon(Icons.Default.Share, "Share")
-                        }
+                        Icon(
+                            Icons.Default.TextFields,
+                            "Toggle Toolbar",
+                            tint = MaterialTheme.colorScheme.onPrimary // ✅ FIXED: Always use onPrimary
+                        )
                     }
 
                     // Delete note (only for non-collaborative or if owner)
@@ -1161,17 +1252,23 @@ fun ToDoListScreen(
                             viewModel.deleteNoteById(noteId)
                             navController.navigateUp()
                         }) {
-                            Icon(Icons.Default.Delete, "Delete")
+                            Icon(
+                                Icons.Default.Delete,
+                                "Delete",
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
                         }
                     }
 
-                    // ✅ FIXED: Save and exit
+                    // Save and exit
                     IconButton(onClick = {
                         coroutineScope.launch {
+                            // ✅ FIXED: Don't save empty notes when exiting
+                            val hasContent = title.isNotBlank() || lines.any { it.content.isNotBlank() }
+
                             if (isCollaborative && collaborativeNoteId != null) {
                                 viewModel.updateCollaborativeNote(collaborativeNoteId, title, lines.toList())
-                            } else {
-                                // ✅ FIXED: Convert to JSON before passing to finaliseAndSave
+                            } else if (hasContent && shouldSaveOnExit) { // ✅ FIXED: Also check shouldSaveOnExit
                                 val contentJson = lines.toList().toJson()
                                 viewModel.finaliseAndSave(noteId, title, contentJson, NoteType.CHECKLIST).join()
                             }
@@ -1192,6 +1289,199 @@ fun ToDoListScreen(
                     actionIconContentColor = MaterialTheme.colorScheme.onPrimary
                 )
             )
+        },
+        floatingActionButton = {
+            // FAB for non-collaborative or collaborative with menu
+            if (!isCollaborative) {
+                // Single FAB for starting collaboration
+                FloatingActionButton(
+                    onClick = { showCollaborationDialog = true },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ) {
+                    Icon(Icons.Default.Group, contentDescription = "Start Collaboration")
+                }
+            } else if (collaborativeNoteId != null) {
+                // Expandable FAB menu for collaborative features
+                // Expandable FAB menu for collaborative features
+                Column(
+                    horizontalAlignment = Alignment.End
+                ) {
+                    // Mini FABs when expanded
+                    AnimatedVisibility(
+                        visible = fabMenuExpanded,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically()
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.End,
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            // Save as local copy mini FAB with label
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.End
+                            ) {
+                                Surface(
+                                    shape = RoundedCornerShape(20.dp),
+                                    color = MaterialTheme.colorScheme.surface,
+                                    shadowElevation = 2.dp
+                                ) {
+                                    Text(
+                                        text = "Save copy",
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                                        style = MaterialTheme.typography.labelMedium
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(8.dp))
+                                SmallFloatingActionButton(
+                                    onClick = {
+                                        coroutineScope.launch {
+                                            val localTitle = "$title (Local Copy)"
+                                            val contentJson = lines.toList().toJson()
+
+                                            viewModel.createNoteWithRandomColor(
+                                                title = localTitle,
+                                                content = contentJson,
+                                                type = NoteType.CHECKLIST
+                                            )
+
+                                            snackbarHostState.showSnackbar("Created local copy of the note")
+                                        }
+                                        fabMenuExpanded = false
+                                    },
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                    contentColor = MaterialTheme.colorScheme.onPrimary
+                                ) {
+                                    Icon(
+                                        Icons.Default.ContentCopy,
+                                        contentDescription = "Save Local Copy"
+                                    )
+                                }
+                            }
+
+                            // Leave collaboration mini FAB with label
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.End
+                            ) {
+                                Surface(
+                                    shape = RoundedCornerShape(20.dp),
+                                    color = MaterialTheme.colorScheme.surface,
+                                    shadowElevation = 2.dp
+                                ) {
+                                    Text(
+                                        text = "Leave",
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                                        style = MaterialTheme.typography.labelMedium
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(8.dp))
+                                SmallFloatingActionButton(
+                                    onClick = {
+                                        viewModel.leaveCollaborativeNote(collaborativeNoteId)
+                                        navController.navigateUp()
+                                    },
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                    contentColor = MaterialTheme.colorScheme.onPrimary
+                                ) {
+                                    Icon(
+                                        Icons.AutoMirrored.Filled.ExitToApp,
+                                        contentDescription = "Leave"
+                                    )
+                                }
+                            }
+
+                            // Invite members mini FAB with label
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.End
+                            ) {
+                                Surface(
+                                    shape = RoundedCornerShape(20.dp),
+                                    color = MaterialTheme.colorScheme.surface,
+                                    shadowElevation = 2.dp
+                                ) {
+                                    Text(
+                                        text = "Invite",
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                                        style = MaterialTheme.typography.labelMedium
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(8.dp))
+                                SmallFloatingActionButton(
+                                    onClick = {
+                                        showInviteDialog = true
+                                        fabMenuExpanded = false
+                                    },
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                    contentColor = MaterialTheme.colorScheme.onPrimary
+                                ) {
+                                    Icon(
+                                        Icons.Default.PersonAdd,
+                                        contentDescription = "Invite"
+                                    )
+                                }
+                            }
+
+                            // View members mini FAB with label
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.End
+                            ) {
+                                Surface(
+                                    shape = RoundedCornerShape(20.dp),
+                                    color = MaterialTheme.colorScheme.surface,
+                                    shadowElevation = 2.dp
+                                ) {
+                                    Text(
+                                        text = "Members",
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
+                                        style = MaterialTheme.typography.labelMedium
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(8.dp))
+                                SmallFloatingActionButton(
+                                    onClick = {
+                                        showCollaboratorsDialog = true
+                                        fabMenuExpanded = false
+                                    },
+                                    containerColor = MaterialTheme.colorScheme.primary,
+                                    contentColor = MaterialTheme.colorScheme.onPrimary
+                                ) {
+                                    Icon(
+                                        Icons.Default.People,
+                                        contentDescription = "Members"
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Main FAB
+                    FloatingActionButton(
+                        onClick = { fabMenuExpanded = !fabMenuExpanded },
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    ) {
+                        AnimatedContent(
+                            targetState = fabMenuExpanded,
+                            transitionSpec = {
+                                fadeIn() togetherWith fadeOut()
+                            },
+                            label = "fab_icon"
+                        ) { expanded ->
+                            if (expanded) {
+                                Icon(Icons.Default.Close, contentDescription = "Close menu")
+                            } else {
+                                Icon(Icons.Default.Group, contentDescription = "Collaboration menu")
+                            }
+                        }
+                    }
+                }
+            }
         }
     ) { paddingValues ->
         Box(
@@ -1202,7 +1492,7 @@ fun ToDoListScreen(
             Column(
                 modifier = Modifier.fillMaxSize()
             ) {
-                // ✅ UPDATED: Formatting toolbar with proper handlers
+                // Formatting toolbar with proper handlers
                 AnimatedVisibility(visible = isToolbarVisible) {
                     FormattingToolbar(
                         toggledStyles = toggledStyles,
@@ -1210,14 +1500,12 @@ fun ToDoListScreen(
                         activeFontSize = activeFontSize,
                         onStyleToggle = { styleKey ->
                             if (selectedLineId != null && selectedTextRange != null && !selectedTextRange!!.collapsed) {
-                                // ✅ FIXED: Apply to selection
                                 applyFormattingToSelection(
                                     toggleBold = styleKey == "BOLD",
                                     toggleItalic = styleKey == "ITALIC",
                                     toggleUnderline = styleKey == "UNDERLINE"
                                 )
                             } else {
-                                // Toggle for future typing
                                 toggledStyles = if (toggledStyles.contains(styleKey)) {
                                     toggledStyles - styleKey
                                 } else {
@@ -1227,19 +1515,15 @@ fun ToDoListScreen(
                         },
                         onColorChange = { color ->
                             if (selectedLineId != null && selectedTextRange != null && !selectedTextRange!!.collapsed) {
-                                // Apply color to selection
                                 applyFormattingToSelection(color = color)
                             } else {
-                                // Set color for future typing
                                 activeColor = if (activeColor == color) null else color
                             }
                         },
                         onFontSizeChange = { size ->
                             if (selectedLineId != null && selectedTextRange != null && !selectedTextRange!!.collapsed) {
-                                // Apply font size to selection
                                 applyFormattingToSelection(fontSize = size)
                             } else {
-                                // Set font size for future typing
                                 activeFontSize = size ?: 16
                             }
                         },
@@ -1300,7 +1584,7 @@ fun ToDoListScreen(
                     state = lazyListState,
                     contentPadding = PaddingValues(
                         top = 8.dp,
-                        bottom = 80.dp
+                        bottom = 80.dp // Extra padding for FAB
                     )
                 ) {
                     // Active items section
@@ -1329,212 +1613,249 @@ fun ToDoListScreen(
                                 DropIndicator()
                             }
 
-                            when (line.type) {
-                                LineType.SEPARATOR -> {
-                                    // ✅ FIXED: Separator with drag handle and matching style
-                                    SeparatorItem(
-                                        text = line.content.ifEmpty { sectionDividerText },
-                                        isDragging = isDragged,
-                                        dragOffset = if (isDragged) dragOffset else 0f,
-                                        onDelete = { deleteLineWithUndo(line) },
-                                        onDragStart = {
-                                            draggedItemId = line.id
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        },
-                                        onDragOffset = { offset ->
-                                            if (draggedItemId == line.id) {
-                                                dragOffset = offset
-                                                dropTargetId = calculateDropTarget(offset)
-
-                                                // Auto-scroll logic
-                                                val layoutInfo = lazyListState.layoutInfo
-                                                val viewportHeight = layoutInfo.viewportEndOffset - layoutInfo.viewportStartOffset
-
-                                                when {
-                                                    offset < -viewportHeight * 0.2f -> startAutoScroll(-1)
-                                                    offset > viewportHeight * 0.2f -> startAutoScroll(1)
-                                                    else -> stopAutoScroll()
+                            Box(
+                                modifier = Modifier
+                                    .then(
+                                        if (isDragged) {
+                                            Modifier
+                                                .zIndex(1f)
+                                                .graphicsLayer {
+                                                    translationY = dragOffset
+                                                    scaleX = 1.05f
+                                                    scaleY = 1.05f
+                                                    shadowElevation = 16.dp.toPx()
+                                                    alpha = 0.9f
                                                 }
-                                            }
-                                        },
-                                        onDragEnd = {
-                                            if (draggedItemId == line.id) {
-                                                performDrop()
-                                            }
-                                        },
-                                        modifier = Modifier
-                                            .zIndex(if (isDragged) 1f else 0f)
-                                            .graphicsLayer {
-                                                alpha = if (isDragged) 0.9f else 1f
-                                                shadowElevation = if (isDragged) 8.dp.toPx() else 0f
-                                            }
+                                        } else {
+                                            Modifier
+                                        }
                                     )
-                                }
-                                else -> {
-                                    PlainTextToDoItem(
-                                        line = line,
-                                        isEditing = editingLineId == line.id,
-                                        isDragging = isDragged,
-                                        dragOffset = if (isDragged) dragOffset else 0f,
-                                        activeFormatting = currentActiveFormatting,
-                                        lines = lines,
-                                        lineFocusRequesters = lineFocusRequesters,
-                                        isCollaborative = isCollaborative,
-                                        onTextChange = { newText, cursorPos ->
-                                            handleTextChange(line.id, newText, cursorPos)
-                                        },
-                                        onCheckChange = { isChecked ->
-                                            handleCheckChange(line, isChecked)
-                                        },
-                                        onDelete = { deleteLineWithUndo(line) },
-                                        onFocusChange = { hasFocus ->
-                                            editingLineId = if (hasFocus) line.id else null
-                                            if (!hasFocus) {
-                                                selectedLineId = null
-                                                selectedTextRange = null
-                                            }
-                                        },
-                                        onBackspaceOnEmptyLine = {
-                                            if (line.content.isEmpty()) {
-                                                deleteLineWithUndo(line)
-                                            }
-                                        },
-                                        onEnterPressed = {
-                                            val lineIndex = lines.indexOf(line)
-                                            if (lineIndex != -1) {
-                                                val newLine = NoteLine(type = LineType.CHECKLIST, content = "")
-                                                lines.add(lineIndex + 1, newLine)
-                                                // Immediate save when adding new line
-                                                triggerImmediateAutoSave()
+                            ) {
+                                when (line.type) {
+                                    LineType.SEPARATOR -> {
+                                        SeparatorItem(
+                                            text = line.content.ifEmpty { sectionDividerText },
+                                            isDragging = isDragged,
+                                            onTextChange = { newText ->
+                                                val index = lines.indexOf(line)
+                                                if (index != -1) {
+                                                    lines[index] = line.copy(content = newText)
+                                                    triggerDebouncedAutoSave()
+                                                }
+                                            },
+                                            onDelete = { deleteLineWithUndo(line) },
+                                            onDragStart = {
+                                                draggedItemId = line.id
+                                                initialDragPosition = 0f
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            },
+                                            onDragOffset = { offset ->
+                                                if (draggedItemId == line.id) {
+                                                    dragOffset += offset
+                                                    dropTargetId = calculateDropTarget(dragOffset)
 
-                                                // ✅ FIXED: Clear current editing first, then set new line
-                                                editingLineId = null
+                                                    // Auto-scroll logic
+                                                    val layoutInfo = lazyListState.layoutInfo
+                                                    val viewportHeight = layoutInfo.viewportEndOffset - layoutInfo.viewportStartOffset
 
-                                                coroutineScope.launch {
-                                                    delay(100) // Give time for the list to update
-                                                    editingLineId = newLine.id
-
-                                                    // ✅ FIXED: Ensure focus requester exists and request focus
-                                                    val newFocusRequester = lineFocusRequesters.getOrPut(newLine.id) { FocusRequester() }
-                                                    delay(50) // Small delay to ensure the component is composed
-                                                    try {
-                                                        newFocusRequester.requestFocus()
-                                                    } catch (e: Exception) {
-                                                        // Fallback: try again after a longer delay
-                                                        delay(100)
-                                                        newFocusRequester.requestFocus()
-                                                    }
-
-                                                    val newItemIndex = activeItems.indexOfFirst { it.id == newLine.id }
-                                                    if (newItemIndex >= 0) {
-                                                        lazyListState.animateScrollToItem(newItemIndex + 1)
+                                                    when {
+                                                        dragOffset < -viewportHeight * 0.2f -> startAutoScroll(-1)
+                                                        dragOffset > viewportHeight * 0.2f -> startAutoScroll(1)
+                                                        else -> stopAutoScroll()
                                                     }
                                                 }
+                                            },
+                                            onDragEnd = {
+                                                if (draggedItemId == line.id) {
+                                                    performDrop()
+                                                }
                                             }
-                                        },
-                                        onSelectionChange = { lineId, range ->
-                                            selectedLineId = lineId
-                                            selectedTextRange = range
-                                            selection = range
-
-                                            // ✅ FIXED: Update toolbar state based on selection
-                                            if (!range.collapsed && lineId == line.id) {
-                                                val lineIndex = lines.indexOfFirst { it.id == lineId }
+                                        )
+                                    }
+                                    else -> {
+                                        PlainTextToDoItem(
+                                            line = line,
+                                            isEditing = editingLineId == line.id,
+                                            isDragging = isDragged,
+                                            activeFormatting = currentActiveFormatting,
+                                            lines = lines,
+                                            lineFocusRequesters = lineFocusRequesters,
+                                            isCollaborative = isCollaborative,
+                                            onTextChange = { newText, cursorPos ->
+                                                handleTextChange(line.id, newText, cursorPos)
+                                            },
+                                            onCheckChange = { isChecked ->
+                                                handleCheckChange(line, isChecked)
+                                            },
+                                            onDelete = { deleteLineWithUndo(line) },
+                                            onFocusChange = { hasFocus ->
+                                                editingLineId = if (hasFocus) line.id else null
+                                                if (!hasFocus) {
+                                                    selectedLineId = null
+                                                    selectedTextRange = null
+                                                }
+                                            },
+                                            onBackspaceOnEmptyLine = {
+                                                deleteLineWithUndo(line)
+                                            },
+                                            onEnterPressed = {
+                                                val lineIndex = lines.indexOf(line)
                                                 if (lineIndex != -1) {
-                                                    val currentLine = lines[lineIndex]
+                                                    val newLine = NoteLine(type = LineType.CHECKLIST, content = "")
+                                                    lines.add(lineIndex + 1, newLine)
+                                                    triggerImmediateAutoSave()
 
-                                                    // Check what formatting is applied to the selection
-                                                    val selectionStart = range.min
-                                                    val selectionEnd = range.max
+                                                    editingLineId = null
 
-                                                    // Helper function to check if formatting covers entire selection
-                                                    fun hasFormattingInSelection(checkSpan: (SerializableSpanStyle) -> Boolean): Boolean {
-                                                        if (selectionStart >= selectionEnd) return false
+                                                    coroutineScope.launch {
+                                                        delay(100)
+                                                        editingLineId = newLine.id
+                                                        val newFocusRequester = lineFocusRequesters.getOrPut(newLine.id) { FocusRequester() }
+                                                        delay(50)
+                                                        try {
+                                                            newFocusRequester.requestFocus()
+                                                        } catch (e: Exception) {
+                                                            delay(100)
+                                                            newFocusRequester.requestFocus()
+                                                        }
 
-                                                        val positions = BooleanArray(selectionEnd - selectionStart) { false }
+                                                        val newItemIndex = activeItems.indexOfFirst { it.id == newLine.id }
+                                                        if (newItemIndex >= 0) {
+                                                            lazyListState.animateScrollToItem(newItemIndex + 1)
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            onSelectionChange = { lineId, range ->
+                                                selectedLineId = lineId
+                                                selectedTextRange = range
+                                                selection = range
 
-                                                        currentLine.spanStyles.forEach { span ->
-                                                            if (checkSpan(span)) {
-                                                                val overlapStart = maxOf(span.start, selectionStart)
-                                                                val overlapEnd = minOf(span.end, selectionEnd)
-                                                                if (overlapStart < overlapEnd) {
-                                                                    for (i in overlapStart until overlapEnd) {
-                                                                        if (i >= selectionStart && i < selectionEnd) {
-                                                                            positions[i - selectionStart] = true
+                                                if (!range.collapsed && lineId == line.id) {
+                                                    val lineIndex = lines.indexOfFirst { it.id == lineId }
+                                                    if (lineIndex != -1) {
+                                                        val currentLine = lines[lineIndex]
+
+                                                        val selectionStart = range.min
+                                                        val selectionEnd = range.max
+
+                                                        fun hasFormattingInSelection(checkSpan: (SerializableSpanStyle) -> Boolean): Boolean {
+                                                            if (selectionStart >= selectionEnd) return false
+
+                                                            val positions = BooleanArray(selectionEnd - selectionStart) { false }
+
+                                                            currentLine.spanStyles.forEach { span ->
+                                                                if (checkSpan(span)) {
+                                                                    val overlapStart = maxOf(span.start, selectionStart)
+                                                                    val overlapEnd = minOf(span.end, selectionEnd)
+                                                                    if (overlapStart < overlapEnd) {
+                                                                        for (i in overlapStart until overlapEnd) {
+                                                                            if (i >= selectionStart && i < selectionEnd) {
+                                                                                positions[i - selectionStart] = true
+                                                                            }
                                                                         }
                                                                     }
                                                                 }
                                                             }
+
+                                                            return positions.all { it }
                                                         }
 
-                                                        return positions.all { it }
+                                                        val hasBold = hasFormattingInSelection { it.fontWeight != null }
+                                                        val hasItalic = hasFormattingInSelection { it.fontStyle != null }
+                                                        val hasUnderline = hasFormattingInSelection { it.textDecoration != null }
+
+                                                        val newToggledStyles = mutableSetOf<String>()
+                                                        if (hasBold) newToggledStyles.add("BOLD")
+                                                        if (hasItalic) newToggledStyles.add("ITALIC")
+                                                        if (hasUnderline) newToggledStyles.add("UNDERLINE")
+
+                                                        toggledStyles = newToggledStyles
+
+                                                        val colorSpans = currentLine.spanStyles.filter { span ->
+                                                            span.color != null &&
+                                                                    span.start < selectionEnd && span.end > selectionStart
+                                                        }
+                                                        activeColor = colorSpans.firstOrNull()?.let { Color(it.color!!) }
+
+                                                        val fontSizeSpans = currentLine.spanStyles.filter { span ->
+                                                            span.fontSize != null &&
+                                                                    span.start < selectionEnd && span.end > selectionStart
+                                                        }
+                                                        activeFontSize = fontSizeSpans.firstOrNull()?.fontSize?.toInt() ?: 16
                                                     }
-
-                                                    // Check formatting
-                                                    val hasBold = hasFormattingInSelection { it.fontWeight != null }
-                                                    val hasItalic = hasFormattingInSelection { it.fontStyle != null }
-                                                    val hasUnderline = hasFormattingInSelection { it.textDecoration != null }
-
-                                                    // Update toolbar state
-                                                    val newToggledStyles = mutableSetOf<String>()
-                                                    if (hasBold) newToggledStyles.add("BOLD")
-                                                    if (hasItalic) newToggledStyles.add("ITALIC")
-                                                    if (hasUnderline) newToggledStyles.add("UNDERLINE")
-
-                                                    toggledStyles = newToggledStyles
-
-                                                    // Check for color (take the most common color in selection)
-                                                    val colorSpans = currentLine.spanStyles.filter { span ->
-                                                        span.color != null &&
-                                                                span.start < selectionEnd && span.end > selectionStart
-                                                    }
-                                                    activeColor = colorSpans.firstOrNull()?.let { Color(it.color!!) }
-
-                                                    // Check for font size (take the most common size in selection)
-                                                    val fontSizeSpans = currentLine.spanStyles.filter { span ->
-                                                        span.fontSize != null &&
-                                                                span.start < selectionEnd && span.end > selectionStart
-                                                    }
-                                                    activeFontSize = fontSizeSpans.firstOrNull()?.fontSize?.toInt() ?: 16
                                                 }
-                                            }
-                                        },
-                                        onDragStart = {
-                                            if (!line.isChecked || line.type == LineType.SEPARATOR) {
-                                                draggedItemId = line.id
-                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            }
-                                        },
-                                        onDragOffset = { offset ->
-                                            if (draggedItemId == line.id) {
-                                                dragOffset = offset
-                                                dropTargetId = calculateDropTarget(offset)
-
-                                                // Auto-scroll logic
-                                                val layoutInfo = lazyListState.layoutInfo
-                                                val viewportHeight = layoutInfo.viewportEndOffset - layoutInfo.viewportStartOffset
-
-                                                when {
-                                                    offset < -viewportHeight * 0.2f -> startAutoScroll(-1)
-                                                    offset > viewportHeight * 0.2f -> startAutoScroll(1)
-                                                    else -> stopAutoScroll()
+                                            },
+                                            onDragStart = {
+                                                if (!line.isChecked || line.type == LineType.SEPARATOR) {
+                                                    draggedItemId = line.id
+                                                    initialDragPosition = 0f
+                                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                                 }
-                                            }
-                                        },
-                                        onDragEnd = {
-                                            if (draggedItemId == line.id) {
-                                                performDrop()
-                                            }
-                                        },
-                                        onImmediateSave = { triggerImmediateAutoSave() },
-                                        modifier = Modifier
-                                            .zIndex(if (isDragged) 1f else 0f)
-                                            .graphicsLayer {
-                                                alpha = if (isDragged) 0.9f else 1f
-                                                shadowElevation = if (isDragged) 8.dp.toPx() else 0f
-                                            }
-                                    )
+                                            },
+                                            onDragOffset = { offset ->
+                                                if (draggedItemId == line.id) {
+                                                    dragOffset += offset
+                                                    dropTargetId = calculateDropTarget(dragOffset)
+
+                                                    // Auto-scroll logic
+                                                    val layoutInfo = lazyListState.layoutInfo
+                                                    val viewportHeight = layoutInfo.viewportEndOffset - layoutInfo.viewportStartOffset
+
+                                                    when {
+                                                        dragOffset < -viewportHeight * 0.2f -> startAutoScroll(-1)
+                                                        dragOffset > viewportHeight * 0.2f -> startAutoScroll(1)
+                                                        else -> stopAutoScroll()
+                                                    }
+                                                }
+                                            },
+                                            onDragEnd = {
+                                                if (draggedItemId == line.id) {
+                                                    performDrop()
+                                                }
+                                            },
+                                            onImmediateSave = { triggerImmediateAutoSave() },
+                                            coroutineScope = coroutineScope
+                                        )
+                                    }
                                 }
+                            }
+                        }
+
+                        // Add Field Button - only under active items
+                        item(key = "add_field_button") {
+                            TextButton(
+                                onClick = {
+                                    val newLine = NoteLine(type = LineType.CHECKLIST, content = "")
+                                    // Find insertion point - after last active item
+                                    val insertIndex = lines.indexOfLast { !it.isChecked || it.type == LineType.SEPARATOR } + 1
+                                    lines.add(insertIndex.coerceAtMost(lines.size), newLine)
+                                    triggerImmediateAutoSave()
+
+                                    coroutineScope.launch {
+                                        delay(100)
+                                        editingLineId = newLine.id
+                                        val newItemIndex = activeItems.indexOfFirst { it.id == newLine.id }
+                                        if (newItemIndex >= 0) {
+                                            lazyListState.animateScrollToItem(newItemIndex + 1)
+                                        }
+                                        lineFocusRequesters[newLine.id]?.requestFocus()
+                                    }
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                            ) {
+                                Icon(
+                                    Icons.Default.Add,
+                                    contentDescription = "Add field",
+                                    modifier = Modifier.size(20.dp)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Add field",
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
                             }
                         }
                     }
@@ -1567,52 +1888,8 @@ fun ToDoListScreen(
                     }
                 }
             }
-
-            // ✅ FIXED: FABs positioned correctly using Box
-            Column(
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // ✅ FIXED: Collaboration FAB (only when not collaborative)
-                if (!isCollaborative) {
-                    FloatingActionButton(
-                        onClick = { showCollaborationDialog = true },
-                        containerColor = MaterialTheme.colorScheme.secondary,
-                        contentColor = MaterialTheme.colorScheme.onSecondary
-                    ) {
-                        Icon(Icons.Default.Share, contentDescription = "Start Collaboration")
-                    }
-                }
-
-                // ✅ FIXED: Add Item FAB (always visible)
-                FloatingActionButton(
-                    onClick = {
-                        val newLine = NoteLine(type = LineType.CHECKLIST, content = "")
-                        lines.add(newLine)
-                        // Immediate save when adding new line
-                        triggerImmediateAutoSave()
-
-                        coroutineScope.launch {
-                            delay(100)
-                            editingLineId = newLine.id
-                            val newItemIndex = activeItems.indexOfFirst { it.id == newLine.id }
-                            if (newItemIndex >= 0) {
-                                lazyListState.animateScrollToItem(newItemIndex + 1)
-                            }
-                            lineFocusRequesters[newLine.id]?.requestFocus()
-                        }
-                    },
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = "Add Item")
-                }
-            }
         }
     }
-
 }
 
 @Composable
@@ -1620,7 +1897,6 @@ fun PlainTextToDoItem(
     line: NoteLine,
     isEditing: Boolean,
     isDragging: Boolean,
-    dragOffset: Float,
     activeFormatting: ActiveFormatting,
     lines: SnapshotStateList<NoteLine>,
     lineFocusRequesters: MutableMap<String, FocusRequester>,
@@ -1636,78 +1912,73 @@ fun PlainTextToDoItem(
     onDragOffset: (Float) -> Unit,
     onDragEnd: () -> Unit,
     onImmediateSave: () -> Unit,
+    coroutineScope: kotlinx.coroutines.CoroutineScope,
     modifier: Modifier = Modifier
 ) {
     // Get or create focus requester for this line
     val focusRequester = lineFocusRequesters.getOrPut(line.id) { FocusRequester() }
 
-    // ✅ FIXED: Stable text field value management
+    // Text field value with proper formatting - FIXED initialization
     var textFieldValue by remember(line.id) {
-        mutableStateOf(TextFieldValue(""))
-    }
-
-    // ✅ FIXED: Better text field value management
-    LaunchedEffect(line.content, line.spanStyles.size) {
-        // Only update if we're not currently editing or if there's a significant difference
-        val currentPlainText = textFieldValue.text
-
-        try {
-            val newAnnotatedString = line.toAnnotatedString()
-
-            if (!isEditing || currentPlainText != line.content) {
-                // Calculate appropriate cursor position
-                val newCursorPos = if (isEditing && currentPlainText.length <= newAnnotatedString.length) {
-                    // Try to preserve cursor position
-                    textFieldValue.selection.start.coerceAtMost(newAnnotatedString.length)
-                } else {
-                    // Place cursor at end
-                    newAnnotatedString.length
-                }
-
-                textFieldValue = TextFieldValue(
-                    annotatedString = newAnnotatedString,
-                    selection = TextRange(newCursorPos)
-                )
-            }
-        } catch (e: Exception) {
-            // Fallback to plain text if annotation fails
-            textFieldValue = TextFieldValue(
-                text = line.content,
-                selection = if (isEditing) TextRange(line.content.length) else TextRange.Zero
+        mutableStateOf(
+            TextFieldValue(
+                annotatedString = try {
+                    line.toAnnotatedString()
+                } catch (e: Exception) {
+                    AnnotatedString(line.content)
+                },
+                selection = TextRange(0)
             )
-        }
+        )
     }
 
-    // ✅ FIXED: Focus management
-    LaunchedEffect(isEditing) {
-        if (isEditing) {
-            // When editing starts, ensure cursor is at end if text field is empty
-            if (textFieldValue.text.isEmpty()) {
-                textFieldValue = textFieldValue.copy(
-                    selection = TextRange(line.content.length)
-                )
+    // Track if we're actively typing
+    var isTyping by remember { mutableStateOf(false) }
+    var lastCursorPosition by remember { mutableStateOf(0) }
+
+    // Update text field value when line content changes
+    LaunchedEffect(line.content, line.spanStyles, isEditing) {
+        val annotatedString = if (isEditing && isTyping) {
+            // While typing, show with active formatting preview
+            buildAnnotatedStringWithActiveFormatting(
+                line.content,
+                line.spanStyles,
+                activeFormatting,
+                lastCursorPosition
+            )
+        } else {
+            // Show normal formatting
+            try {
+                line.toAnnotatedString()
+            } catch (e: Exception) {
+                AnnotatedString(line.content)
             }
         }
+
+        // Update text field value
+        textFieldValue = TextFieldValue(
+            annotatedString = annotatedString,
+            selection = if (isEditing) {
+                TextRange(
+                    start = textFieldValue.selection.start.coerceAtMost(annotatedString.length),
+                    end = textFieldValue.selection.end.coerceAtMost(annotatedString.length)
+                )
+            } else {
+                TextRange(annotatedString.length)
+            }
+        )
     }
 
-    val currentUser = if (isCollaborative) FirebaseAuth.getInstance().currentUser else null
-    val lastEditedBy = if (isCollaborative) {
-        when {
-            line.content.isEmpty() -> null
-            line.content.contains("test") -> UserInfo("test@example.com", "Test User", Color(0xFF4CAF50))
-            line.content.length > 20 -> UserInfo("collaborator@gmail.com", "John Doe", Color(0xFF2196F3))
-            else -> UserInfo(currentUser?.email ?: "you@gmail.com", currentUser?.displayName ?: "You", Color(0xFFFF9800))
+    // Reset typing state when focus changes
+    LaunchedEffect(isEditing) {
+        if (!isEditing) {
+            isTyping = false
         }
-    } else null
+    }
 
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .graphicsLayer {
-                translationY = if (isDragging) dragOffset else 0f
-                alpha = if (isDragging) 0.8f else 1f
-                shadowElevation = if (isDragging) 8.dp.toPx() else 0f
-            }
             .padding(vertical = 4.dp, horizontal = 8.dp)
             .then(
                 if (isCollaborative) {
@@ -1727,7 +1998,6 @@ fun PlainTextToDoItem(
                 .size(32.dp)
                 .clip(RoundedCornerShape(8.dp))
                 .pointerInput(line.id) {
-                    // ✅ FIXED: Use detectDragGestures instead of detectDragGesturesAfterLongPress
                     detectDragGestures(
                         onDragStart = { _ -> onDragStart() },
                         onDragEnd = { onDragEnd() },
@@ -1747,26 +2017,6 @@ fun PlainTextToDoItem(
 
         Spacer(modifier = Modifier.width(8.dp))
 
-        // User avatar for collaborative mode
-        if (isCollaborative && lastEditedBy != null) {
-            Box(
-                modifier = Modifier
-                    .size(28.dp)
-                    .clip(CircleShape)
-                    .background(lastEditedBy.color.copy(alpha = 0.8f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = getInitials(lastEditedBy.displayName ?: lastEditedBy.email),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 10.sp
-                )
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-        }
-
         // Checkbox
         Checkbox(
             checked = line.isChecked,
@@ -1782,7 +2032,7 @@ fun PlainTextToDoItem(
             )
         )
 
-        // ✅ FIXED: BasicTextField with proper handling
+        // BasicTextField with formatting support
         BasicTextField(
             value = textFieldValue,
             onValueChange = { newTfv ->
@@ -1793,21 +2043,37 @@ fun PlainTextToDoItem(
                 }
 
                 // Handle backspace on empty line
-                if (newTfv.text.isEmpty() && textFieldValue.text.isNotEmpty()) {
+                if (newTfv.text.isEmpty() && textFieldValue.text.isEmpty()) {
                     onBackspaceOnEmptyLine()
                     return@BasicTextField
                 }
 
-                // ✅ FIXED: Update text field value immediately to prevent flickering
-                textFieldValue = newTfv
+                // Mark as typing
+                isTyping = true
+                lastCursorPosition = newTfv.selection.start
 
-                // Only trigger text change if content actually changed
-                if (newTfv.text != line.content) {
-                    onTextChange(newTfv.text, newTfv.selection.start)
-                }
+                // Build annotated string with active formatting preview
+                val annotatedWithPreview = buildAnnotatedStringWithActiveFormatting(
+                    newTfv.text,
+                    line.spanStyles,
+                    activeFormatting,
+                    newTfv.selection.start
+                )
 
-                // Always update selection
+                // Update text field value with formatting
+                textFieldValue = newTfv.copy(
+                    annotatedString = annotatedWithPreview
+                )
+
+                // Notify parent of changes
+                onTextChange(newTfv.text, newTfv.selection.start)
                 onSelectionChange(line.id, newTfv.selection)
+
+                // Reset typing state after a delay
+                coroutineScope.launch {
+                    delay(500)
+                    isTyping = false
+                }
             },
             modifier = Modifier
                 .weight(1f)
@@ -1816,8 +2082,11 @@ fun PlainTextToDoItem(
                     val hadFocus = isEditing
                     onFocusChange(focusState.isFocused)
 
-                    if (hadFocus && !focusState.isFocused && line.content.isNotEmpty()) {
-                        onImmediateSave()
+                    if (hadFocus && !focusState.isFocused) {
+                        isTyping = false
+                        if (line.content.isNotEmpty()) {
+                            onImmediateSave()
+                        }
                     }
                 },
             textStyle = MaterialTheme.typography.bodyLarge.copy(
@@ -1861,12 +2130,12 @@ fun PlainTextToDoItem(
                 Icons.Default.CloudSync,
                 contentDescription = "Synced",
                 modifier = Modifier.size(16.dp),
-                tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f)
+                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
             )
             Spacer(modifier = Modifier.width(4.dp))
         }
 
-        // ✅ FIXED: Delete button with matching separator style
+        // Delete button
         IconButton(
             onClick = onDelete,
             modifier = Modifier
@@ -1890,16 +2159,6 @@ fun CompletedToDoItem(
     onCheckChange: (Boolean) -> Unit,
     onDelete: () -> Unit
 ) {
-    val currentUser = if (isCollaborative) FirebaseAuth.getInstance().currentUser else null
-    val lastEditedBy = if (isCollaborative) {
-        when {
-            line.content.isEmpty() -> null
-            line.content.contains("test") -> UserInfo("test@example.com", "Test User", Color(0xFF4CAF50))
-            line.content.length > 20 -> UserInfo("collaborator@gmail.com", "John Doe", Color(0xFF2196F3))
-            else -> UserInfo(currentUser?.email ?: "you@gmail.com", currentUser?.displayName ?: "You", Color(0xFFFF9800))
-        }
-    } else null
-
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -1919,26 +2178,6 @@ fun CompletedToDoItem(
         // Spacing for drag handle (completed items can't be dragged)
         Spacer(modifier = Modifier.width(40.dp))
 
-        // User avatar for collaborative mode
-        if (isCollaborative && lastEditedBy != null) {
-            Box(
-                modifier = Modifier
-                    .size(28.dp)
-                    .clip(CircleShape)
-                    .background(lastEditedBy.color.copy(alpha = 0.6f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = getInitials(lastEditedBy.displayName ?: lastEditedBy.email),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 10.sp
-                )
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-        }
-
         // Checkbox
         Checkbox(
             checked = line.isChecked,
@@ -1954,7 +2193,7 @@ fun CompletedToDoItem(
             )
         )
 
-        // ✅ FIXED: Text with proper annotation handling
+        // Text with proper annotation handling
         Text(
             text = remember(line.content, line.spanStyles.hashCode()) {
                 try {
@@ -1976,7 +2215,7 @@ fun CompletedToDoItem(
                 Icons.Default.CloudSync,
                 contentDescription = "Synced",
                 modifier = Modifier.size(16.dp),
-                tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f)
+                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
             )
             Spacer(modifier = Modifier.width(4.dp))
         }
@@ -1997,88 +2236,155 @@ fun CompletedToDoItem(
         }
     }
 }
-
-// ✅ FIXED: SeparatorItem with drag handle and matching style
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SeparatorItem(
     text: String,
     isDragging: Boolean = false,
-    dragOffset: Float = 0f,
+    onTextChange: (String) -> Unit,
     onDelete: () -> Unit,
     onDragStart: () -> Unit = {},
     onDragOffset: (Float) -> Unit = {},
     onDragEnd: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
-    Row(
+    // Use placeholder as default if text is empty
+    val defaultText = text.ifEmpty { "Section divider" }
+    var textFieldValue by remember {
+        mutableStateOf(TextFieldValue(text = defaultText))
+    }
+    val focusRequester = remember { FocusRequester() }
+    var isFocused by remember { mutableStateOf(false) }
+
+    // Only update from external text when not editing
+    LaunchedEffect(text) {
+        if (!isFocused) {
+            textFieldValue = TextFieldValue(text = text.ifEmpty { "Section divider" })
+        }
+    }
+
+    Card(
         modifier = modifier
             .fillMaxWidth()
-            .graphicsLayer {
-                translationY = if (isDragging) dragOffset else 0f
-                alpha = if (isDragging) 0.8f else 1f
-                shadowElevation = if (isDragging) 8.dp.toPx() else 0f
-            }
+            .height(64.dp) // Increased height to accommodate text descenders
             .padding(vertical = 4.dp, horizontal = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        border = BorderStroke(
+            width = 1.dp,
+            color = if (isFocused)
+                MaterialTheme.colorScheme.primary
+            else
+                MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = if (isFocused) 2.dp else 0.dp
+        )
     ) {
-        // ✅ FIXED: Add drag handle to match other items
-        Box(
-            modifier = Modifier
-                .size(32.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .pointerInput(Unit) {
-                    detectDragGestures(
-                        onDragStart = { _ -> onDragStart() },
-                        onDragEnd = { onDragEnd() },
-                        onDrag = { _, dragAmount -> onDragOffset(dragAmount.y) }
+        Row(
+            modifier = Modifier.fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Drag handle
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .pointerInput(Unit) {
+                        detectDragGestures(
+                            onDragStart = { _ -> onDragStart() },
+                            onDragEnd = { onDragEnd() },
+                            onDrag = { _, dragAmount -> onDragOffset(dragAmount.y) }
+                        )
+                    }
+                    .padding(4.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Default.DragHandle,
+                    contentDescription = "Drag to reorder",
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            }
+
+            Spacer(modifier = Modifier.width(8.dp))
+
+            // Separator with line and text
+            Row(
+                modifier = Modifier.weight(1f),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                HorizontalDivider(
+                    modifier = Modifier.weight(1f),
+                    thickness = 2.dp,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+                )
+
+                // Use BasicTextField for better control
+                Box(
+                    modifier = Modifier
+                        .widthIn(min = 100.dp, max = 250.dp)
+                        .padding(horizontal = 8.dp, vertical = 8.dp), // Add vertical padding here
+                    contentAlignment = Alignment.Center
+                ) {
+                    BasicTextField(
+                        value = textFieldValue,
+                        onValueChange = { newValue ->
+                            textFieldValue = newValue
+                            onTextChange(newValue.text)
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .focusRequester(focusRequester)
+                            .onFocusChanged { focusState ->
+                                if (focusState.isFocused && !isFocused) {
+                                    // Select all text when gaining focus
+                                    textFieldValue = textFieldValue.copy(
+                                        selection = TextRange(0, textFieldValue.text.length)
+                                    )
+                                }
+                                isFocused = focusState.isFocused
+                            },
+                        textStyle = MaterialTheme.typography.bodyLarge.copy(
+                            color = MaterialTheme.colorScheme.primary,
+                            fontWeight = FontWeight.SemiBold,
+                            textAlign = TextAlign.Center
+                        ),
+                        singleLine = true,
+                        cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+                        decorationBox = { innerTextField ->
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                innerTextField()
+                            }
+                        }
                     )
                 }
-                .padding(4.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                Icons.Default.DragHandle,
-                contentDescription = "Drag to reorder",
-                modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            )
-        }
 
-        Spacer(modifier = Modifier.width(8.dp))
+                HorizontalDivider(
+                    modifier = Modifier.weight(1f),
+                    thickness = 2.dp,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+                )
+            }
 
-        // ✅ FIXED: Separator content with proper spacing
-        HorizontalDivider(
-            modifier = Modifier.weight(1f),
-            thickness = 1.dp,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
-        )
-
-        Text(
-            text = text,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-            modifier = Modifier.padding(horizontal = 12.dp)
-        )
-
-        HorizontalDivider(
-            modifier = Modifier.weight(1f),
-            thickness = 1.dp,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
-        )
-
-        // ✅ FIXED: Delete button with matching style
-        IconButton(
-            onClick = onDelete,
-            modifier = Modifier
-                .size(32.dp)
-                .padding(start = 4.dp)
-        ) {
-            Icon(
-                Icons.Default.Close,
-                contentDescription = "Delete separator",
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                modifier = Modifier.size(16.dp)
-            )
+            // Delete button
+            IconButton(
+                onClick = onDelete,
+                modifier = Modifier.size(32.dp)
+            ) {
+                Icon(
+                    Icons.Default.Close,
+                    contentDescription = "Delete separator",
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    modifier = Modifier.size(16.dp)
+                )
+            }
         }
     }
 }

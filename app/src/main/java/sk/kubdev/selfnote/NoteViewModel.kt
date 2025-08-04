@@ -310,10 +310,25 @@ class NoteViewModel @Inject constructor(
     }
 
     // ✅ Get collaborative note by ID - FIXED
-    fun getCollaborativeNoteById(noteId: String, callback: (Result<CollaborativeNote?>) -> Unit) {
+    fun getCollaborativeNoteById(
+        noteId: String,
+        onResult: (Result<CollaborativeNote?>) -> Unit
+    ) {
         viewModelScope.launch {
-            val result = collaborationService.getCollaborativeNoteById(noteId)
-            callback(result)
+            try {
+                Log.d("NoteViewModel", "Fetching collaborative note: $noteId")
+                val result = collaborationService.getCollaborativeNoteById(noteId)
+                result.onSuccess { note ->
+                    Log.d("NoteViewModel", "Fetched note: ${note?.title}")
+                    onResult(Result.success(note))
+                }.onFailure { error ->
+                    Log.e("NoteViewModel", "Error fetching collaborative note", error)
+                    onResult(Result.failure(error))
+                }
+            } catch (e: Exception) {
+                Log.e("NoteViewModel", "Error fetching collaborative note", e)
+                onResult(Result.failure(e))
+            }
         }
     }
 
