@@ -8,6 +8,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization) apply false
     id("com.google.gms.google-services") version "4.4.3" apply false
     id("com.google.dagger.hilt.android") version "2.48" apply false
+    id("com.google.firebase.crashlytics") version "3.0.2" apply false
 }
 
 tasks.register("printDebugKeystoreSHA") {

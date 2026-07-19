@@ -7,18 +7,18 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:946751285218:android:7096143351c5f47945fbbb",
+        "mobilesdk_app_id": "1:946751285218:android:460ff689284126ed45fbbb",
         "android_client_info": {
-          "package_name": "sk.kubdev.selfnote"
+          "package_name": "sk.kubdev.mynotes"
         }
       },
       "oauth_client": [
         {
-          "client_id": "946751285218-grgbfa3kcgucs2h9u283vkr3fnjqf4e9.apps.googleusercontent.com",
+          "client_id": "946751285218-3e8cu1a8hv3lhki9du853smrq215q8q6.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "sk.kubdev.selfnote",
-            "certificate_hash": "c0f33020347a5a5c5624ff436b38698eed8d9b56"
+            "package_name": "sk.kubdev.mynotes",
+            "certificate_hash": "a7b457ac89230caa38097a560862264b1cf1fb27"
           }
         },
         {

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- App Name -->
-    <string name="app_name">SelfNote</string>
+    <string name="app_name">MyNotes</string>
 
     <!-- Main Navigation -->
     <string name="nav_notes">Notas</string>
@@ -16,21 +16,11 @@
     <string name="action_save">Guardar</string>
     <string name="action_cancel">Cancelar</string>
     <string name="action_delete">Eliminar</string>
-    <string name="action_archive">Archivar</string>
     <string name="action_restore">Restaurar</string>
     <string name="action_ok">OK</string>
     <string name="action_close">Cerrar</string>
-    <string name="action_search">Buscar</string>
-    <string name="action_add">Añadir</string>
-    <string name="action_edit">Editar</string>
-    <string name="action_undo">Deshacer</string>
 
     <!-- Note Management -->
-    <string name="note_title_hint">Título de la nota</string>
-    <string name="note_content_hint">Empieza a escribir tu nota...</string>
-    <string name="note_search_hint">Buscar notas...</string>
-    <string name="note_empty_title">Nota sin título</string>
-    <string name="notes_empty_message">Aún no hay notas. ¡Toca el botón + para crear tu primera nota!</string>
     <string name="archive_empty_message">No hay notas archivadas</string>
     <string name="bin_empty_message">La papelera está vacía</string>
 
@@ -44,7 +34,6 @@
     <string name="bin_title">Papelera</string>
     <string name="bin_empty_hint">Las notas eliminadas aparecerán aquí</string>
     <string name="bin_auto_delete_info">Las notas se eliminan automáticamente después de 30 días</string>
-    <string name="bin_clean_expired">Limpiar expiradas</string>
     <string name="bin_empty_action">Vaciar papelera</string>
     <string name="bin_restore_all">Restaurar todo</string>
     <string name="bin_all_restored">Todas las notas han sido restauradas</string>
@@ -52,9 +41,8 @@
     <string name="bin_empty_dialog_message">¿Estás seguro de que quieres eliminar permanentemente todas las notas de la papelera? Esta acción no se puede deshacer.</string>
     <string name="bin_delete_all">Eliminar todo</string>
     <string name="bin_emptied">Papelera vaciada</string>
-    <string name="bin_cleanup_dialog_title">Limpiar notas expiradas</string>
-    <string name="bin_cleanup_dialog_message">Esto eliminará permanentemente todas las notas que han estado en la papelera durante más de 30 días. Esta acción no se puede deshacer.</string>
-    <string name="bin_cleanup_action">Limpiar</string>
+    <string name="bin_restore_all_dialog_title">Restaurar todas las notas</string>
+    <string name="bin_restore_all_dialog_message">¿Seguro que quieres restaurar todas las notas de la papelera?</string>
     <string name="bin_expired_status">Expirada - se eliminará automáticamente</string>
     <string name="bin_expires_today">Expira hoy</string>
     <string name="bin_expires_days">Expira en %d días</string>
@@ -69,8 +57,6 @@
 
     <!-- Date Format -->
     <string name="date_format_full">d MMM yyyy</string>
-    <string name="date_format_note">d MMM yyyy</string>
-    <string name="time_format_note">HH:mm</string>
 
     <!-- Settings Screen -->
     <string name="settings_title">Ajustes</string>
@@ -102,7 +88,6 @@
     <string name="language_czech">Checo</string>
     <string name="language_system">Predeterminado del sistema</string>
     <string name="language_system_description">Usar el idioma del dispositivo</string>
-    <string name="language_restart_info">La aplicación se reiniciará para aplicar el cambio de idioma</string>
     <string name="language_changed_title">Idioma cambiado</string>
     <string name="language_changed_message">El idioma se ha cambiado correctamente. Por favor, reinicia la aplicación para aplicar completamente los cambios.</string>
 
@@ -128,10 +113,6 @@
     <string name="swipe_action_archive_desc">Archivar nota para más tarde</string>
     <string name="swipe_action_none">Ninguna</string>
     <string name="swipe_action_none_desc">Sin acción</string>
-    <string name="swipe_release_to">Suelta para %s</string>
-    <string name="swipe_almost_there">Casi allí...</string>
-    <string name="swipe_keep_swiping">Sigue deslizando...</string>
-    <string name="swipe_to">Desliza para %s</string>
 
     <!-- Password Dialog -->
     <string name="password_setup_title">Establecer contraseña</string>
@@ -157,15 +138,14 @@
     <string name="auth_hide_password">Ocultar contraseña</string>
 
     <!-- Authentication -->
-    <string name="auth_title">SelfNote</string>
+    <string name="auth_title">MyNotes</string>
     <string name="auth_subtitle">Autentícate para acceder a tus notas</string>
-    <string name="auth_biometric_unavailable">Autenticación biométrica no disponible</string>
     <string name="auth_biometric_not_available">Autenticación biométrica no disponible</string>
     <string name="auth_password_required_for_setup">Se requiere contraseña para la autenticación por contraseña</string>
     <string name="auth_biometric_verification_failed">Falló la verificación biométrica</string>
     <string name="auth_invalid_password">Contraseña inválida</string>
     <string name="auth_password_required">Se requiere contraseña</string>
-    <string name="auth_biometric_prompt_title">Autentícate para acceder a SelfNote</string>
+    <string name="auth_biometric_prompt_title">Autentícate para acceder a MyNotes</string>
     <string name="auth_biometric_prompt_subtitle">Usa tu credencial biométrica para desbloquear la aplicación</string>
     <string name="auth_authentication_failed">Falló la autenticación</string>
     <string name="auth_password_label">Contraseña</string>
@@ -174,41 +154,26 @@
     <string name="auth_use_biometric">Usar biométrico</string>
 
     <!-- Backup Screen -->
-    <string name="backup_title">Copia de seguridad y restauración</string>
-    <string name="backup_description">Mantén tus notas seguras creando copias de seguridad. Exporta tus datos o restaura desde copias de seguridad anteriores.</string>
-    <string name="backup_current_data">Datos actuales</string>
-    <string name="backup_active_notes">Notas activas</string>
-    <string name="backup_archived">Archivadas</string>
-    <string name="backup_total">Total</string>
-    <string name="backup_export_title">Exportar datos</string>
-    <string name="backup_export_description">Crear un archivo de copia de seguridad con todas tus notas y configuraciones.</string>
-    <string name="backup_export_all">Exportar todas las notas</string>
-    <string name="backup_export_active">Exportar solo notas activas</string>
-    <string name="backup_import_title">Importar datos</string>
-    <string name="backup_import_description">Restaurar notas desde un archivo de copia de seguridad. Esto se añadirá a tus notas existentes.</string>
-    <string name="backup_import_select">Seleccionar archivo de copia de seguridad</string>
-    <string name="backup_tips_title">💡 Consejos de copia de seguridad</string>
-    <string name="backup_tips_content">• Las copias de seguridad regulares protegen contra la pérdida de datos\n• Exporta antes de actualizaciones importantes de la aplicación\n• Guarda los archivos de copia de seguridad en almacenamiento en la nube\n• La importación añade a las notas existentes (no reemplaza)</string>
 
     <!-- About Screen -->
     <string name="about_title">Acerca de</string>
     <string name="about_subtitle">Tu compañero personal para tomar notas</string>
     <string name="about_version">Versión %s</string>
-    <string name="about_description">SelfNote es una aplicación potente e intuitiva para tomar notas, diseñada para ayudarte a capturar, organizar y gestionar tus pensamientos, ideas y tareas sin esfuerzo. Con características como colores personalizables, acciones de deslizamiento y organización automática, SelfNote hace que tomar notas sea una experiencia agradable.</string>
+    <string name="about_description">MyNotes es una aplicación potente e intuitiva para tomar notas, diseñada para ayudarte a capturar, organizar y gestionar tus pensamientos, ideas y tareas sin esfuerzo. Con características como colores personalizables, acciones de deslizamiento y organización automática, MyNotes hace que tomar notas sea una experiencia agradable.</string>
     <string name="about_features_title">Características principales</string>
-    <string name="about_support_title">Apoya a SelfNote</string>
-    <string name="about_support_description">SelfNote se desarrolla con pasión como un proyecto independiente. Si disfrutas usando la aplicación y la encuentras útil, ¡considera apoyar su desarrollo!</string>
+    <string name="about_support_title">Apoya a MyNotes</string>
+    <string name="about_support_description">MyNotes es completamente gratis y sin anuncios. Si te gusta usarla, puedes invitarme a un café para ayudar a que siga siendo así.</string>
     <string name="about_coffee_button">Invítame a un café</string>
-    <string name="about_support_message">¡Tu apoyo ayuda a mantener SelfNote gratuito y motiva el desarrollo continuo!</string>
+    <string name="about_support_message">¡Tu apoyo ayuda a mantener MyNotes gratuito y motiva el desarrollo continuo!</string>
     <string name="about_contact_title">Contacto y comentarios</string>
     <string name="about_contact_send">Enviar comentarios</string>
+    <string name="about_feedback_subtitle">¿Encontraste un error o tienes una idea? Me encantaría saberlo.</string>
     <string name="about_contact_email">kubisdev1@gmail.com</string>
     <string name="about_feedback_tips">💡 Qué incluir en tus comentarios:</string>
     <string name="about_feedback_content">• Informes de errores con pasos para reproducir\n• Solicitudes de funciones y sugerencias\n• Comentarios generales sobre tu experiencia\n• Preguntas sobre la funcionalidad de la aplicación</string>
-    <string name="about_contact_message">¡Leo cada correo y aprecio todos los comentarios! Tu aporte ayuda a hacer SelfNote mejor para todos.</string>
-    <string name="about_developer">Creado con ❤️ por KubDev</string>
-    <string name="about_copyright">© 2025 SelfNote. Todos los derechos reservados.</string>
-    <string name="about_tagline">Un proyecto independiente construido con pasión por la productividad y la simplicidad.</string>
+    <string name="about_contact_message">¡Leo cada correo y aprecio todos los comentarios! Tu aporte ayuda a hacer MyNotes mejor para todos.</string>
+    <string name="about_developer">Creado por kub1sDev</string>
+    <string name="about_copyright">© 2026 MyNotes. Todos los derechos reservados.</string>
 
     <!-- Features -->
     <string name="feature_colors_title">Colores personalizables</string>
@@ -223,19 +188,14 @@
     <string name="feature_search_desc">Encuentra tus notas rápidamente con búsqueda avanzada</string>
     <string name="feature_themes_title">Temas adaptativos</string>
     <string name="feature_themes_desc">Temas claros, oscuros y del sistema con colores dinámicos</string>
+    <string name="feature_collaboration_title">Colaboración en tiempo real</string>
+    <string name="feature_collaboration_desc">Comparte notas y listas de tareas que se sincronizan en vivo</string>
+    <string name="feature_backup_title">Copia de seguridad en la nube</string>
+    <string name="feature_backup_desc">Copias automáticas en Google Drive, restaurables en cualquier momento</string>
 
     <!-- Error Messages -->
-    <string name="error_generic">Algo salió mal. Por favor, inténtalo de nuevo.</string>
-    <string name="error_network">Error de red. Verifica tu conexión.</string>
-    <string name="error_no_email_app">Por favor, instala una aplicación de correo o contacta a %s directamente.</string>
 
     <!-- Success Messages -->
-    <string name="success_note_saved">Nota guardada</string>
-    <string name="success_note_deleted">Nota eliminada</string>
-    <string name="success_note_archived">Nota archivada</string>
-    <string name="success_note_restored">Nota restaurada</string>
-    <string name="success_export_complete">¡Exportación completa! Revisa tu carpeta de Descargas.</string>
-    <string name="success_import_complete">¡Importación completa! %d notas restauradas.</string>
 
     <!-- Accessibility -->
     <string name="selected_indicator">Seleccionado</string>
@@ -243,118 +203,40 @@
     <!-- Note Detail Screen -->
     <string name="note_new_title">Nueva nota</string>
     <string name="note_edit_title">Editar nota</string>
-    <string name="note_toggle_toolbar">Alternar barra de herramientas</string>
-    <string name="note_delete">Eliminar nota</string>
-    <string name="note_save">Guardar nota</string>
-    <string name="note_add_line">Añadir línea de texto</string>
-    <string name="note_delete_separator">Eliminar separador</string>
-    <string name="note_delete_checkbox">Eliminar casilla de verificación</string>
-    <string name="note_bullet">Viñeta</string>
 
     <!-- Note Image -->
     <string name="note_image">Imagen de nota</string>
-    <string name="image_zoom_out">Alejar</string>
-    <string name="image_zoom_in">Acercar</string>
-    <string name="image_resize">Cambiar tamaño</string>
-    <string name="image_move_up">Mover arriba</string>
-    <string name="image_move_down">Mover abajo</string>
-    <string name="image_reset">Restablecer imagen</string>
-    <string name="image_delete">Eliminar imagen</string>
-    <string name="image_position">Posición: %1$d/%2$d</string>
-    <string name="image_drag_release_up">Suelta para mover arriba ↑</string>
-    <string name="image_drag_release_down">Suelta para mover abajo ↓</string>
-    <string name="image_drag_reorder">Arrastra arriba/abajo para reordenar</string>
-    <string name="image_height">Altura: %ddp</string>
 
     <!-- Note Formatting -->
-    <string name="formatting_bold">Negrita</string>
-    <string name="formatting_italic">Cursiva</string>
-    <string name="formatting_underline">Subrayado</string>
-    <string name="formatting_font_size">Tamaño de fuente</string>
-    <string name="formatting_text_color">Color de texto</string>
-    <string name="formatting_clear_color">Borrar color</string>
-    <string name="formatting_bullet_mode">Modo viñetas</string>
-    <string name="formatting_checklist_mode">Modo lista de verificación</string>
-    <string name="formatting_add_separator">Añadir separador</string>
-    <string name="formatting_add_image">Añadir imagen</string>
-    <string name="formatting_default_size">Tamaño predeterminado</string>
-    <string name="font_size_sp">%dsp</string>
 
     <!-- Note Item -->
-    <string name="note_pin">Fijar nota</string>
-    <string name="note_unpin">Desfijar nota</string>
-    <string name="note_type_text">Nota de texto</string>
-    <string name="note_type_checklist">Lista de verificación</string>
-    <string name="note_checklist_preview">%1$s • %2$d/%3$d completados</string>
-    <string name="note_checklist_empty">Lista de verificación vacía</string>
-    <string name="note_pin_action">Fijar</string>
-    <string name="note_unpin_action">Desfijar</string>
-    <string name="note_title_placeholder">Título de la nota</string>
 
     <!-- Note List Screen -->
-    <string name="search_notes_hint">Buscar notas...</string>
-    <string name="clear_search">Borrar búsqueda</string>
-    <string name="open_drawer">Abrir cajón de navegación</string>
-    <string name="filter_notes">Filtrar notas</string>
-    <string name="change_layout">Cambiar diseño</string>
 
     <!-- Filter Menu -->
-    <string name="filter_section">Filtrar</string>
-    <string name="filter_all_notes">Todas las notas</string>
-    <string name="filter_text_only">Solo notas de texto</string>
-    <string name="filter_checklist_only">Solo listas de verificación</string>
 
     <!-- Sort Menu -->
-    <string name="sort_section">Ordenar</string>
-    <string name="sort_manual">Orden manual</string>
-    <string name="sort_newest">Más recientes primero</string>
-    <string name="sort_oldest">Más antiguas primero</string>
-    <string name="sort_az">A → Z</string>
-    <string name="sort_za">Z → A</string>
 
     <!-- FAB Items -->
-    <string name="fab_todo_list">Lista de tareas</string>
-    <string name="fab_note">Nota</string>
-    <string name="fab_new_category">Nueva categoría</string>
 
     <!-- Empty States -->
-    <string name="no_notes_found">No se encontraron notas para \"%s\"</string>
-    <string name="no_notes_filter">Ninguna nota coincide con el filtro actual</string>
-    <string name="no_notes_yet">Aún no hay notas.\nToca el botón \'+\' para crear una.</string>
-    <string name="no_notes_in_category">No hay notas en esta categoría</string>
 
     <!-- Sections -->
-    <string name="section_pinned">Fijadas</string>
-    <string name="section_others">Otras</string>
 
     <!-- Snackbar Messages -->
-    <string name="snackbar_note_deleted">Nota eliminada</string>
-    <string name="snackbar_note_archived">Nota archivada</string>
 
     <!-- Note Options Bottom Sheet -->
     <string name="untitled_note">Nota sin título</string>
-    <string name="edit_title">Editar título</string>
-    <string name="move_to_category">Mover a categoría</string>
-    <string name="change_color">Cambiar color</string>
 
     <!-- Section Header -->
-    <string name="collapse_section">Contraer</string>
-    <string name="expand_section">Expandir</string>
-    <string name="category_options">Opciones de categoría</string>
 
     <!-- Category Dialog -->
-    <string name="new_category">Nueva categoría</string>
-    <string name="edit_category">Editar categoría</string>
-    <string name="category_name_label">Nombre de categoría</string>
-    <string name="move_to_category_title">Mover a categoría</string>
 
     <!-- ViewModel Messages -->
     <string name="untitled_todo">Tarea sin título</string>
 
     <!-- Cleanup Messages -->
     <string name="msg_expired_notes_deleted">%d notas expiradas eliminadas automáticamente</string>
-    <string name="msg_expired_notes_cleaned">%d notas expiradas limpiadas</string>
-    <string name="msg_no_expired_notes">No hay notas expiradas para limpiar</string>
 
     <!-- Note Operation Messages -->
     <string name="msg_note_color_updated">Color de nota actualizado</string>
@@ -362,9 +244,6 @@
     <string name="msg_note_restored_from_archive">Nota restaurada del archivo</string>
     <string name="msg_note_permanently_deleted">Nota eliminada permanentemente</string>
     <string name="msg_note_restored">Nota restaurada</string>
-    <string name="msg_notes_moved_to_bin">%d notas movidas a la papelera</string>
-    <string name="msg_notes_archived">%d notas archivadas</string>
-    <string name="msg_notes_permanently_deleted">%d notas eliminadas permanentemente</string>
     <string name="msg_note_pinned">Nota fijada</string>
     <string name="msg_note_unpinned">Nota desfijada</string>
 
@@ -376,38 +255,31 @@
     <string name="msg_note_moved_to_uncategorized">Nota movida a sin categorizar</string>
 
     <!-- Import/Export Messages -->
-    <string name="msg_notes_imported">%d notas importadas</string>
-    <string name="msg_all_notes_reset_to_default_color">Todas las notas restablecidas al color predeterminado</string>
-    <string name="msg_note_duplicated">Nota duplicada</string>
-    <string name="msg_notes_restored_from_backup">%d notas restauradas desde la copia de seguridad</string>
 
     <!-- Note Copy Suffix -->
-    <string name="note_copy_suffix">%s (Copia)</string>
 
     <!-- Validation Messages -->
-    <string name="validation_empty_note">Nota vacía (sin título o contenido)</string>
-    <string name="validation_invalid_note_type">Tipo de nota no válido: %s</string>
 
     <!-- ToDo List Screen -->
-    <string name="todo_toggle_formatting">Alternar formato</string>
-    <string name="todo_add_item">Añadir elemento</string>
-    <string name="todo_font_size_applied">Tamaño de fuente aplicado a toda la línea (%dsp)</string>
     <string name="todo_section_divider">Divisor de sección</string>
-    <string name="todo_active_tasks">Tareas activas (%d)</string>
-    <string name="todo_completed_tasks">Completadas (%d)</string>
-    <string name="todo_empty_state">Toca + para añadir tu primera tarea</string>
-    <string name="todo_drag_to_reorder">Arrastra para reordenar</string>
-    <string name="todo_add_separator">Añadir separador</string>
 
     <!-- Backup ViewModel -->
     <string name="backup_sign_in_failed">Inicio de sesión fallido: %s</string>
     <string name="backup_sign_in_error">Error de inicio de sesión: %s</string>
-    <string name="backup_starting">Iniciando copia de seguridad...</string>
+    <string name="backup_starting">Iniciando copia de seguridad…</string>
     <string name="backup_failed">Copia de seguridad fallida: %s</string>
     <string name="backup_error">Error de copia de seguridad: %s</string>
     <string name="backup_load_failed">Fallo al cargar las copias de seguridad: %s</string>
-    <string name="backup_restore_starting">Iniciando restauración...</string>
+    <string name="backup_restore_starting">Iniciando restauración…</string>
     <string name="backup_restore_success">%d notas restauradas exitosamente</string>
+    <string name="backup_restore_partial">Restauradas %1$d de %2$d notas - algunas notas no se pudieron restaurar</string>
+    <string name="backup_restore_success_with_duplicates">Restauradas %1$d notas (%2$d ya existían y se omitieron)</string>
+    <string name="backup_restore_choice_title">Restaurar notas</string>
+    <string name="backup_restore_choice_description">¿Cómo se debe restaurar esta copia de seguridad?</string>
+    <string name="backup_restore_merge_title">Combinar</string>
+    <string name="backup_restore_merge_description">Mantener tus notas actuales y añadir todo lo nuevo de la copia de seguridad. Las notas ya restauradas no se duplicarán.</string>
+    <string name="backup_restore_replace_title">Reemplazar</string>
+    <string name="backup_restore_replace_description">Eliminar todas las notas y grupos actuales, y restaurar solo lo que hay en esta copia de seguridad.</string>
     <string name="backup_restore_failed">Restauración fallida: %s</string>
     <string name="backup_delete_failed">Eliminación fallida: %s</string>
     <string name="backup_auto_disabled">Copia de seguridad automática desactivada</string>
@@ -432,10 +304,10 @@
     <string name="backup_notification_channel_name">Notificaciones de copia de seguridad</string>
     <string name="backup_notification_channel_description">Notificaciones para el estado de la copia de seguridad automática</string>
     <string name="backup_notification_backing_up">Haciendo copia de seguridad de las notas</string>
-    <string name="backup_notification_in_progress">Tus notas se están respaldando en Google Drive...</string>
+    <string name="backup_notification_in_progress">Tus notas se están respaldando en Google Drive…</string>
     <string name="backup_notification_skipped">Copia de seguridad omitida</string>
     <string name="backup_notification_sign_in_required">Por favor, inicia sesión en Google Drive para habilitar las copias de seguridad</string>
-    <string name="backup_notification_backing_up_count">Haciendo copia de seguridad de %d notas...</string>
+    <string name="backup_notification_backing_up_count">Haciendo copia de seguridad de %d notas…</string>
     <string name="backup_notification_success">Copia de seguridad exitosa</string>
     <string name="backup_notification_success_message">Se hizo copia de seguridad exitosamente de %d notas en Google Drive</string>
     <string name="backup_notification_failed">Copia de seguridad fallida</string>
@@ -453,13 +325,13 @@
     <string name="drive_service_not_initialized">Servicio de Drive no inicializado</string>
 
     <!-- Google Drive Progress Messages -->
-    <string name="drive_preparing_backup">Preparando datos de copia de seguridad...</string>
-    <string name="drive_creating_backup_file">Creando archivo de copia de seguridad...</string>
-    <string name="drive_uploading_to_drive">Subiendo a Google Drive...</string>
+    <string name="drive_preparing_backup">Preparando datos de copia de seguridad…</string>
+    <string name="drive_creating_backup_file">Creando archivo de copia de seguridad…</string>
+    <string name="drive_uploading_to_drive">Subiendo a Google Drive…</string>
     <string name="drive_backup_completed">¡Copia de seguridad completada exitosamente!</string>
     <string name="drive_backup_created_success">Copia de seguridad creada exitosamente: %s</string>
-    <string name="drive_downloading_backup">Descargando archivo de copia de seguridad...</string>
-    <string name="drive_processing_backup">Procesando datos de copia de seguridad...</string>
+    <string name="drive_downloading_backup">Descargando archivo de copia de seguridad…</string>
+    <string name="drive_processing_backup">Procesando datos de copia de seguridad…</string>
     <string name="drive_restore_completed">¡Restauración completada exitosamente!</string>
     <string name="drive_backup_deleted_success">Copia de seguridad eliminada exitosamente</string>
 
@@ -482,4 +354,129 @@
     <string name="color_picker_current">Actual: %s</string>
     <string name="color_picker_random">Aleatorio</string>
     <string name="color_picker_selected_desc">%s seleccionado</string>
+    <!-- Sign In Screen -->
+    <string name="sign_in_title">Iniciar sesión</string>
+    <string name="sign_in_headline">Inicia sesión para colaborar</string>
+    <string name="sign_in_subtitle">Inicia sesión con Google para compartir notas, invitar a colaboradores y sincronizar tus listas de tareas entre dispositivos.</string>
+    <string name="sign_in_signed_in_as">Has iniciado sesión</string>
+    <string name="sign_in_with_google">Iniciar sesión con Google</string>
+    <string name="sign_in_sign_out">Cerrar sesión</string>
+
+    <!-- Previously missing keys -->
+    <string name="enter_title_hint">Escribe un título…</string>
+    <string name="item_deleted">Elemento eliminado</string>
+    <string name="undo">Deshacer</string>
+    <string name="language_instant_change">El idioma cambia al instante</string>
+    <string name="language_quick_restart">El idioma se actualizará con un breve refresco</string>
+    <string name="language_ai_translated">%1$s (traducido por IA)</string>
+    <string name="language_ai_notice">Los idiomas marcados con IA se tradujeron automáticamente y pueden contener imprecisiones</string>
+
+    <!-- Onboarding tour -->
+    <string name="onb_skip">Omitir</string>
+    <string name="onb_next">Siguiente</string>
+    <string name="onb_get_started">Empezar</string>
+    <string name="onb_finish">Finalizar</string>
+    <string name="onb_welcome_title">Bienvenido a MyNotes</string>
+    <string name="onb_welcome_desc">Vamos a configurar algunas cosas para que la aplicación funcione a tu manera. Solo toma un minuto y todo se puede cambiar después en Ajustes.</string>
+    <string name="onb_appearance_title">Hazla tuya</string>
+    <string name="onb_appearance_desc">Elige un esquema de color. Puedes cambiar entre tema claro, oscuro o del sistema en cualquier momento desde Ajustes.</string>
+    <string name="onb_notifications_title">Mantente informado</string>
+    <string name="onb_notifications_desc">Activa las notificaciones para saber cuándo se completa o falla una copia de seguridad.</string>
+    <string name="onb_notifications_enabled">Notificaciones activadas</string>
+    <string name="onb_enable_notifications">Activar notificaciones</string>
+    <string name="onb_backup_title">Haz copias de tus notas</string>
+    <string name="onb_backup_desc">Inicia sesión con Google para hacer copias de seguridad automáticas en Google Drive, o restaura desde una copia existente.</string>
+    <string name="onb_import_title">Importa tus notas</string>
+    <string name="onb_import_desc">Trae tus notas desde Evernote, Google Keep o un archivo de texto/markdown.</string>
+    <string name="onb_import_button">Elegir archivo para importar</string>
+    <string name="onb_security_title">Protege tus notas</string>
+    <string name="onb_security_desc">Añade un bloqueo para que solo tú puedas abrir la aplicación. Puedes cambiarlo o quitarlo en cualquier momento desde Ajustes.</string>
+    <string name="onb_biometric_lock">Usar bloqueo biométrico</string>
+    <string name="onb_password_lock">Usar bloqueo con contraseña</string>
+    <string name="onb_biometric_enabled">Bloqueo biométrico activado</string>
+    <string name="onb_password_enabled">Bloqueo con contraseña activado</string>
+    <string name="onb_done_title">¡Todo listo!</string>
+    <string name="onb_done_desc">Todo lo que acabas de configurar está disponible en cualquier momento en Ajustes.</string>
+    <string name="onb_done_button">Empezar a usar MyNotes</string>
+
+    <!-- Drawer -->
+    <string name="drawer_section_collaboration">Colaboración</string>
+    <string name="drawer_section_more">Más</string>
+    <string name="nav_invitations">Invitaciones</string>
+    <string name="nav_import">Importar notas</string>
+
+    <!-- Editor & list -->
+    <string name="action_share">Compartir</string>
+    <string name="note_color">Color de la nota</string>
+    <string name="pattern_label">Patrón</string>
+    <string name="pattern_none">Ninguno</string>
+    <string name="pattern_dots">Puntos</string>
+    <string name="pattern_grid">Cuadrícula</string>
+    <string name="pattern_stripes">Rayas</string>
+    <string name="pattern_waves">Ondas</string>
+    <string name="pattern_rings">Anillos</string>
+    <string name="pattern_zigzag">Zigzag</string>
+    <string name="words_count">%d palabras</string>
+    <string name="more_options">Más opciones</string>
+    <string name="collaborative_note_label">Nota colaborativa</string>
+    <string name="collaborative_todo_label">Lista de tareas colaborativa</string>
+    <string name="fab_paragraph">Párrafo</string>
+    <string name="fab_bullet">Viñetas</string>
+    <string name="fab_checklist">Lista de tareas</string>
+    <string name="fab_image">Imagen</string>
+    <string name="note_deleted">Nota eliminada</string>
+    <string name="notes_deleted">%d notas eliminadas</string>
+    <string name="note_archived">Nota archivada</string>
+    <string name="show_more">Mostrar más</string>
+    <string name="show_less">Mostrar menos</string>
+    <string name="search_notes_hint">Buscar notas…</string>
+    <string name="type_something_hint">Escribe algo…</string>
+    <string name="filter_label">Filtro</string>
+    <string name="sort_label">Orden</string>
+    <string name="filter_all">Todas las notas</string>
+    <string name="filter_text_only">Solo texto</string>
+    <string name="filter_checklist_only">Solo listas de tareas</string>
+    <string name="sort_newest">Más recientes primero</string>
+    <string name="sort_oldest">Más antiguas primero</string>
+    <string name="sort_az">A-Z</string>
+    <string name="sort_za">Z-A</string>
+    <string name="gradient_headers_title">Encabezados con degradado</string>
+    <string name="gradient_headers_desc">Usar un degradado en las barras superiores, como en el menú</string>
+    <string name="sign_in_to_collaborate">Inicia sesión para colaborar</string>
+    <string name="collab_save_copy">Guardar copia</string>
+    <string name="collab_leave">Salir</string>
+    <string name="collab_invite">Invitar</string>
+    <string name="collab_members">Miembros</string>
+    <string name="collab_color">Color</string>
+    <string name="todo_new">Nueva lista de tareas</string>
+    <string name="todo_edit">Editar lista de tareas</string>
+    <string name="collab_members_count">Colaborativa • %d miembros</string>
+    <string name="fab_todo_list">Lista de tareas</string>
+    <string name="fab_note">Nota</string>
+    <string name="fab_new_category">Nueva categoría</string>
+    <string name="section_pinned">Fijadas</string>
+    <string name="section_others">Otras</string>
+    <string name="note_title_hint">Título de la nota</string>
+    <string name="category_name_label">Nombre de la categoría</string>
+    <string name="move_to_category">Mover a categoría</string>
+    <string name="change_color">Cambiar color</string>
+    <string name="no_invitations_title">Sin invitaciones</string>
+    <string name="no_invitations_message">No tienes invitaciones pendientes. ¡Inicia sesión para empezar a colaborar con otros!</string>
+    <string name="action_edit">Editar</string>
+    <string name="todo_add_field">Añadir campo</string>
+    <string name="action_pin">Fijar</string>
+    <string name="action_unpin">Dejar de fijar</string>
+    <string name="edit_category">Editar categoría</string>
+    <string name="collab_delete_option">Eliminar nota colaborativa</string>
+    <string name="collab_leave_option">Salir de la nota colaborativa</string>
+    <string name="dialog_delete_collab_title">¿Eliminar nota colaborativa?</string>
+    <string name="dialog_leave_collab_title">¿Salir de la nota colaborativa?</string>
+    <string name="dialog_delete_note_title">¿Eliminar nota?</string>
+    <string name="dialog_delete_collab_message">¿Seguro que quieres eliminar permanentemente \"%1$s\"?\n\n• Se eliminará la nota para TODOS los colaboradores\n• Todos los datos asociados se eliminarán de la nube\n• Esta acción no se puede deshacer</string>
+    <string name="dialog_leave_collab_message">¿Seguro que quieres salir de \"%1$s\"?\n\n• Perderás el acceso a esta nota colaborativa\n• Necesitarás una nueva invitación para volver\n• La nota seguirá disponible para los demás colaboradores</string>
+    <string name="dialog_delete_note_message">¿Seguro que quieres eliminar \"%1$s\"?\n\nEsta acción no se puede deshacer.</string>
+    <string name="delete_everywhere">Eliminar en todas partes</string>
+    <string name="leave_note">Salir de la nota</string>
+    <string name="section_shared_notes">Notas compartidas</string>
+    <string name="collaborators_count">%d colaboradores</string>
 </resources>

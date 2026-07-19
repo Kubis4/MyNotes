@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- App Name -->
-    <string name="app_name">SelfNote</string>
+    <string name="app_name">MyNotes</string>
 
     <!-- Main Navigation -->
     <string name="nav_notes">Notes</string>
@@ -16,21 +16,11 @@
     <string name="action_save">Save</string>
     <string name="action_cancel">Cancel</string>
     <string name="action_delete">Delete</string>
-    <string name="action_archive">Archive</string>
     <string name="action_restore">Restore</string>
     <string name="action_ok">OK</string>
     <string name="action_close">Close</string>
-    <string name="action_search">Search</string>
-    <string name="action_add">Add</string>
-    <string name="action_edit">Edit</string>
-    <string name="action_undo">Undo</string>
 
     <!-- Note Management -->
-    <string name="note_title_hint">Note title</string>
-    <string name="note_content_hint">Start typing your note...</string>
-    <string name="note_search_hint">Search notes...</string>
-    <string name="note_empty_title">Untitled Note</string>
-    <string name="notes_empty_message">No notes yet. Tap the + button to create your first note!</string>
     <string name="archive_empty_message">No archived notes</string>
     <string name="bin_empty_message">Bin is empty</string>
 
@@ -44,7 +34,6 @@
     <string name="bin_title">Bin</string>
     <string name="bin_empty_hint">Deleted notes will appear here</string>
     <string name="bin_auto_delete_info">Notes are automatically deleted after 30 days</string>
-    <string name="bin_clean_expired">Clean Expired</string>
     <string name="bin_empty_action">Empty Bin</string>
     <string name="bin_restore_all">Restore All</string>
     <string name="bin_all_restored">All notes have been restored</string>
@@ -52,9 +41,8 @@
     <string name="bin_empty_dialog_message">Are you sure you want to permanently delete all notes in the bin? This action cannot be undone.</string>
     <string name="bin_delete_all">Delete All</string>
     <string name="bin_emptied">Bin emptied</string>
-    <string name="bin_cleanup_dialog_title">Clean Up Expired Notes</string>
-    <string name="bin_cleanup_dialog_message">This will permanently delete all notes that have been in the bin for more than 30 days. This action cannot be undone.</string>
-    <string name="bin_cleanup_action">Clean Up</string>
+    <string name="bin_restore_all_dialog_title">Restore All Notes</string>
+    <string name="bin_restore_all_dialog_message">Are you sure you want to restore all notes from the bin?</string>
     <string name="bin_expired_status">Expired - will be automatically deleted</string>
     <string name="bin_expires_today">Expires today</string>
     <string name="bin_expires_days">Expires in %d days</string>
@@ -69,8 +57,6 @@
 
     <!-- Date Format -->
     <string name="date_format_full">MMM d, yyyy</string>
-    <string name="date_format_note">MMM d, yyyy</string>
-    <string name="time_format_note">HH:mm</string>
 
     <!-- Settings Screen -->
     <string name="settings_title">Settings</string>
@@ -97,7 +83,6 @@
     <string name="language_slovak">Slovak</string>
     <string name="language_system">System Default</string>
     <string name="language_system_description">Use device language</string>
-    <string name="language_restart_info">App will restart to apply language change</string>
     <string name="language_changed_title">Language Changed</string>
     <string name="language_changed_message">Language has been successfully changed. Please restart the app to fully apply the changes.</string>
 
@@ -123,10 +108,6 @@
     <string name="swipe_action_archive_desc">Archive note for later</string>
     <string name="swipe_action_none">None</string>
     <string name="swipe_action_none_desc">No action</string>
-    <string name="swipe_release_to">Release to %s</string>
-    <string name="swipe_almost_there">Almost there...</string>
-    <string name="swipe_keep_swiping">Keep swiping...</string>
-    <string name="swipe_to">Swipe to %s</string>
 
     <!-- Password Dialog -->
     <string name="password_setup_title">Set Password</string>
@@ -152,15 +133,14 @@
     <string name="auth_hide_password">Hide password</string>
 
     <!-- Authentication -->
-    <string name="auth_title">SelfNote</string>
+    <string name="auth_title">MyNotes</string>
     <string name="auth_subtitle">Authenticate to access your notes</string>
-    <string name="auth_biometric_unavailable">Biometric authentication not available</string>
     <string name="auth_biometric_not_available">Biometric authentication not available</string>
     <string name="auth_password_required_for_setup">Password required for password authentication</string>
     <string name="auth_biometric_verification_failed">Biometric verification failed</string>
     <string name="auth_invalid_password">Invalid password</string>
     <string name="auth_password_required">Password required</string>
-    <string name="auth_biometric_prompt_title">Authenticate to access SelfNote</string>
+    <string name="auth_biometric_prompt_title">Authenticate to access MyNotes</string>
     <string name="auth_biometric_prompt_subtitle">Use your biometric credential to unlock the app</string>
     <string name="auth_authentication_failed">Authentication failed</string>
     <string name="auth_password_label">Password</string>
@@ -169,41 +149,26 @@
     <string name="auth_use_biometric">Use Biometric</string>
 
     <!-- Backup Screen -->
-    <string name="backup_title">Backup &amp; Restore</string>
-    <string name="backup_description">Keep your notes safe by creating backups. Export your data or restore from previous backups.</string>
-    <string name="backup_current_data">Current Data</string>
-    <string name="backup_active_notes">Active Notes</string>
-    <string name="backup_archived">Archived</string>
-    <string name="backup_total">Total</string>
-    <string name="backup_export_title">Export Data</string>
-    <string name="backup_export_description">Create a backup file with all your notes and settings.</string>
-    <string name="backup_export_all">Export All Notes</string>
-    <string name="backup_export_active">Export Active Notes Only</string>
-    <string name="backup_import_title">Import Data</string>
-    <string name="backup_import_description">Restore notes from a backup file. This will add to your existing notes.</string>
-    <string name="backup_import_select">Select backup file</string>
-    <string name="backup_tips_title">💡 Backup Tips</string>
-    <string name="backup_tips_content">• Regular backups protect against data loss\n• Export before major app updates\n• Store backup files in cloud storage\n• Import adds to existing notes (doesn\'t replace)</string>
 
     <!-- About Screen -->
     <string name="about_title">About</string>
     <string name="about_subtitle">Your personal note-taking companion</string>
     <string name="about_version">Version %s</string>
-    <string name="about_description">SelfNote is a powerful, intuitive note-taking app designed to help you capture, organize, and manage your thoughts, ideas, and tasks effortlessly. With features like customizable colors, swipe actions, and automatic organization, SelfNote makes note-taking a delightful experience.</string>
+    <string name="about_description">MyNotes helps you capture notes and to-do lists, with colors, swipe actions, real-time collaboration, and automatic cloud backup.</string>
     <string name="about_features_title">Key Features</string>
-    <string name="about_support_title">Support SelfNote</string>
-    <string name="about_support_description">SelfNote is developed with passion as an independent project. If you enjoy using the app and find it helpful, consider supporting its development!</string>
+    <string name="about_support_title">Support MyNotes</string>
+    <string name="about_support_description">MyNotes is completely free and ad-free. If you enjoy using it, consider buying me a coffee to help keep it that way.</string>
     <string name="about_coffee_button">Buy Me a Coffee</string>
-    <string name="about_support_message">Your support helps keep SelfNote free and motivates continued development!</string>
+    <string name="about_support_message">Your support helps keep MyNotes free.</string>
     <string name="about_contact_title">Get in Touch &amp; Feedback</string>
     <string name="about_contact_send">Send Feedback</string>
+    <string name="about_feedback_subtitle">Got a bug or an idea? I\'d love to hear it.</string>
     <string name="about_contact_email">kubisdev1@gmail.com</string>
     <string name="about_feedback_tips">💡 What to include in your feedback:</string>
-    <string name="about_feedback_content">• Bug reports with steps to reproduce\n• Feature requests and suggestions\n• General feedback about your experience\n• Questions about app functionality</string>
-    <string name="about_contact_message">I read every email and appreciate all feedback! Your input helps make SelfNote better for everyone.</string>
-    <string name="about_developer">Created with ❤️ by KubDev</string>
-    <string name="about_copyright">© 2025 SelfNote. All rights reserved.</string>
-    <string name="about_tagline">An independent project built with passion for productivity and simplicity.</string>
+    <string name="about_feedback_content">• Bug reports with steps to reproduce\n• Feature requests and suggestions\n• General feedback</string>
+    <string name="about_contact_message">I read every email — thanks for helping improve MyNotes.</string>
+    <string name="about_developer">Created by kub1sDev</string>
+    <string name="about_copyright">© 2026 MyNotes. All rights reserved.</string>
 
     <!-- Features -->
     <string name="feature_colors_title">Customizable Colors</string>
@@ -218,19 +183,14 @@
     <string name="feature_search_desc">Find your notes quickly with advanced search</string>
     <string name="feature_themes_title">Adaptive Themes</string>
     <string name="feature_themes_desc">Light, dark, and system themes with dynamic colors</string>
+    <string name="feature_collaboration_title">Real-Time Collaboration</string>
+    <string name="feature_collaboration_desc">Share notes and to-do lists that sync live with others</string>
+    <string name="feature_backup_title">Cloud Backup</string>
+    <string name="feature_backup_desc">Automatic backups to Google Drive, restore anytime</string>
 
     <!-- Error Messages -->
-    <string name="error_generic">Something went wrong. Please try again.</string>
-    <string name="error_network">Network error. Check your connection.</string>
-    <string name="error_no_email_app">Please install an email app or contact %s directly.</string>
 
     <!-- Success Messages -->
-    <string name="success_note_saved">Note saved</string>
-    <string name="success_note_deleted">Note deleted</string>
-    <string name="success_note_archived">Note archived</string>
-    <string name="success_note_restored">Note restored</string>
-    <string name="success_export_complete">Export complete! Check your Downloads folder.</string>
-    <string name="success_import_complete">Import complete! %d notes restored.</string>
 
     <!-- Accessibility -->
     <string name="selected_indicator">Selected</string>
@@ -238,118 +198,40 @@
     <!-- Note Detail Screen -->
     <string name="note_new_title">New Note</string>
     <string name="note_edit_title">Edit Note</string>
-    <string name="note_toggle_toolbar">Toggle toolbar</string>
-    <string name="note_delete">Delete note</string>
-    <string name="note_save">Save note</string>
-    <string name="note_add_line">Add text line</string>
-    <string name="note_delete_separator">Delete separator</string>
-    <string name="note_delete_checkbox">Delete checkbox</string>
-    <string name="note_bullet">Bullet</string>
 
     <!-- Note Image -->
     <string name="note_image">Note image</string>
-    <string name="image_zoom_out">Zoom out</string>
-    <string name="image_zoom_in">Zoom in</string>
-    <string name="image_resize">Resize</string>
-    <string name="image_move_up">Move up</string>
-    <string name="image_move_down">Move down</string>
-    <string name="image_reset">Reset image</string>
-    <string name="image_delete">Delete image</string>
-    <string name="image_position">Position: %1$d/%2$d</string>
-    <string name="image_drag_release_up">Release to move up ↑</string>
-    <string name="image_drag_release_down">Release to move down ↓</string>
-    <string name="image_drag_reorder">Drag up/down to reorder</string>
-    <string name="image_height">Height: %ddp</string>
 
     <!-- Note Formatting -->
-    <string name="formatting_bold">Bold</string>
-    <string name="formatting_italic">Italic</string>
-    <string name="formatting_underline">Underline</string>
-    <string name="formatting_font_size">Font size</string>
-    <string name="formatting_text_color">Text color</string>
-    <string name="formatting_clear_color">Clear color</string>
-    <string name="formatting_bullet_mode">Bullet mode</string>
-    <string name="formatting_checklist_mode">Checklist mode</string>
-    <string name="formatting_add_separator">Add separator</string>
-    <string name="formatting_add_image">Add image</string>
-    <string name="formatting_default_size">Default Size</string>
-    <string name="font_size_sp">%dsp</string>
 
     <!-- Note Item -->
-    <string name="note_pin">Pin note</string>
-    <string name="note_unpin">Unpin note</string>
-    <string name="note_type_text">Text note</string>
-    <string name="note_type_checklist">Checklist</string>
-    <string name="note_checklist_preview">%1$s • %2$d/%3$d completed</string>
-    <string name="note_checklist_empty">Empty checklist</string>
-    <string name="note_pin_action">Pin</string>
-    <string name="note_unpin_action">Unpin</string>
-    <string name="note_title_placeholder">Note title</string>
 
     <!-- Note List Screen -->
-    <string name="search_notes_hint">Search notes...</string>
-    <string name="clear_search">Clear search</string>
-    <string name="open_drawer">Open navigation drawer</string>
-    <string name="filter_notes">Filter notes</string>
-    <string name="change_layout">Change layout</string>
 
     <!-- Filter Menu -->
-    <string name="filter_section">Filter</string>
-    <string name="filter_all_notes">All notes</string>
-    <string name="filter_text_only">Text notes only</string>
-    <string name="filter_checklist_only">Checklists only</string>
 
     <!-- Sort Menu -->
-    <string name="sort_section">Sort</string>
-    <string name="sort_manual">Manual order</string>
-    <string name="sort_newest">Newest first</string>
-    <string name="sort_oldest">Oldest first</string>
-    <string name="sort_az">A → Z</string>
-    <string name="sort_za">Z → A</string>
 
     <!-- FAB Items -->
-    <string name="fab_todo_list">To-Do List</string>
-    <string name="fab_note">Note</string>
-    <string name="fab_new_category">New Category</string>
 
     <!-- Empty States -->
-    <string name="no_notes_found">No notes found for \"%s\"</string>
-    <string name="no_notes_filter">No notes match the current filter</string>
-    <string name="no_notes_yet">No notes yet.\nTap the \'+\' button to create one.</string>
-    <string name="no_notes_in_category">No notes in this category</string>
 
     <!-- Sections -->
-    <string name="section_pinned">Pinned</string>
-    <string name="section_others">Others</string>
 
     <!-- Snackbar Messages -->
-    <string name="snackbar_note_deleted">Note deleted</string>
-    <string name="snackbar_note_archived">Note archived</string>
 
     <!-- Note Options Bottom Sheet -->
     <string name="untitled_note">Untitled Note</string>
-    <string name="edit_title">Edit title</string>
-    <string name="move_to_category">Move to category</string>
-    <string name="change_color">Change color</string>
 
     <!-- Section Header -->
-    <string name="collapse_section">Collapse</string>
-    <string name="expand_section">Expand</string>
-    <string name="category_options">Category options</string>
 
     <!-- Category Dialog -->
-    <string name="new_category">New Category</string>
-    <string name="edit_category">Edit Category</string>
-    <string name="category_name_label">Category name</string>
-    <string name="move_to_category_title">Move to Category</string>
 
     <!-- ViewModel Messages -->
     <string name="untitled_todo">Untitled To-Do</string>
 
     <!-- Cleanup Messages -->
     <string name="msg_expired_notes_deleted">%d expired notes automatically deleted</string>
-    <string name="msg_expired_notes_cleaned">%d expired notes cleaned up</string>
-    <string name="msg_no_expired_notes">No expired notes to clean up</string>
 
     <!-- Note Operation Messages -->
     <string name="msg_note_color_updated">Note color updated</string>
@@ -357,9 +239,6 @@
     <string name="msg_note_restored_from_archive">Note restored from archive</string>
     <string name="msg_note_permanently_deleted">Note permanently deleted</string>
     <string name="msg_note_restored">Note restored</string>
-    <string name="msg_notes_moved_to_bin">%d notes moved to bin</string>
-    <string name="msg_notes_archived">%d notes archived</string>
-    <string name="msg_notes_permanently_deleted">%d notes permanently deleted</string>
     <string name="msg_note_pinned">Note pinned</string>
     <string name="msg_note_unpinned">Note unpinned</string>
 
@@ -371,38 +250,31 @@
     <string name="msg_note_moved_to_uncategorized">Note moved to uncategorized</string>
 
     <!-- Import/Export Messages -->
-    <string name="msg_notes_imported">%d notes imported</string>
-    <string name="msg_all_notes_reset_to_default_color">All notes reset to default color</string>
-    <string name="msg_note_duplicated">Note duplicated</string>
-    <string name="msg_notes_restored_from_backup">%d notes restored from backup</string>
 
     <!-- Note Copy Suffix -->
-    <string name="note_copy_suffix">%s (Copy)</string>
 
     <!-- Validation Messages -->
-    <string name="validation_empty_note">Empty note (no title or content)</string>
-    <string name="validation_invalid_note_type">Invalid note type: %s</string>
 
     <!-- ToDo List Screen -->
-    <string name="todo_toggle_formatting">Toggle Formatting</string>
-    <string name="todo_add_item">Add Item</string>
-    <string name="todo_font_size_applied">Font size applied to entire line (%dsp)</string>
     <string name="todo_section_divider">Section Divider</string>
-    <string name="todo_active_tasks">Active Tasks (%d)</string>
-    <string name="todo_completed_tasks">Completed (%d)</string>
-    <string name="todo_empty_state">Tap + to add your first task</string>
-    <string name="todo_drag_to_reorder">Drag to reorder</string>
-    <string name="todo_add_separator">Add Separator</string>
 
     <!-- Backup ViewModel -->
     <string name="backup_sign_in_failed">Sign-in failed: %s</string>
     <string name="backup_sign_in_error">Sign-in error: %s</string>
-    <string name="backup_starting">Starting backup...</string>
+    <string name="backup_starting">Starting backup…</string>
     <string name="backup_failed">Backup failed: %s</string>
     <string name="backup_error">Backup error: %s</string>
     <string name="backup_load_failed">Failed to load backups: %s</string>
-    <string name="backup_restore_starting">Starting restore...</string>
+    <string name="backup_restore_starting">Starting restore…</string>
     <string name="backup_restore_success">Successfully restored %d notes</string>
+    <string name="backup_restore_partial">Restored %1$d of %2$d notes - some notes could not be restored</string>
+    <string name="backup_restore_success_with_duplicates">Restored %1$d notes (%2$d already existed and were skipped)</string>
+    <string name="backup_restore_choice_title">Restore Notes</string>
+    <string name="backup_restore_choice_description">How should this backup be restored?</string>
+    <string name="backup_restore_merge_title">Merge</string>
+    <string name="backup_restore_merge_description">Keep your current notes and add anything new from the backup. Notes already restored won\'t be duplicated.</string>
+    <string name="backup_restore_replace_title">Replace</string>
+    <string name="backup_restore_replace_description">Delete all current notes and groups, then restore only what\'s in this backup.</string>
     <string name="backup_restore_failed">Restore failed: %s</string>
     <string name="backup_delete_failed">Delete failed: %s</string>
     <string name="backup_auto_disabled">Automatic backup disabled</string>
@@ -427,10 +299,10 @@
     <string name="backup_notification_channel_name">Backup Notifications</string>
     <string name="backup_notification_channel_description">Notifications for automatic backup status</string>
     <string name="backup_notification_backing_up">Backing up notes</string>
-    <string name="backup_notification_in_progress">Your notes are being backed up to Google Drive...</string>
+    <string name="backup_notification_in_progress">Your notes are being backed up to Google Drive…</string>
     <string name="backup_notification_skipped">Backup Skipped</string>
     <string name="backup_notification_sign_in_required">Please sign in to Google Drive to enable backups</string>
-    <string name="backup_notification_backing_up_count">Backing up %d notes...</string>
+    <string name="backup_notification_backing_up_count">Backing up %d notes…</string>
     <string name="backup_notification_success">Backup Successful</string>
     <string name="backup_notification_success_message">Successfully backed up %d notes to Google Drive</string>
     <string name="backup_notification_failed">Backup Failed</string>
@@ -448,13 +320,13 @@
     <string name="drive_service_not_initialized">Drive service not initialized</string>
 
     <!-- Google Drive Progress Messages -->
-    <string name="drive_preparing_backup">Preparing backup data...</string>
-    <string name="drive_creating_backup_file">Creating backup file...</string>
-    <string name="drive_uploading_to_drive">Uploading to Google Drive...</string>
+    <string name="drive_preparing_backup">Preparing backup data…</string>
+    <string name="drive_creating_backup_file">Creating backup file…</string>
+    <string name="drive_uploading_to_drive">Uploading to Google Drive…</string>
     <string name="drive_backup_completed">Backup completed successfully!</string>
     <string name="drive_backup_created_success">Backup created successfully: %s</string>
-    <string name="drive_downloading_backup">Downloading backup file...</string>
-    <string name="drive_processing_backup">Processing backup data...</string>
+    <string name="drive_downloading_backup">Downloading backup file…</string>
+    <string name="drive_processing_backup">Processing backup data…</string>
     <string name="drive_restore_completed">Restore completed successfully!</string>
     <string name="drive_backup_deleted_success">Backup deleted successfully</string>
 
@@ -489,8 +361,6 @@
     <string name="enter_title_hint">Enter title…</string>
     <string name="item_deleted">Item deleted</string>
     <string name="undo">Undo</string>
-    <string name="new_todo_list">New To-Do List</string>
-    <string name="edit_todo_list">Edit To-Do List</string>
 
     <string name="language_instant_change">Language changes instantly</string>
     <string name="language_quick_restart">Language will update with a quick refresh</string>
@@ -498,32 +368,127 @@
     <string name="language_ai_translated">%1$s (AI translated)</string>
     <string name="language_ai_notice">Languages marked with AI were machine translated and may contain inaccuracies</string>
 
-    <string name="note_checklist_more">…and more</string>
-    <string name="note_checklist_count">%1$d/%2$d completed</string>
-    <string name="show_more">Show more</string>
-    <string name="show_less">Show less</string>
 
-    <string name="todo_item_hint">Add task...</string>
-    <string name="todo_delete_item">Delete item</string>
 
     <!-- Collaboration strings -->
-    <string name="nav_invitations">Invitations</string>
-    <string name="pending_invitations_title">Pending Invitations</string>
-    <string name="no_pending_invitations">No pending invitations</string>
-    <string name="invitation_from">Invitation from %1$s</string>
-    <string name="collaborate_on_note">Collaborate on "%1$s"</string>
-    <string name="accept_invitation">Accept</string>
-    <string name="decline_invitation">Decline</string>
-    <string name="invitation_accepted">Invitation accepted!</string>
-    <string name="invitation_declined">Invitation declined</string>
-    <string name="firebase_test_title">Firebase Test</string>
 
     <!-- Add these missing string resources -->
-    <string name="todo_new_title">New Todo</string>
-    <string name="todo_edit_title">Edit Todo</string>
-    <string name="todo_toggle_toolbar">Toggle Toolbar</string>
-    <string name="todo_share">Share Todo</string>
-    <string name="todo_delete">Delete Todo</string>
-    <string name="todo_progress">Progress</string>
 
+    <!-- Sign In Screen -->
+    <string name="sign_in_title">Sign In</string>
+    <string name="sign_in_headline">Sign in to collaborate</string>
+    <string name="sign_in_subtitle">Sign in with Google to share notes, invite collaborators and sync your to-do lists across devices.</string>
+    <string name="sign_in_signed_in_as">You\'re signed in</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
+    <string name="sign_in_sign_out">Sign out</string>
+
+    <!-- Onboarding tour -->
+    <string name="onb_skip">Skip</string>
+    <string name="onb_next">Next</string>
+    <string name="onb_get_started">Get Started</string>
+    <string name="onb_finish">Finish</string>
+    <string name="onb_welcome_title">Welcome to MyNotes</string>
+    <string name="onb_welcome_desc">Let\'s set a few things up so the app works the way you want. It only takes a minute, and everything here can be changed later in Settings.</string>
+    <string name="onb_appearance_title">Make It Yours</string>
+    <string name="onb_appearance_desc">Pick a color scheme. You can switch between light, dark, or system theme anytime in Settings.</string>
+    <string name="onb_notifications_title">Stay Informed</string>
+    <string name="onb_notifications_desc">Turn on notifications so you know when a backup finishes, or if one fails.</string>
+    <string name="onb_notifications_enabled">Notifications enabled</string>
+    <string name="onb_enable_notifications">Enable Notifications</string>
+    <string name="onb_backup_title">Backup or Restore your Notes</string>
+    <string name="onb_backup_desc">Sign in with Google to automatically back up your notes to Google Drive, or restore notes from an existing backup.</string>
+    <string name="onb_import_title">Import Your Notes</string>
+    <string name="onb_import_desc">Bring notes over from Evernote, Google Keep, or a plain text/markdown file.</string>
+    <string name="onb_import_button">Choose File to Import</string>
+    <string name="onb_security_title">Protect Your Notes</string>
+    <string name="onb_security_desc">Add a lock so only you can open the app. You can change or remove this anytime in Settings.</string>
+    <string name="onb_biometric_lock">Use Biometric Lock</string>
+    <string name="onb_password_lock">Use Password Lock</string>
+    <string name="onb_biometric_enabled">Biometric lock enabled</string>
+    <string name="onb_password_enabled">Password lock enabled</string>
+    <string name="onb_done_title">You\'re all set!</string>
+    <string name="onb_done_desc">Everything you just set up can be revisited anytime from Settings.</string>
+    <string name="onb_done_button">Start Using MyNotes</string>
+
+    <!-- Drawer -->
+    <string name="drawer_section_collaboration">Collaboration</string>
+    <string name="drawer_section_more">More</string>
+    <string name="nav_invitations">Invitations</string>
+    <string name="nav_import">Import Notes</string>
+
+    <!-- Editor & list -->
+    <string name="action_share">Share</string>
+    <string name="note_color">Note color</string>
+    <string name="pattern_label">Pattern</string>
+    <string name="pattern_none">None</string>
+    <string name="pattern_dots">Dots</string>
+    <string name="pattern_grid">Grid</string>
+    <string name="pattern_stripes">Stripes</string>
+    <string name="pattern_waves">Waves</string>
+    <string name="pattern_rings">Rings</string>
+    <string name="pattern_zigzag">Zigzag</string>
+    <string name="words_count">%d words</string>
+    <string name="more_options">More options</string>
+    <string name="collaborative_note_label">Collaborative Note</string>
+    <string name="collaborative_todo_label">Collaborative Todo</string>
+    <string name="fab_paragraph">Paragraph</string>
+    <string name="fab_bullet">Bullet list</string>
+    <string name="fab_checklist">Checklist</string>
+    <string name="fab_image">Image</string>
+    <string name="note_deleted">Note deleted</string>
+    <string name="notes_deleted">%d notes deleted</string>
+    <string name="note_archived">Note archived</string>
+    <string name="show_more">Show More</string>
+    <string name="show_less">Show Less</string>
+    <string name="search_notes_hint">Search notes…</string>
+    <string name="type_something_hint">Type something…</string>
+    <string name="filter_label">Filter</string>
+    <string name="sort_label">Sort</string>
+    <string name="filter_all">All Notes</string>
+    <string name="filter_text_only">Text Only</string>
+    <string name="filter_checklist_only">Checklist Only</string>
+    <string name="sort_newest">Newest First</string>
+    <string name="sort_oldest">Oldest First</string>
+    <string name="sort_az">A-Z</string>
+    <string name="sort_za">Z-A</string>
+    <string name="gradient_headers_title">Gradient Headers</string>
+    <string name="gradient_headers_desc">Use a gradient on top bars, like the menu</string>
+    <string name="sign_in_to_collaborate">Sign in to collaborate</string>
+    <string name="collab_save_copy">Save copy</string>
+    <string name="collab_leave">Leave</string>
+    <string name="collab_invite">Invite</string>
+    <string name="collab_members">Members</string>
+    <string name="collab_color">Color</string>
+    <string name="todo_new">New Todo</string>
+    <string name="todo_edit">Edit Todo</string>
+    <string name="collab_members_count">Collaborative • %d members</string>
+
+    <string name="fab_todo_list">Todo List</string>
+    <string name="fab_note">Note</string>
+    <string name="fab_new_category">New Category</string>
+    <string name="section_pinned">Pinned</string>
+    <string name="section_others">Others</string>
+    <string name="note_title_hint">Note title</string>
+    <string name="category_name_label">Category Name</string>
+    <string name="move_to_category">Move to Category</string>
+    <string name="change_color">Change Color</string>
+    <string name="no_invitations_title">No Invitations</string>
+    <string name="no_invitations_message">You don\'t have any pending invitations. Sign in to start collaborating with others!</string>
+    <string name="action_edit">Edit</string>
+    <string name="todo_add_field">Add field</string>
+    <string name="action_pin">Pin</string>
+    <string name="action_unpin">Unpin</string>
+    <string name="edit_category">Edit Category</string>
+    <string name="collab_delete_option">Delete Collaborative Note</string>
+    <string name="collab_leave_option">Leave Collaborative Note</string>
+    <string name="dialog_delete_collab_title">Delete Collaborative Note?</string>
+    <string name="dialog_leave_collab_title">Leave Collaborative Note?</string>
+    <string name="dialog_delete_note_title">Delete Note?</string>
+    <string name="dialog_delete_collab_message">Are you sure you want to permanently delete \"%1$s\"?\n\n• This will delete the note for ALL collaborators\n• All associated data will be removed from the cloud\n• This action cannot be undone</string>
+    <string name="dialog_leave_collab_message">Are you sure you want to leave \"%1$s\"?\n\n• You will lose access to this collaborative note\n• You\'ll need a new invitation to rejoin\n• The note will remain accessible to other collaborators</string>
+    <string name="dialog_delete_note_message">Are you sure you want to delete \"%1$s\"?\n\nThis action cannot be undone.</string>
+    <string name="delete_everywhere">Delete Everywhere</string>
+    <string name="leave_note">Leave Note</string>
+    <string name="section_shared_notes">Shared Notes</string>
+    <string name="collaborators_count">%d collaborators</string>
 </resources>
