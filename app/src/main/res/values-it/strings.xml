@@ -19,6 +19,7 @@
     <string name="action_restore">Ripristina</string>
     <string name="action_ok">OK</string>
     <string name="action_close">Chiudi</string>
+    <string name="action_view">Visualizza</string>
 
     <!-- Note Management -->
     <string name="archive_empty_message">Nessuna nota archiviata</string>
@@ -64,6 +65,7 @@
     <string name="settings_language">Lingua</string>
     <string name="settings_security">Sicurezza</string>
     <string name="settings_note_interactions">Interazioni note</string>
+    <string name="settings_collaboration">Collaborazione</string>
 
     <!-- Theme Settings -->
     <string name="theme_title">Tema</string>
@@ -152,6 +154,7 @@
     <string name="auth_unlock">Sblocca</string>
     <string name="auth_or">o</string>
     <string name="auth_use_biometric">Usa biometrico</string>
+    <string name="auth_use_device_credential">Usa il PIN o la password del dispositivo</string>
 
     <!-- Backup Screen -->
 
@@ -162,8 +165,8 @@
     <string name="about_description">MyNotes è un\'app potente e intuitiva per prendere appunti, progettata per aiutarti a catturare, organizzare e gestire i tuoi pensieri, idee e attività senza sforzo. Con funzionalità come colori personalizzabili, azioni di scorrimento e organizzazione automatica, MyNotes rende piacevole prendere appunti.</string>
     <string name="about_features_title">Funzionalità principali</string>
     <string name="about_support_title">Supporta MyNotes</string>
-    <string name="about_support_description">MyNotes è completamente gratuita e senza pubblicità. Se ti piace usarla, puoi offrirmi un caffè per aiutarmi a mantenerla così.</string>
-    <string name="about_coffee_button">Offrimi un caffè</string>
+    <string name="about_support_description">MyNotes è completamente gratuita e senza pubblicità. Se ti piace usarla, puoi offrirmi una birra — ogni contributo è volontario e aiuta a mantenerla così.</string>
+    <string name="about_coffee_button">Offrimi una birra</string>
     <string name="about_support_message">Il tuo supporto aiuta a mantenere MyNotes gratuito e motiva lo sviluppo continuo!</string>
     <string name="about_contact_title">Contatti &amp; Feedback</string>
     <string name="about_contact_send">Invia feedback</string>
@@ -451,6 +454,19 @@
     <string name="todo_new">Nuova lista di attività</string>
     <string name="todo_edit">Modifica lista di attività</string>
     <string name="collab_members_count">Collaborativa • %d membri</string>
+    <string name="collab_new_invite">%1$s ti ha invitato a \"%2$s\"</string>
+    <string name="import_supported_formats">Formati supportati</string>
+    <string name="import_format_evernote_title">Evernote</string>
+    <string name="import_format_evernote_desc">Esporta un taccuino come .enex da Evernote, quindi seleziona qui quel file.</string>
+    <string name="import_format_keep_title">Google Keep</string>
+    <string name="import_format_keep_desc">Esporta i tuoi dati con Google Takeout (solo Keep) e seleziona il file .zip risultante, o un singolo file .json.</string>
+    <string name="import_format_plaintext_title">Testo semplice / Markdown</string>
+    <string name="import_format_plaintext_desc">Ogni file .txt o .md diventa una nota. Le caselle di controllo Markdown (\"- [ ] \" / \"- [x] \") vengono importate come elementi di una lista.</string>
+    <string name="changelog_title">Novità</string>
+    <string name="changelog_1_0_note_1">Prima versione stabile</string>
+    <string name="changelog_1_0_note_2">Note e liste di cose da fare collaborative in tempo reale con accesso Google</string>
+    <string name="changelog_1_0_note_3">Backup automatico sul tuo Google Drive</string>
+    <string name="changelog_1_0_note_4">Importazione da testo semplice ed esportazioni di Google Keep ed Evernote</string>
     <string name="fab_todo_list">Lista di attività</string>
     <string name="fab_note">Nota</string>
     <string name="fab_new_category">Nuova categoria</string>
@@ -479,4 +495,86 @@
     <string name="leave_note">Abbandona la nota</string>
     <string name="section_shared_notes">Note condivise</string>
     <string name="collaborators_count">%d collaboratori</string>
+
+    <!-- Backup screen -->
+    <string name="backup_screen_title">Backup e ripristino</string>
+    <string name="backup_google_drive">Google Drive</string>
+    <string name="backup_signin_desc">Salva le tue note nel cloud</string>
+    <string name="backup_connected">Connesso</string>
+    <string name="backup_signin_button">Accedi a Google Drive</string>
+    <string name="backup_auto_title">Backup automatico</string>
+    <string name="backup_auto_desc">Esegue automaticamente il backup delle tue note</string>
+    <string name="backup_schedule_daily">Ogni giorno alle %1$s</string>
+    <string name="backup_schedule_weekly">Ogni settimana di %1$s alle %2$s</string>
+    <string name="backup_schedule_monthly">Ogni mese il giorno %1$d alle %2$s</string>
+    <string name="backup_stat_active">Attive</string>
+    <string name="backup_stat_archived">Archiviate</string>
+    <string name="backup_stat_total">Totale</string>
+    <string name="backup_create_new">Crea nuovo backup</string>
+    <string name="backup_all_notes">Backup di tutte le note</string>
+    <string name="backup_active_only">Backup solo delle note attive</string>
+    <string name="backup_existing">Backup esistenti</string>
+    <string name="backup_none_found">Nessun backup trovato</string>
+    <string name="backup_show_all">Mostra tutti (%1$d)</string>
+    <string name="backup_delete_title">Elimina backup</string>
+    <string name="backup_delete_message">Vuoi davvero eliminare questo backup? Questa azione non può essere annullata.</string>
+    <string name="backup_tips_title">Consigli per il backup</string>
+    <string name="backup_tips_text">• Tutte le note, incluse quelle archiviate, vengono salvate sul tuo Google Drive\n• Scegli backup automatici giornalieri, settimanali o mensili — funzionano anche ad app chiusa\n• Ripristina qualsiasi backup precedente in qualsiasi momento\n• I vecchi backup vengono ripuliti automaticamente (vengono conservati gli ultimi 10)</string>
+    <string name="backup_schedule_title">Pianificazione backup</string>
+    <string name="backup_frequency">Frequenza</string>
+    <string name="backup_freq_daily">Giornaliero</string>
+    <string name="backup_freq_weekly">Settimanale</string>
+    <string name="backup_freq_monthly">Mensile</string>
+    <string name="backup_time">Ora</string>
+    <string name="backup_day_of_week">Giorno della settimana</string>
+    <string name="backup_day_of_month">Giorno del mese (1–28)</string>
+    <string name="backup_select_time">Seleziona l\'ora</string>
+    <string name="action_set">Imposta</string>
+    <string name="backup_name_title">Nome del backup</string>
+    <string name="backup_name_desc">Inserisci un nome personalizzato per il backup (facoltativo)</string>
+    <string name="backup_name_label">Nome personalizzato</string>
+    <string name="backup_name_preview">Anteprima: %1$s</string>
+    <string name="notif_enable_title">Attiva le notifiche</string>
+    <string name="notif_enable_message">Attiva le notifiche di MyNotes per sapere quando un backup è completato.</string>
+    <string name="notif_open_settings">Apri impostazioni</string>
+    <string name="notif_not_now">Non ora</string>
+
+    <!-- Import screen -->
+    <string name="import_from_other_title">Importa da un\'altra app</string>
+    <string name="import_from_other_desc">Scegli un file esportato e il suo contenuto verrà aggiunto qui come nuove note. Ogni nota resta separata da quelle esistenti.</string>
+    <string name="import_importing">Importazione…</string>
+    <string name="import_choose_file">Scegli il file da importare</string>
+
+    <!-- Collaboration dialogs -->
+    <string name="collab_start_title">Inizia a collaborare</string>
+    <string name="collab_start_desc">Lavora su questa lista di attività insieme ad altri in tempo reale</string>
+    <string name="collab_make_collaborative">Rendi collaborativa</string>
+    <string name="collab_view_invitations">Vedi inviti</string>
+    <string name="collab_invite_title">Invita collaboratori</string>
+    <string name="collab_pending_title">Inviti in sospeso</string>
+    <string name="collab_send_invite_tab">Invia invito</string>
+    <string name="collab_pending_tab">In sospeso (%1$d)</string>
+    <string name="collab_email_label">Indirizzo e-mail</string>
+    <string name="collab_send_invitation">Invia invito</string>
+    <string name="collab_no_pending">Nessun invito in sospeso</string>
+    <string name="collab_from">Da: %1$s</string>
+    <string name="collab_collaborators">Collaboratori (%1$d)</string>
+    <string name="collab_no_collaborators">Ancora nessun collaboratore</string>
+    <string name="action_accept">Accetta</string>
+    <string name="action_decline">Rifiuta</string>
+
+    <!-- Invitations screen -->
+    <string name="inv_sign_in_required">Accesso richiesto</string>
+    <string name="inv_sign_in_message">Devi accedere per vedere e gestire gli inviti</string>
+    <string name="inv_none_title">Nessun invito</string>
+    <string name="inv_none_message">Al momento non hai inviti in sospeso</string>
+
+    <!-- To-do screen -->
+    <string name="todo_progress">Avanzamento</string>
+    <string name="todo_active_count">Attive (%1$d)</string>
+    <string name="todo_completed_count">Completate (%1$d)</string>
+
+    <!-- Misc -->
+    <string name="format_clear_color">Rimuovi colore</string>
+    <string name="notes_none_in_category">Nessuna nota in questa categoria</string>
 </resources>

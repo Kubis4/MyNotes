@@ -1,7 +1,9 @@
 package sk.kubdev.mynotes.ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -48,20 +50,8 @@ fun BinScreen(
     var showColorPicker by remember { mutableStateOf(false) }
     var selectedNoteForColor by remember { mutableStateOf<Note?>(null) }
 
-    // Handle UI events
-    LaunchedEffect(key1 = true) {
-        viewModel.uiEvent.collect { event ->
-            when (event) {
-                is NoteViewModel.UiEvent.ShowMessage -> {
-                    snackbarHostState.showSnackbar(message = event.message)
-                }
-                is NoteViewModel.UiEvent.ShowError -> {
-                    snackbarHostState.showSnackbar(message = event.error)
-                }
-                else -> { /* Handle other events */ }
-            }
-        }
-    }
+    // Plain ShowMessage/ShowError events have no action to offer here, so they're
+    // not surfaced as a snackbar - only undo-capable actions get one.
 
     // Color picker dialog
     if (showColorPicker && selectedNoteForColor != null) {
@@ -85,7 +75,12 @@ fun BinScreen(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             GradientTopAppBar(
-                title = { Text(stringResource(R.string.bin_title)) },
+                title = {
+                    Text(
+                        text = stringResource(R.string.bin_title),
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
@@ -162,32 +157,31 @@ fun BinScreen(
             }
         } else {
             Column {
-                // AUTO-DELETE INFO HEADER
-                Card(
+                // AUTO-DELETE INFO HEADER - flat tonal pill, same look as the inline
+                // info rows on the Settings screen.
+                Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-                    )
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                        .background(
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
+                            RoundedCornerShape(12.dp)
+                        )
+                        .padding(horizontal = 12.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier.padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Schedule,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = stringResource(R.string.bin_auto_delete_info),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                        )
-                    }
+                    Icon(
+                        imageVector = Icons.Default.Schedule,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = stringResource(R.string.bin_auto_delete_info),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                    )
                 }
 
                 LazyColumn(
@@ -303,21 +297,25 @@ fun BinNoteItem(
     Card(
         modifier = modifier.fillMaxWidth(),
         onClick = onNoteClick,
+        shape = RoundedCornerShape(20.dp),
         colors = if (isExpired) {
             CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.3f)
             )
         } else {
-            CardDefaults.cardColors()
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            )
         }
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            // Note content with color support
+            // NoteItem's own clickable CONSUMES taps (same bug as the Archive screen
+            // had), so the open action must be wired here directly, not on the Card.
             NoteItem(
                 note = note,
-                onClick = { /* Handled by Card onClick */ },
+                onClick = onNoteClick,
                 onLongClick = onLongClick
             )
 

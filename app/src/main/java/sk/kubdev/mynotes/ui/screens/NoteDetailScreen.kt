@@ -85,7 +85,7 @@ import java.io.FileOutputStream
 // buildAnnotatedStringWithActiveFormatting are defined top-level in ToDoListScreen.kt
 // (same package) and reused here rather than duplicated.
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 fun NoteDetailScreen(
     noteIdArg: Int,
@@ -1041,7 +1041,12 @@ fun NoteDetailScreen(
                         }
                     },
                 state = lazyListState,
-                contentPadding = PaddingValues(top = 8.dp, bottom = 96.dp) // extra space so FAB doesn't cover the last row
+                // 96.dp is FAB clearance, and doubles as the scroll runway below the last
+                // line: bringIntoView() targets the cursor's line plus a 64.dp margin, so
+                // this is all the extra scroll room a field at the very end ever needs.
+                // (A larger IME-only padding used to live here as a workaround for
+                // whole-field bringIntoView; it just read as a big empty gap.)
+                contentPadding = PaddingValues(top = 8.dp, bottom = 96.dp)
             ) {
                 itemsIndexed(items = lines, key = { _, line -> line.id }) { itemIndex, line ->
                     val isDragged = draggedItemId == line.id

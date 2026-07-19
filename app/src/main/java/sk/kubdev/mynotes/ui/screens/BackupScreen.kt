@@ -7,12 +7,19 @@ import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -29,6 +36,8 @@ import androidx.navigation.NavController
 import sk.kubdev.mynotes.R
 import sk.kubdev.mynotes.backup.*
 import sk.kubdev.mynotes.ui.components.GradientTopAppBar
+import sk.kubdev.mynotes.ui.components.SectionCard
+import sk.kubdev.mynotes.ui.components.SectionIconCircle
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import sk.kubdev.mynotes.NoteViewModel
@@ -106,16 +115,16 @@ fun BackupScreen(
 
     val snackbarHostState = remember { SnackbarHostState() }
 
+    // Backup success/failure has no undo to offer, so no snackbar - just clear the
+    // transient state once observed.
     LaunchedEffect(uiState.message) {
-        uiState.message?.let { message ->
-            snackbarHostState.showSnackbar(message)
+        if (uiState.message != null) {
             backupViewModel.clearMessage()
         }
     }
 
     LaunchedEffect(uiState.error) {
-        uiState.error?.let { error ->
-            snackbarHostState.showSnackbar(error)
+        if (uiState.error != null) {
             backupViewModel.clearError()
         }
     }
@@ -123,7 +132,12 @@ fun BackupScreen(
     Scaffold(
         topBar = {
             GradientTopAppBar(
-                title = { Text("Backup & Restore") },
+                title = {
+                    Text(
+                        text = stringResource(R.string.backup_screen_title),
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                },
                 navigationIcon = {
                     IconButton(
                         onClick = {
@@ -137,7 +151,7 @@ fun BackupScreen(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.action_back)
                         )
                     }
                 }
@@ -251,8 +265,8 @@ fun BackupScreen(
     if (showNotificationPermissionDialog) {
         AlertDialog(
             onDismissRequest = { showNotificationPermissionDialog = false },
-            title = { Text("Enable Notifications") },
-            text = { Text("Turn on notifications for MyNotes so you're told when a backup finishes.") },
+            title = { Text(stringResource(R.string.notif_enable_title)) },
+            text = { Text(stringResource(R.string.notif_enable_message)) },
             confirmButton = {
                 TextButton(onClick = {
                     showNotificationPermissionDialog = false
@@ -262,12 +276,12 @@ fun BackupScreen(
                         }
                     )
                 }) {
-                    Text("Open Settings")
+                    Text(stringResource(R.string.notif_open_settings))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showNotificationPermissionDialog = false }) {
-                    Text("Not Now")
+                    Text(stringResource(R.string.notif_not_now))
                 }
             }
         )
@@ -341,87 +355,64 @@ fun AutoBackupCard(
     onToggleAutoBackup: (Boolean) -> Unit,
     onSettingsClick: () -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
+    SectionCard {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = "Automatic Backup",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "Automatically backup your notes",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
-                }
-
-                Switch(
-                    checked = isAutoBackupEnabled,
-                    onCheckedChange = onToggleAutoBackup
+            SectionIconCircle(Icons.Default.Schedule)
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.backup_auto_title),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = stringResource(R.string.backup_auto_desc),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
             }
+            Spacer(modifier = Modifier.width(8.dp))
+            Switch(
+                checked = isAutoBackupEnabled,
+                onCheckedChange = onToggleAutoBackup
+            )
+        }
 
-            if (isAutoBackupEnabled) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-                    ),
-                    onClick = onSettingsClick
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Schedule,
-                                contentDescription = null,
-                                modifier = Modifier.size(16.dp),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-
-                            val scheduleText = when (backupSettings.frequency) {
-                                BackupFrequency.DAILY ->
-                                    "Daily at ${String.format("%02d:%02d", backupSettings.hour, backupSettings.minute)}"
-                                BackupFrequency.WEEKLY ->
-                                    "Weekly on ${getDayName(backupSettings.dayOfWeek)} at ${String.format("%02d:%02d", backupSettings.hour, backupSettings.minute)}"
-                                BackupFrequency.MONTHLY ->
-                                    "Monthly on day ${backupSettings.dayOfMonth} at ${String.format("%02d:%02d", backupSettings.hour, backupSettings.minute)}"
-                            }
-
-                            Text(
-                                text = scheduleText,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Change settings",
-                            modifier = Modifier.size(16.dp),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
+        if (isAutoBackupEnabled) {
+            Spacer(modifier = Modifier.height(12.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f))
+                    .clickable(onClick = onSettingsClick)
+                    .padding(horizontal = 12.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val time = String.format("%02d:%02d", backupSettings.hour, backupSettings.minute)
+                val scheduleText = when (backupSettings.frequency) {
+                    BackupFrequency.DAILY ->
+                        stringResource(R.string.backup_schedule_daily, time)
+                    BackupFrequency.WEEKLY ->
+                        stringResource(R.string.backup_schedule_weekly, getDayName(backupSettings.dayOfWeek), time)
+                    BackupFrequency.MONTHLY ->
+                        stringResource(R.string.backup_schedule_monthly, backupSettings.dayOfMonth, time)
                 }
+                Text(
+                    text = scheduleText,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.weight(1f)
+                )
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = stringResource(R.string.action_edit),
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
             }
         }
     }
@@ -444,12 +435,12 @@ fun BackupSettingsDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Backup Schedule") },
+        title = { Text(stringResource(R.string.backup_schedule_title)) },
         text = {
             Column {
                 // Frequency Selection
                 Text(
-                    text = "Frequency",
+                    text = stringResource(R.string.backup_frequency),
                     style = MaterialTheme.typography.labelMedium,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
@@ -464,9 +455,13 @@ fun BackupSettingsDialog(
                             onClick = { frequency = freq },
                             label = {
                                 Text(
-                                    freq.name.lowercase().replaceFirstChar {
-                                        if (it.isLowerCase()) it.titlecase() else it.toString()
-                                    }
+                                    stringResource(
+                                        when (freq) {
+                                            BackupFrequency.DAILY -> R.string.backup_freq_daily
+                                            BackupFrequency.WEEKLY -> R.string.backup_freq_weekly
+                                            BackupFrequency.MONTHLY -> R.string.backup_freq_monthly
+                                        }
+                                    )
                                 )
                             }
                         )
@@ -487,7 +482,7 @@ fun BackupSettingsDialog(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text("Time")
+                        Text(stringResource(R.string.backup_time))
                         Text(
                             text = String.format("%02d:%02d", hour, minute),
                             color = MaterialTheme.colorScheme.primary
@@ -499,19 +494,19 @@ fun BackupSettingsDialog(
                 if (frequency == BackupFrequency.WEEKLY) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "Day of Week",
+                        text = stringResource(R.string.backup_day_of_week),
                         style = MaterialTheme.typography.labelMedium,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
 
                     val days = listOf(
-                        Calendar.MONDAY to "Monday",
-                        Calendar.TUESDAY to "Tuesday",
-                        Calendar.WEDNESDAY to "Wednesday",
-                        Calendar.THURSDAY to "Thursday",
-                        Calendar.FRIDAY to "Friday",
-                        Calendar.SATURDAY to "Saturday",
-                        Calendar.SUNDAY to "Sunday"
+                        Calendar.MONDAY to stringResource(R.string.day_monday),
+                        Calendar.TUESDAY to stringResource(R.string.day_tuesday),
+                        Calendar.WEDNESDAY to stringResource(R.string.day_wednesday),
+                        Calendar.THURSDAY to stringResource(R.string.day_thursday),
+                        Calendar.FRIDAY to stringResource(R.string.day_friday),
+                        Calendar.SATURDAY to stringResource(R.string.day_saturday),
+                        Calendar.SUNDAY to stringResource(R.string.day_sunday)
                     )
 
                     LazyColumn(
@@ -543,7 +538,7 @@ fun BackupSettingsDialog(
                 if (frequency == BackupFrequency.MONTHLY) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "Day of Month (1-28)",
+                        text = stringResource(R.string.backup_day_of_month),
                         style = MaterialTheme.typography.labelMedium,
                         modifier = Modifier.padding(bottom = 8.dp)
                     )
@@ -579,12 +574,12 @@ fun BackupSettingsDialog(
                     )
                 }
             ) {
-                Text("Save")
+                Text(stringResource(R.string.action_save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.action_cancel))
             }
         }
     )
@@ -618,7 +613,7 @@ fun TimePickerDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Select Time") },
+        title = { Text(stringResource(R.string.backup_select_time)) },
         text = {
             TimePicker(
                 state = timePickerState,
@@ -631,28 +626,31 @@ fun TimePickerDialog(
                     onTimeSelected(timePickerState.hour, timePickerState.minute)
                 }
             ) {
-                Text("Set")
+                Text(stringResource(R.string.action_set))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.action_cancel))
             }
         }
     )
 }
 
+@Composable
 fun getDayName(dayOfWeek: Int): String {
-    return when (dayOfWeek) {
-        Calendar.SUNDAY -> "Sunday"
-        Calendar.MONDAY -> "Monday"
-        Calendar.TUESDAY -> "Tuesday"
-        Calendar.WEDNESDAY -> "Wednesday"
-        Calendar.THURSDAY -> "Thursday"
-        Calendar.FRIDAY -> "Friday"
-        Calendar.SATURDAY -> "Saturday"
-        else -> "Monday"
-    }
+    return stringResource(
+        when (dayOfWeek) {
+            Calendar.SUNDAY -> R.string.day_sunday
+            Calendar.MONDAY -> R.string.day_monday
+            Calendar.TUESDAY -> R.string.day_tuesday
+            Calendar.WEDNESDAY -> R.string.day_wednesday
+            Calendar.THURSDAY -> R.string.day_thursday
+            Calendar.FRIDAY -> R.string.day_friday
+            Calendar.SATURDAY -> R.string.day_saturday
+            else -> R.string.day_monday
+        }
+    )
 }
 
 @Composable
@@ -668,24 +666,27 @@ fun CustomBackupNameDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Backup Name") },
+        title = { Text(stringResource(R.string.backup_name_title)) },
         text = {
             Column {
                 Text(
-                    text = "Enter a custom name for your backup (optional)",
+                    text = stringResource(R.string.backup_name_desc),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
                 OutlinedTextField(
                     value = customName,
                     onValueChange = { customName = it },
-                    label = { Text("Custom name") },
-                    placeholder = { Text("My Important Backup") },
+                    label = { Text(stringResource(R.string.backup_name_label)) },
+                    placeholder = { Text("MyNotes") },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
                 Text(
-                    text = "Preview: MyNotes_${if (customName.isNotEmpty()) "${customName}_" else ""}$timestamp.json",
+                    text = stringResource(
+                        R.string.backup_name_preview,
+                        "MyNotes_${if (customName.isNotEmpty()) "${customName}_" else ""}$timestamp.json"
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     modifier = Modifier.padding(top = 8.dp)
@@ -702,12 +703,12 @@ fun CustomBackupNameDialog(
                     }
                 }
             ) {
-                Text("Create Backup")
+                Text(stringResource(R.string.backup_create_new))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.action_cancel))
             }
         }
     )
@@ -722,116 +723,76 @@ fun GoogleDriveSignInCard(
     onSignIn: () -> Unit,
     onSignOut: () -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isSignedIn) {
-                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-            } else {
-                MaterialTheme.colorScheme.surfaceVariant
-            }
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    imageVector = Icons.Default.CloudSync,
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = if (isSignedIn) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.width(12.dp))
+    SectionCard {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            SectionIconCircle(Icons.Default.CloudSync)
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Google Drive Backup",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    text = stringResource(R.string.backup_google_drive),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold
                 )
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            if (isSignedIn && accountInfo != null) {
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
-                    )
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(12.dp)
-                    ) {
-                        Text(
-                            text = "✅ Connected",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.SemiBold,
-                            color = MaterialTheme.colorScheme.primary
+                if (isSignedIn && accountInfo != null) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        // Small green status dot replaces the old "✅ Connected" emoji card
+                        Box(
+                            modifier = Modifier
+                                .size(7.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary)
                         )
+                        Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = "Account: ${accountInfo.email}",
+                            text = accountInfo.email ?: stringResource(R.string.backup_connected),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
+                } else {
+                    Text(
+                        text = stringResource(R.string.backup_signin_desc),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
                 }
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                OutlinedButton(
-                    onClick = onSignOut,
-                    enabled = !isLoading,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    if (isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(16.dp),
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Filled.Logout,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            if (isSignedIn) {
+                if (isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                } else {
+                    TextButton(onClick = onSignOut) {
+                        Text(stringResource(R.string.sign_in_sign_out))
                     }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Sign Out")
                 }
-            } else {
-                Text(
-                    text = "Sign in to Google Drive to backup and restore your notes securely in the cloud.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
+            }
+        }
 
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Button(
-                    onClick = onSignIn,
-                    enabled = !isLoading,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    if (isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(16.dp),
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.CloudSync,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Sign in to Google Drive")
+        if (!isSignedIn) {
+            Spacer(modifier = Modifier.height(12.dp))
+            Button(
+                onClick = onSignIn,
+                enabled = !isLoading,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.CloudSync,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
                 }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(stringResource(R.string.backup_signin_button))
             }
         }
     }
@@ -843,82 +804,54 @@ fun DataOverviewCard(
     archivedNotesCount: Int,
     totalNotesCount: Int
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
+    SectionCard {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Min),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "Current Data Overview",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 16.dp)
+            DataStat(title = stringResource(R.string.backup_stat_active), count = activeNotesCount, modifier = Modifier.weight(1f))
+            VerticalDivider(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .padding(vertical = 4.dp),
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
             )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                DataStatCard(
-                    title = "Active Notes",
-                    count = activeNotesCount,
-                    icon = Icons.AutoMirrored.Filled.Note
-                )
-                DataStatCard(
-                    title = "Archived",
-                    count = archivedNotesCount,
-                    icon = Icons.Default.Archive
-                )
-                DataStatCard(
-                    title = "Total",
-                    count = totalNotesCount,
-                    icon = Icons.Default.Storage
-                )
-            }
+            DataStat(title = stringResource(R.string.backup_stat_archived), count = archivedNotesCount, modifier = Modifier.weight(1f))
+            VerticalDivider(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .padding(vertical = 4.dp),
+                color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+            )
+            DataStat(title = stringResource(R.string.backup_stat_total), count = totalNotesCount, modifier = Modifier.weight(1f))
         }
     }
 }
 
 @Composable
-fun DataStatCard(
+private fun DataStat(
     title: String,
     count: Int,
-    icon: androidx.compose.ui.graphics.vector.ImageVector
+    modifier: Modifier = Modifier
 ) {
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-        )
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
-            modifier = Modifier.padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-                tint = MaterialTheme.colorScheme.primary
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = count.toString(),
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                textAlign = TextAlign.Center
-            )
-        }
+        Text(
+            text = count.toString(),
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Text(
+            text = title,
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+            textAlign = TextAlign.Center
+        )
     }
 }
 
@@ -928,85 +861,56 @@ fun CreateBackupCard(
     progress: String,
     onCreateBackup: (Boolean) -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
+    SectionCard {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            SectionIconCircle(Icons.Default.CloudUpload)
+            Spacer(modifier = Modifier.width(12.dp))
             Text(
-                text = "Create New Backup",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
+                text = stringResource(R.string.backup_create_new),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold
             )
+        }
 
-            Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
-            Text(
-                text = "Create a backup of your notes to Google Drive",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-            )
+        if (isCreating) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                LinearProgressIndicator(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(4.dp))
+                )
+                Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = progress,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                    textAlign = TextAlign.Center
+                )
+            }
+        } else {
+            Button(
+                onClick = { onCreateBackup(true) },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CloudUpload,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(stringResource(R.string.backup_all_notes))
+            }
 
-            if (isCreating) {
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-                    )
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(32.dp),
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = progress,
-                            style = MaterialTheme.typography.bodyMedium,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                }
-            } else {
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Button(
-                    onClick = { onCreateBackup(true) },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.CloudUpload,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Backup All Notes")
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                OutlinedButton(
-                    onClick = { onCreateBackup(false) },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.Note,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Backup Active Notes Only")
-                }
+            TextButton(
+                onClick = { onCreateBackup(false) },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(stringResource(R.string.backup_active_only))
             }
         }
     }
@@ -1025,145 +929,104 @@ fun ExistingBackupsCard(
     var showAllFiles by remember { mutableStateOf(false) }
     val visibleFiles = if (showAllFiles) backupFiles else backupFiles.take(3)
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
+    SectionCard {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Existing Backups",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+            SectionIconCircle(Icons.Default.CloudDownload)
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = stringResource(R.string.backup_existing),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.weight(1f)
+            )
+            IconButton(onClick = onRefresh, enabled = !isLoading && !isRestoring) {
+                Icon(
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
                 )
+            }
+        }
 
-                IconButton(onClick = onRefresh, enabled = !isLoading && !isRestoring) {
-                    Icon(
-                        imageVector = Icons.Default.Refresh,
-                        contentDescription = "Refresh",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
+        if (isRestoring) {
+            Spacer(modifier = Modifier.height(12.dp))
+            LinearProgressIndicator(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(4.dp))
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+            Text(
+                text = restoreProgress,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        } else if (isLoading) {
+            Spacer(modifier = Modifier.height(12.dp))
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(28.dp),
+                    strokeWidth = 3.dp,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        } else if (backupFiles.isEmpty()) {
+            Spacer(modifier = Modifier.height(12.dp))
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    imageVector = Icons.Default.CloudOff,
+                    contentDescription = null,
+                    modifier = Modifier.size(40.dp),
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.backup_none_found),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            }
+        } else {
+            Spacer(modifier = Modifier.height(8.dp))
+
+            visibleFiles.forEachIndexed { index, backupFile ->
+                if (index > 0) {
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.15f))
                 }
+                BackupFileItem(
+                    backupFile = backupFile,
+                    onRestore = { onRestore(backupFile.id) },
+                    onDelete = { onDelete(backupFile.id) },
+                    enabled = !isRestoring
+                )
             }
 
-            if (isRestoring) {
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-                    )
+            if (backupFiles.size > 3) {
+                TextButton(
+                    onClick = { showAllFiles = !showAllFiles },
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(32.dp),
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = restoreProgress,
-                            style = MaterialTheme.typography.bodyMedium,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                }
-            } else if (isLoading) {
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(32.dp),
-                        color = MaterialTheme.colorScheme.primary
+                    Icon(
+                        imageVector = if (showAllFiles) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
                     )
-                }
-            } else if (backupFiles.isEmpty()) {
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = if (showAllFiles) stringResource(R.string.show_less)
+                        else stringResource(R.string.backup_show_all, backupFiles.size)
                     )
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.CloudOff,
-                            contentDescription = null,
-                            modifier = Modifier.size(48.dp),
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "No backups found",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                }
-            } else {
-                Spacer(modifier = Modifier.height(16.dp))
-
-                visibleFiles.forEach { backupFile ->
-                    BackupFileItem(
-                        backupFile = backupFile,
-                        onRestore = { onRestore(backupFile.id) },
-                        onDelete = { onDelete(backupFile.id) },
-                        enabled = !isRestoring
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                }
-
-                if (backupFiles.size > 3) {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
-                        ),
-                        onClick = { showAllFiles = !showAllFiles }
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(12.dp),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = if (showAllFiles) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                                contentDescription = null,
-                                modifier = Modifier.size(20.dp),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = if (showAllFiles) "Show Less" else "Show More (${backupFiles.size - 3} more)",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
-                    }
                 }
             }
         }
@@ -1179,76 +1042,59 @@ fun BackupFileItem(
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        border = androidx.compose.foundation.BorderStroke(
-            1.dp,
-            MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-        )
+    // Flat row inside the section card (no bordered card-in-card): name on one
+    // ellipsized line, date + size merged into a single meta line.
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(
-            modifier = Modifier.padding(12.dp)
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = backupFile.name,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = "${backupFile.getFormattedDate()} · ${backupFile.getFormattedSize()}",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+        }
+
+        IconButton(
+            onClick = onRestore,
+            enabled = enabled
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.Top
-            ) {
-                Column(
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(
-                        text = backupFile.name,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Medium
-                    )
-                    Text(
-                        text = backupFile.getFormattedDate(),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                    )
-                    Text(
-                        text = "Size: ${backupFile.getFormattedSize()}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                    )
-                }
+            Icon(
+                imageVector = Icons.Default.CloudDownload,
+                contentDescription = stringResource(R.string.action_restore),
+                modifier = Modifier.size(20.dp),
+                tint = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+            )
+        }
 
-                Row {
-                    IconButton(
-                        onClick = onRestore,
-                        enabled = enabled
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.CloudDownload,
-                            contentDescription = "Restore",
-                            tint = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-                        )
-                    }
-
-                    IconButton(
-                        onClick = { showDeleteDialog = true },
-                        enabled = enabled
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete",
-                            tint = if (enabled) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-                        )
-                    }
-                }
-            }
+        IconButton(
+            onClick = { showDeleteDialog = true },
+            enabled = enabled
+        ) {
+            Icon(
+                imageVector = Icons.Outlined.Delete,
+                contentDescription = stringResource(R.string.action_delete),
+                modifier = Modifier.size(20.dp),
+                tint = if (enabled) MaterialTheme.colorScheme.error.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+            )
         }
     }
 
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete Backup") },
-            text = { Text("Are you sure you want to delete this backup? This action cannot be undone.") },
+            title = { Text(stringResource(R.string.backup_delete_title)) },
+            text = { Text(stringResource(R.string.backup_delete_message)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -1256,12 +1102,12 @@ fun BackupFileItem(
                         showDeleteDialog = false
                     }
                 ) {
-                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.action_delete), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.action_cancel))
                 }
             }
         )
@@ -1270,29 +1116,23 @@ fun BackupFileItem(
 
 @Composable
 fun BackupTipsCard() {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
+    SectionCard {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            SectionIconCircle(Icons.Default.Lightbulb)
+            Spacer(modifier = Modifier.width(12.dp))
             Text(
-                text = "💡 Backup Tips",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "• All notes, including archived ones, are backed up to your Google Drive\n• Choose daily, weekly, or monthly automatic backups — runs even when the app is closed\n• Restore any previous backup at any time\n• Old backups are cleaned up automatically (keeps the last 10)",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                text = stringResource(R.string.backup_tips_title),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.SemiBold
             )
         }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        Text(
+            text = stringResource(R.string.backup_tips_text),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f)
+        )
     }
 }

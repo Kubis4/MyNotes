@@ -46,29 +46,12 @@ fun ArchiveScreen(
     var showColorPicker by remember { mutableStateOf(false) }
     var selectedNoteForColor by remember { mutableStateOf<Note?>(null) }
 
-    // Tapping an archived note used to jump straight into the full editor, which
-    // meant the only way to just LOOK at an archived note's content was through a
-    // screen that also lets you edit/delete it. This read-only preview lets you
-    // view an archived note without touching its archived state either way.
-    var previewNote by remember { mutableStateOf<Note?>(null) }
-
     // String resources - get them in composable scope
     val archiveAllRestoredMessage = stringResource(R.string.archive_all_restored)
 
-    // Handle UI events
-    LaunchedEffect(key1 = true) {
-        viewModel.uiEvent.collect { event ->
-            when (event) {
-                is NoteViewModel.UiEvent.ShowMessage -> {
-                    snackbarHostState.showSnackbar(message = event.message)
-                }
-                is NoteViewModel.UiEvent.ShowError -> {
-                    snackbarHostState.showSnackbar(message = event.error)
-                }
-                else -> { /* Handle other events */ }
-            }
-        }
-    }
+    // Only ShowUndoDeleteSnackbar/ShowUndoArchiveSnackbar (handled where notes are
+    // actually deleted/archived) get a snackbar - plain ShowMessage/ShowError here
+    // have no action to offer, so they'd just be noise.
 
     // Color picker dialog
     if (showColorPicker && selectedNoteForColor != null) {
@@ -86,22 +69,16 @@ fun ArchiveScreen(
         )
     }
 
-    previewNote?.let { note ->
-        ArchivedNotePreviewDialog(
-            note = note,
-            onDismiss = { previewNote = null },
-            onRestore = {
-                viewModel.triggerUnarchive(note)
-                previewNote = null
-            }
-        )
-    }
-
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             GradientTopAppBar(
-                title = { Text(stringResource(R.string.archive_title)) },
+                title = {
+                    Text(
+                        text = stringResource(R.string.archive_title),
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(
@@ -173,7 +150,18 @@ fun ArchiveScreen(
                     ArchiveNoteItem(
                         modifier = Modifier.animateItemPlacement(),
                         note = note,
-                        onNoteClick = { previewNote = note },
+                        // Open the full note, same as the Bin screen - the archived
+                        // state is untouched by just viewing it.
+                        onNoteClick = {
+                            when (note.type) {
+                                NoteType.CHECKLIST -> navController.navigate(
+                                    sk.kubdev.mynotes.Screen.ToDoList.createRoute(note.id)
+                                )
+                                NoteType.TEXT -> navController.navigate(
+                                    sk.kubdev.mynotes.Screen.NoteDetail.createRoute(note.id)
+                                )
+                            }
+                        },
                         onRestore = { viewModel.triggerUnarchive(note) },
                         onDelete = { viewModel.triggerDelete(note) },
                         onLongClick = {
@@ -198,15 +186,22 @@ fun ArchiveNoteItem(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        onClick = onNoteClick
+        onClick = onNoteClick,
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        )
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
             // Note content with color support
+            // NoteItem's own clickable CONSUMES taps, so the Card's onClick never fires
+            // for taps landing on the note content (i.e. almost all of them) - the
+            // preview must be wired here directly, not on the Card.
             NoteItem(
                 note = note,
-                onClick = { /* Handled by Card onClick */ },
+                onClick = onNoteClick,
                 onLongClick = onLongClick
             )
 
@@ -253,70 +248,3 @@ fun ArchiveNoteItem(
     }
 }
 
-// Plain read-only rendering of an archived note's content - no text fields, no
-// checkbox toggling, no delete/reorder controls. Restore stays available as an
-// explicit action here, but it's opt-in rather than the only way to see what's
-// inside the note.
-@Composable
-private fun ArchivedNotePreviewDialog(
-    note: Note,
-    onDismiss: () -> Unit,
-    onRestore: () -> Unit
-) {
-    val lines = remember(note.content) { note.content.toNoteLines() }
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = {
-            Text(
-                text = note.title.ifBlank { stringResource(R.string.untitled_note) },
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis
-            )
-        },
-        text = {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = 420.dp)
-                    .verticalScroll(rememberScrollState())
-            ) {
-                lines.forEach { line ->
-                    when (line.type) {
-                        LineType.CHECKLIST -> Text(
-                            text = "${if (line.isChecked) "☑" else "☐"} ${line.content}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(vertical = 2.dp)
-                        )
-                        LineType.BULLET -> Text(
-                            text = "• ${line.content}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(vertical = 2.dp)
-                        )
-                        LineType.DIVIDER, LineType.SEPARATOR -> HorizontalDivider(
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        )
-                        LineType.IMAGE -> Unit
-                        else -> if (line.content.isNotBlank()) {
-                            Text(
-                                text = line.content,
-                                style = MaterialTheme.typography.bodyMedium,
-                                modifier = Modifier.padding(vertical = 2.dp)
-                            )
-                        }
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onRestore) {
-                Text(stringResource(R.string.action_restore))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.action_close))
-            }
-        }
-    )
-}

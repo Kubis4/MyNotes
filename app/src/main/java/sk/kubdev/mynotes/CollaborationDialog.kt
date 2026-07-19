@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -53,7 +54,7 @@ fun CollaborationDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Start Collaborating",
+                    text = stringResource(R.string.collab_start_title),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
@@ -62,7 +63,7 @@ fun CollaborationDialog(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
-                    text = "Work together on this todo list with others in real-time",
+                    text = stringResource(R.string.collab_start_desc),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
@@ -81,7 +82,7 @@ fun CollaborationDialog(
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("Make This Collaborative")
+                    Text(stringResource(R.string.collab_make_collaborative))
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
@@ -97,13 +98,13 @@ fun CollaborationDialog(
                         modifier = Modifier.size(18.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("View Invitations")
+                    Text(stringResource(R.string.collab_view_invitations))
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 TextButton(onClick = onDismiss) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.action_cancel))
                 }
             }
         }
@@ -133,7 +134,8 @@ fun InviteManagementDialog(
                 modifier = Modifier.padding(24.dp)
             ) {
                 Text(
-                    text = if (showInviteSection) "Invite Collaborators" else "Pending Invitations",
+                    text = if (showInviteSection) stringResource(R.string.collab_invite_title)
+                    else stringResource(R.string.collab_pending_title),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold
                 )
@@ -147,13 +149,13 @@ fun InviteManagementDialog(
                 ) {
                     FilterChip(
                         onClick = { showInviteSection = true },
-                        label = { Text("Send Invite") },
+                        label = { Text(stringResource(R.string.collab_send_invite_tab)) },
                         selected = showInviteSection,
                         enabled = collaborativeNoteId != null
                     )
                     FilterChip(
                         onClick = { showInviteSection = false },
-                        label = { Text("Pending (${pendingInvites.size})") },
+                        label = { Text(stringResource(R.string.collab_pending_tab, pendingInvites.size)) },
                         selected = !showInviteSection
                     )
                 }
@@ -165,7 +167,7 @@ fun InviteManagementDialog(
                     OutlinedTextField(
                         value = emailInput,
                         onValueChange = { emailInput = it },
-                        label = { Text("Email Address") },
+                        label = { Text(stringResource(R.string.collab_email_label)) },
                         placeholder = { Text("colleague@example.com") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                         modifier = Modifier.fillMaxWidth(),
@@ -192,7 +194,7 @@ fun InviteManagementDialog(
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Send Invitation")
+                        Text(stringResource(R.string.collab_send_invitation))
                     }
                 } else {
                     // Pending Invitations Section
@@ -209,7 +211,7 @@ fun InviteManagementDialog(
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
-                                text = "No pending invitations",
+                                text = stringResource(R.string.collab_no_pending),
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                             )
@@ -237,7 +239,7 @@ fun InviteManagementDialog(
                     horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(onClick = onDismiss) {
-                        Text("Close")
+                        Text(stringResource(R.string.action_close))
                     }
                 }
             }
@@ -288,7 +290,7 @@ fun InviteItem(
                         fontWeight = FontWeight.Medium
                     )
                     Text(
-                        text = "From ${invite.senderDisplayName ?: invite.senderEmail}",
+                        text = stringResource(R.string.collab_from, invite.senderDisplayName ?: invite.senderEmail),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
@@ -305,13 +307,13 @@ fun InviteItem(
                     onClick = onDecline,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text("Decline")
+                    Text(stringResource(R.string.action_decline))
                 }
                 Button(
                     onClick = onAccept,
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text("Accept")
+                    Text(stringResource(R.string.action_accept))
                 }
             }
         }
@@ -344,7 +346,7 @@ fun CollaboratorsDialog(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Collaborators (${collaborators.size})",
+                        text = stringResource(R.string.collab_collaborators, collaborators.size),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold
                     )
@@ -354,7 +356,7 @@ fun CollaboratorsDialog(
 
                 if (collaborators.isEmpty()) {
                     Text(
-                        text = "No collaborators yet",
+                        text = stringResource(R.string.collab_no_collaborators),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                         modifier = Modifier.fillMaxWidth(),
@@ -381,7 +383,7 @@ fun CollaboratorsDialog(
                     horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(onClick = onDismiss) {
-                        Text("Close")
+                        Text(stringResource(R.string.action_close))
                     }
                 }
             }

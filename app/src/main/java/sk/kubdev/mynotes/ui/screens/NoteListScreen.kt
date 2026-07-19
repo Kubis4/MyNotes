@@ -232,7 +232,6 @@ fun NoteListScreen(
     // Collaboration states
     val pendingInvites by viewModel.pendingInvites.collectAsStateWithLifecycle(emptyList())
     val rawCollaborativeNotes by viewModel.collaborativeNotes.collectAsStateWithLifecycle(emptyList())
-    val collaborationError by viewModel.collaborationError.collectAsStateWithLifecycle(null)
     val isUserSignedIn = viewModel.isUserSignedIn()
     val currentUserId = remember(isUserSignedIn) { viewModel.getCurrentUserId() }
 
@@ -307,15 +306,6 @@ fun NoteListScreen(
             } catch (e: Exception) {
                 Log.e("NoteListScreen", "Error starting collaborative sync", e)
             }
-        }
-    }
-
-    LaunchedEffect(collaborationError) {
-        collaborationError?.let { error ->
-            snackbarHostState.showSnackbar(
-                message = "Collaboration Error: $error",
-                duration = SnackbarDuration.Long
-            )
         }
     }
 
@@ -581,20 +571,40 @@ fun NoteListScreen(
                         viewModel.undoArchive()
                     }
                 }
-                is NoteViewModel.UiEvent.ShowMessage -> {
-                    snackbarHostState.showSnackbar(
-                        message = event.message,
-                        duration = SnackbarDuration.Short
-                    )
-                }
-                is NoteViewModel.UiEvent.ShowError -> {
-                    snackbarHostState.showSnackbar(
-                        message = event.error,
-                        duration = SnackbarDuration.Long
-                    )
+                // Plain ShowMessage/ShowError have no undo to offer, so no snackbar -
+                // only the Undo* events above get one.
+                is NoteViewModel.UiEvent.ShowMessage -> Unit
+                is NoteViewModel.UiEvent.ShowError -> Unit
+            }
+        }
+    }
+
+    // Pop up a snackbar for newly-arrived invites while the user is in the app,
+    // instead of only surfacing them silently as the toolbar badge. Only fires for
+    // invites that show up mid-session (not the initial batch loaded on sign-in/launch),
+    // otherwise every app open with pre-existing invites would spam a snackbar.
+    var seenInviteIds by remember { mutableStateOf<Set<String>?>(null) }
+    LaunchedEffect(pendingInvites) {
+        val previouslySeen = seenInviteIds
+        val currentIds = pendingInvites.map { it.id }.toSet()
+        if (previouslySeen != null) {
+            val newInvite = pendingInvites.firstOrNull { it.id !in previouslySeen }
+            if (newInvite != null) {
+                val result = snackbarHostState.showSnackbar(
+                    message = context.getString(
+                        R.string.collab_new_invite,
+                        newInvite.senderDisplayName ?: newInvite.senderEmail ?: "",
+                        newInvite.noteTitle.ifEmpty { context.getString(R.string.untitled_note) }
+                    ),
+                    actionLabel = context.getString(R.string.action_view),
+                    duration = SnackbarDuration.Long
+                )
+                if (result == SnackbarResult.ActionPerformed) {
+                    navController.navigate("pending_invitations")
                 }
             }
         }
+        seenInviteIds = currentIds
     }
 
     // Color picker dialog
@@ -1051,7 +1061,7 @@ fun NoteListScreen(
                                             contentAlignment = Alignment.Center
                                         ) {
                                             Text(
-                                                text = "No notes in this category",
+                                                text = stringResource(R.string.notes_none_in_category),
                                                 style = MaterialTheme.typography.bodyMedium,
                                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                                             )
@@ -1156,7 +1166,7 @@ fun NoteListScreen(
                                             contentAlignment = Alignment.Center
                                         ) {
                                             Text(
-                                                text = "No notes in this category",
+                                                text = stringResource(R.string.notes_none_in_category),
                                                 style = MaterialTheme.typography.bodyMedium,
                                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
                                             )

@@ -31,6 +31,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import androidx.compose.ui.viewinterop.AndroidView
@@ -163,27 +166,71 @@ fun RichTextField(
     // scroll the list to even see what they're typing.
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
     val coroutineScope = rememberCoroutineScope()
+
+    // bringIntoView() with no explicit rect only scrolls the MINIMUM amount needed for this
+    // field's own bounds to be technically inside the viewport - so a field one line tall
+    // ends up scrolled to sit exactly flush with the top of the keyboard, cursor included,
+    // which still reads as "hidden under the keyboard" to the user. Requesting a taller rect
+    // than the field's actual bounds (extending below it) forces the extra scroll needed to
+    // leave real breathing room above the IME.
+    var fieldSizePx by remember { mutableStateOf(androidx.compose.ui.geometry.Size.Zero) }
+    val extraBottomPx = with(LocalDensity.current) { 64.dp.toPx() }
     fun scrollIntoView() {
-        coroutineScope.launch { bringIntoViewRequester.bringIntoView() }
+        coroutineScope.launch {
+            // Target the CURSOR's line, not the whole field: a paragraph taller than the
+            // space left above the keyboard can never fully fit, in which case bringIntoView
+            // aligns its top edge and leaves the cursor (at the bottom) still covered by the
+            // IME. The single line the cursor sits on always fits.
+            val et = controller.editText
+            val layout = et?.layout
+            val rect = if (layout != null) {
+                val cursorLine = layout.getLineForOffset(et.selectionEnd.coerceAtLeast(0))
+                val top = layout.getLineTop(cursorLine).toFloat() + et.paddingTop
+                val bottom = layout.getLineBottom(cursorLine).toFloat() + et.paddingTop
+                androidx.compose.ui.geometry.Rect(
+                    left = 0f,
+                    top = top,
+                    right = fieldSizePx.width,
+                    bottom = bottom + extraBottomPx
+                )
+            } else {
+                androidx.compose.ui.geometry.Rect(
+                    left = 0f,
+                    top = 0f,
+                    right = fieldSizePx.width,
+                    bottom = fieldSizePx.height + extraBottomPx
+                )
+            }
+            bringIntoViewRequester.bringIntoView(rect)
+        }
     }
 
     // A fixed delay-then-scroll after focus is unreliable: it can fire before the IME has
     // actually finished resizing the window, so bringIntoView() computes against the OLD
     // (pre-keyboard) viewport and thinks the field is already visible. Reacting to the real
-    // WindowInsets IME-visibility change instead means the scroll only happens once the
-    // keyboard has actually finished animating in and the layout has been re-measured
-    // around it.
+    // WindowInsets IME-visibility change gets the timing roughly right, but isImeVisible
+    // flips true as soon as the show animation STARTS, not once it's done - the IME inset
+    // height (and therefore imePadding()'s resize of this column) keeps growing for another
+    // ~250-300ms after that. A single bringIntoView() shortly after the flag flips was
+    // landing mid-animation, so the field looked scrolled into view for a moment and then
+    // got covered again as the keyboard kept rising. Waiting out the full show animation
+    // (and re-checking once more after) fixes that without needing to track the live inset.
     var isFocused by remember { mutableStateOf(false) }
     val imeVisible = WindowInsets.isImeVisible
     LaunchedEffect(imeVisible, isFocused) {
         if (imeVisible && isFocused) {
-            delay(50) // let the post-resize layout pass land first
+            delay(300)
+            scrollIntoView()
+            delay(150)
             scrollIntoView()
         }
     }
 
     AndroidView(
-        modifier = modifier.fillMaxWidth().bringIntoViewRequester(bringIntoViewRequester),
+        modifier = modifier
+            .fillMaxWidth()
+            .onSizeChanged { fieldSizePx = androidx.compose.ui.geometry.Size(it.width.toFloat(), it.height.toFloat()) }
+            .bringIntoViewRequester(bringIntoViewRequester),
         factory = { context ->
             RichEditText(context).apply {
                 // Constructed directly (not inflated from XML), so none of the default
@@ -248,7 +295,15 @@ fun RichTextField(
                     isFocused = hasFocus
                     if (hasFocus) scrollIntoView()
                 }
-                onSelectionChanged = { start, end -> onSelectionChangeState.value(start, end) }
+                onSelectionChanged = { start, end ->
+                    onSelectionChangeState.value(start, end)
+                    // Tapping deeper into an already-focused tall paragraph moves only the
+                    // cursor - no focus change, no IME-visibility flip, no text change - so
+                    // none of the other scroll triggers fire and the tapped spot can sit
+                    // under the keyboard. Only react while focused: setText() during initial
+                    // load also moves the selection, and scrolling then would yank the list.
+                    if (isFocused) scrollIntoView()
+                }
             }
         },
         update = { editText ->

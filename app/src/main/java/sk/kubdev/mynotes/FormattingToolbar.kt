@@ -279,7 +279,7 @@ fun FormattingToolbar(
                             },
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("Clear Color")
+                            Text(stringResource(R.string.format_clear_color))
                         }
                     }
                 }

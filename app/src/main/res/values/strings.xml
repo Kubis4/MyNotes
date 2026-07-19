@@ -19,6 +19,7 @@
     <string name="action_restore">Restore</string>
     <string name="action_ok">OK</string>
     <string name="action_close">Close</string>
+    <string name="action_view">View</string>
 
     <!-- Note Management -->
     <string name="archive_empty_message">No archived notes</string>
@@ -64,6 +65,7 @@
     <string name="settings_language">Language</string>
     <string name="settings_security">Security</string>
     <string name="settings_note_interactions">Note Interactions</string>
+    <string name="settings_collaboration">Collaboration</string>
 
     <!-- Theme Settings -->
     <string name="theme_title">Theme</string>
@@ -147,6 +149,7 @@
     <string name="auth_unlock">Unlock</string>
     <string name="auth_or">or</string>
     <string name="auth_use_biometric">Use Biometric</string>
+    <string name="auth_use_device_credential">Use device PIN or password instead</string>
 
     <!-- Backup Screen -->
 
@@ -157,8 +160,8 @@
     <string name="about_description">MyNotes helps you capture notes and to-do lists, with colors, swipe actions, real-time collaboration, and automatic cloud backup.</string>
     <string name="about_features_title">Key Features</string>
     <string name="about_support_title">Support MyNotes</string>
-    <string name="about_support_description">MyNotes is completely free and ad-free. If you enjoy using it, consider buying me a coffee to help keep it that way.</string>
-    <string name="about_coffee_button">Buy Me a Coffee</string>
+    <string name="about_support_description">MyNotes is completely free and ad-free. If you enjoy using it, you can buy me a beer — every contribution is voluntary and helps keep it that way.</string>
+    <string name="about_coffee_button">Buy Me a Beer</string>
     <string name="about_support_message">Your support helps keep MyNotes free.</string>
     <string name="about_contact_title">Get in Touch &amp; Feedback</string>
     <string name="about_contact_send">Send Feedback</string>
@@ -462,6 +465,19 @@
     <string name="todo_new">New Todo</string>
     <string name="todo_edit">Edit Todo</string>
     <string name="collab_members_count">Collaborative • %d members</string>
+    <string name="collab_new_invite">%1$s invited you to \"%2$s\"</string>
+    <string name="import_supported_formats">Supported formats</string>
+    <string name="import_format_evernote_title">Evernote</string>
+    <string name="import_format_evernote_desc">Export a notebook as .enex from Evernote, then pick that file here.</string>
+    <string name="import_format_keep_title">Google Keep</string>
+    <string name="import_format_keep_desc">Export your data with Google Takeout (Keep only) and pick the resulting .zip, or a single note .json file.</string>
+    <string name="import_format_plaintext_title">Plain text / Markdown</string>
+    <string name="import_format_plaintext_desc">Any .txt or .md file becomes one note. Markdown checkboxes (\"- [ ] \" / \"- [x] \") are imported as checklist items.</string>
+    <string name="changelog_title">What\'s new</string>
+    <string name="changelog_1_0_note_1">First stable release</string>
+    <string name="changelog_1_0_note_2">Real-time collaborative notes and to-do lists with Google Sign-In</string>
+    <string name="changelog_1_0_note_3">Automatic backup to your own Google Drive</string>
+    <string name="changelog_1_0_note_4">Import from plain text, Google Keep and Evernote exports</string>
 
     <string name="fab_todo_list">Todo List</string>
     <string name="fab_note">Note</string>
@@ -491,4 +507,86 @@
     <string name="leave_note">Leave Note</string>
     <string name="section_shared_notes">Shared Notes</string>
     <string name="collaborators_count">%d collaborators</string>
+
+    <!-- Backup screen (previously hardcoded) -->
+    <string name="backup_screen_title">Backup &amp; Restore</string>
+    <string name="backup_google_drive">Google Drive</string>
+    <string name="backup_signin_desc">Back up your notes to the cloud</string>
+    <string name="backup_connected">Connected</string>
+    <string name="backup_signin_button">Sign in to Google Drive</string>
+    <string name="backup_auto_title">Automatic Backup</string>
+    <string name="backup_auto_desc">Automatically backup your notes</string>
+    <string name="backup_schedule_daily">Daily at %1$s</string>
+    <string name="backup_schedule_weekly">Weekly on %1$s at %2$s</string>
+    <string name="backup_schedule_monthly">Monthly on day %1$d at %2$s</string>
+    <string name="backup_stat_active">Active</string>
+    <string name="backup_stat_archived">Archived</string>
+    <string name="backup_stat_total">Total</string>
+    <string name="backup_create_new">Create New Backup</string>
+    <string name="backup_all_notes">Backup All Notes</string>
+    <string name="backup_active_only">Backup Active Notes Only</string>
+    <string name="backup_existing">Existing Backups</string>
+    <string name="backup_none_found">No backups found</string>
+    <string name="backup_show_all">Show All (%1$d)</string>
+    <string name="backup_delete_title">Delete Backup</string>
+    <string name="backup_delete_message">Are you sure you want to delete this backup? This action cannot be undone.</string>
+    <string name="backup_tips_title">Backup Tips</string>
+    <string name="backup_tips_text">• All notes, including archived ones, are backed up to your Google Drive\n• Choose daily, weekly, or monthly automatic backups — runs even when the app is closed\n• Restore any previous backup at any time\n• Old backups are cleaned up automatically (keeps the last 10)</string>
+    <string name="backup_schedule_title">Backup Schedule</string>
+    <string name="backup_frequency">Frequency</string>
+    <string name="backup_freq_daily">Daily</string>
+    <string name="backup_freq_weekly">Weekly</string>
+    <string name="backup_freq_monthly">Monthly</string>
+    <string name="backup_time">Time</string>
+    <string name="backup_day_of_week">Day of Week</string>
+    <string name="backup_day_of_month">Day of Month (1–28)</string>
+    <string name="backup_select_time">Select Time</string>
+    <string name="action_set">Set</string>
+    <string name="backup_name_title">Backup Name</string>
+    <string name="backup_name_desc">Enter a custom name for your backup (optional)</string>
+    <string name="backup_name_label">Custom name</string>
+    <string name="backup_name_preview">Preview: %1$s</string>
+    <string name="notif_enable_title">Enable Notifications</string>
+    <string name="notif_enable_message">Turn on notifications for MyNotes so you\'re told when a backup finishes.</string>
+    <string name="notif_open_settings">Open Settings</string>
+    <string name="notif_not_now">Not Now</string>
+
+    <!-- Import screen (previously hardcoded) -->
+    <string name="import_from_other_title">Import from another app</string>
+    <string name="import_from_other_desc">Pick an exported file and it\'ll be added as new notes here. Each note stays separate from your existing ones.</string>
+    <string name="import_importing">Importing…</string>
+    <string name="import_choose_file">Choose file to import</string>
+
+    <!-- Collaboration dialogs (previously hardcoded) -->
+    <string name="collab_start_title">Start Collaborating</string>
+    <string name="collab_start_desc">Work together on this todo list with others in real-time</string>
+    <string name="collab_make_collaborative">Make This Collaborative</string>
+    <string name="collab_view_invitations">View Invitations</string>
+    <string name="collab_invite_title">Invite Collaborators</string>
+    <string name="collab_pending_title">Pending Invitations</string>
+    <string name="collab_send_invite_tab">Send Invite</string>
+    <string name="collab_pending_tab">Pending (%1$d)</string>
+    <string name="collab_email_label">Email Address</string>
+    <string name="collab_send_invitation">Send Invitation</string>
+    <string name="collab_no_pending">No pending invitations</string>
+    <string name="collab_from">From %1$s</string>
+    <string name="collab_collaborators">Collaborators (%1$d)</string>
+    <string name="collab_no_collaborators">No collaborators yet</string>
+    <string name="action_accept">Accept</string>
+    <string name="action_decline">Decline</string>
+
+    <!-- Invitations screen (previously hardcoded) -->
+    <string name="inv_sign_in_required">Sign In Required</string>
+    <string name="inv_sign_in_message">You need to sign in to view and manage invitations</string>
+    <string name="inv_none_title">No Invitations</string>
+    <string name="inv_none_message">You don\'t have any pending invitations at the moment</string>
+
+    <!-- To-do screen (previously hardcoded) -->
+    <string name="todo_progress">Progress</string>
+    <string name="todo_active_count">Active (%1$d)</string>
+    <string name="todo_completed_count">Completed (%1$d)</string>
+
+    <!-- Misc (previously hardcoded) -->
+    <string name="format_clear_color">Clear Color</string>
+    <string name="notes_none_in_category">No notes in this category</string>
 </resources>

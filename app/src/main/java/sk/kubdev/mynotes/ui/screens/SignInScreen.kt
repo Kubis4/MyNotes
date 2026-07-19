@@ -39,8 +39,13 @@ fun SignInScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.sign_in_title)) },
+            sk.kubdev.mynotes.ui.components.GradientTopAppBar(
+                title = {
+                    Text(
+                        text = stringResource(R.string.sign_in_title),
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.action_back))

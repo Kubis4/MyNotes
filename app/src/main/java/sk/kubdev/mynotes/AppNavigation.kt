@@ -74,7 +74,17 @@ fun AppNavigation(
     ) {
         NavHost(
             navController = navController,
-            startDestination = Screen.NoteList.route
+            startDestination = Screen.NoteList.route,
+            // Navigation Compose's default is a 700ms crossfade. With mostly-white
+            // screens that reads as the whole app "flashing white" on every back
+            // navigation, and for most of that window the EXITING screen still sits
+            // on top eating taps - e.g. the burger button did nothing (or showed a
+            // white wash) right after returning from Settings. A short fade fixes
+            // both symptoms.
+            enterTransition = { androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(180)) },
+            exitTransition = { androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(180)) },
+            popEnterTransition = { androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(180)) },
+            popExitTransition = { androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(180)) }
         ) {
             // ✅ FIXED: Main Notes List Screen - pass drawer control functions
             composable(Screen.NoteList.route) {

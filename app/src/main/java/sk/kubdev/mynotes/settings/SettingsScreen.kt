@@ -19,6 +19,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -41,6 +42,9 @@ import android.os.Build
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.foundation.shape.RoundedCornerShape
 import sk.kubdev.mynotes.ui.components.GradientTopAppBar
+import sk.kubdev.mynotes.ui.components.SectionCard
+import sk.kubdev.mynotes.ui.components.SectionHeader
+import sk.kubdev.mynotes.ui.components.SectionIconCircle
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -96,22 +100,16 @@ fun SettingsScreen(
             )
         }
     ) { paddingValues ->
+        // Each card now carries its own icon header (SectionHeader) - the separate
+        // section-label rows above cards are gone, matching the About/Backup layout.
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            item { Spacer(modifier = Modifier.height(8.dp)) }
-
-            // Appearance Section
-            item {
-                SettingsSection(
-                    title = stringResource(R.string.settings_appearance),
-                    icon = Icons.Default.Palette
-                )
-            }
+            item { Spacer(modifier = Modifier.height(4.dp)) }
 
             item {
                 ThemeSettingCard(
@@ -120,17 +118,12 @@ fun SettingsScreen(
                 )
             }
 
-            item { Spacer(modifier = Modifier.height(8.dp)) }
-
-            // Color Scheme Section
             item {
                 ColorSchemeSettingCard(
                     currentColorScheme = settings.colorScheme,
                     onColorSchemeChange = settingsViewModel::updateColorScheme
                 )
             }
-
-            item { Spacer(modifier = Modifier.height(8.dp)) }
 
             item {
                 GradientHeaderSettingCard(
@@ -139,30 +132,10 @@ fun SettingsScreen(
                 )
             }
 
-            item { Spacer(modifier = Modifier.height(16.dp)) }
-
-            // Language Section
-            item {
-                SettingsSection(
-                    title = stringResource(R.string.settings_language),
-                    icon = Icons.Default.Language
-                )
-            }
-
             item {
                 LanguageSettingCard(
                     currentLanguage = settings.language,
                     onLanguageChange = settingsViewModel::updateLanguage
-                )
-            }
-
-            item { Spacer(modifier = Modifier.height(16.dp)) }
-
-            // Security Section
-            item {
-                SettingsSection(
-                    title = stringResource(R.string.settings_security),
-                    icon = Icons.Default.Security
                 )
             }
 
@@ -176,13 +149,9 @@ fun SettingsScreen(
                 )
             }
 
-            item { Spacer(modifier = Modifier.height(16.dp)) }
-
-            // Note Interaction Section
             item {
-                SettingsSection(
-                    title = stringResource(R.string.settings_note_interactions),
-                    icon = Icons.Default.SwipeLeft
+                CollaborationSettingCard(
+                    onClick = { navController.navigate(Screen.SignIn.route) }
                 )
             }
 
@@ -197,7 +166,7 @@ fun SettingsScreen(
                 )
             }
 
-            item { Spacer(modifier = Modifier.height(16.dp)) }
+            item { Spacer(modifier = Modifier.height(12.dp)) }
         }
     }
 
@@ -573,58 +542,21 @@ fun SettingsScreen(
 }
 
 @Composable
-fun SettingsSection(
-    title: String,
-    icon: ImageVector
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(20.dp)
-        )
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(start = 8.dp)
-        )
-    }
-}
-
-@Composable
 fun ThemeSettingCard(
     currentTheme: AppTheme,
     onThemeChange: (AppTheme) -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.theme_title),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(bottom = 12.dp)
-            )
+    SectionCard {
+        SectionHeader(
+            icon = Icons.Default.DarkMode,
+            title = stringResource(R.string.theme_title)
+        )
 
-            Column(
-                modifier = Modifier.selectableGroup()
-            ) {
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Column(
+            modifier = Modifier.selectableGroup()
+        ) {
                 AppTheme.entries.forEach { theme ->
                     Row(
                         modifier = Modifier
@@ -653,7 +585,6 @@ fun ThemeSettingCard(
                     }
                 }
             }
-        }
     }
 }
 
@@ -673,23 +604,13 @@ fun ColorSchemeSettingCard(
         AppColorScheme.OLIVE
     )
 
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.color_title),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(bottom = 16.dp)
+    SectionCard {
+            SectionHeader(
+                icon = Icons.Default.Palette,
+                title = stringResource(R.string.color_title)
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
 
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -743,7 +664,6 @@ fun ColorSchemeSettingCard(
                 Spacer(modifier = Modifier.width(4.dp))
                 Text("(${AppColorScheme.values().size})")
             }
-        }
     }
 
     if (showAllColors) {
@@ -763,45 +683,66 @@ fun GradientHeaderSettingCard(
     enabled: Boolean,
     onEnabledChange: (Boolean) -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
+    SectionCard {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.weight(1f)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .background(
-                            sk.kubdev.mynotes.ui.components.gradientHeaderBrush(),
-                            RoundedCornerShape(10.dp)
-                        )
+            // The live gradient swatch stands in for the icon circle here - it shows
+            // exactly what the toggle controls.
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(
+                        sk.kubdev.mynotes.ui.components.gradientHeaderBrush(),
+                        CircleShape
+                    )
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = stringResource(R.string.gradient_headers_title),
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold
                 )
-                Column(modifier = Modifier.padding(start = 12.dp)) {
-                    Text(
-                        text = stringResource(R.string.gradient_headers_title),
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Text(
-                        text = stringResource(R.string.gradient_headers_desc),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                    )
-                }
+                Text(
+                    text = stringResource(R.string.gradient_headers_desc),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
             }
+            Spacer(modifier = Modifier.width(8.dp))
             Switch(checked = enabled, onCheckedChange = onEnabledChange)
+        }
+    }
+}
+
+@Composable
+fun CollaborationSettingCard(
+    onClick: () -> Unit,
+    viewModel: sk.kubdev.mynotes.NoteViewModel = androidx.hilt.navigation.compose.hiltViewModel()
+) {
+    val isSignedIn = viewModel.isUserSignedIn()
+    val email = viewModel.getCurrentUserEmail()
+
+    SectionCard(onClick = onClick) {
+        SectionHeader(
+            icon = Icons.Default.Group,
+            title = stringResource(R.string.settings_collaboration),
+            subtitle = if (isSignedIn) {
+                email ?: stringResource(R.string.sign_in_signed_in_as)
+            } else {
+                stringResource(R.string.sign_in_to_collaborate)
+            }
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = null,
+                modifier = Modifier
+                    .size(16.dp)
+                    .graphicsLayer(rotationZ = 180f),
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+            )
         }
     }
 }
@@ -1002,23 +943,13 @@ fun LanguageSettingCard(
     currentLanguage: AppLanguage,
     onLanguageChange: (AppLanguage) -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.language_title),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(bottom = 12.dp)
+    SectionCard {
+            SectionHeader(
+                icon = Icons.Default.Language,
+                title = stringResource(R.string.language_title)
             )
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             Column(
                 modifier = Modifier.selectableGroup()
@@ -1118,72 +1049,59 @@ fun LanguageSettingCard(
                 }
             }
 
-            // Info cards
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-                )
-            ) {
-                Row(
-                    modifier = Modifier.padding(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        imageVector = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            Icons.Default.Check
-                        } else {
-                            Icons.Default.Info
-                        },
-                        contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                            stringResource(R.string.language_instant_change)
-                        } else {
-                            stringResource(R.string.language_quick_restart)
-                        },
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                    )
-                }
-            }
+            SettingsInfoRow(
+                icon = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    Icons.Default.Check
+                } else {
+                    Icons.Default.Info
+                },
+                text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    stringResource(R.string.language_instant_change)
+                } else {
+                    stringResource(R.string.language_quick_restart)
+                },
+                modifier = Modifier.padding(top = 12.dp)
+            )
 
-            // AI Translation Notice
             if (AppLanguage.entries.any { it.isAITranslated }) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f)
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier.padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.AutoAwesome,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp),
-                            tint = MaterialTheme.colorScheme.secondary
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = stringResource(R.string.language_ai_notice),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                        )
-                    }
-                }
+                SettingsInfoRow(
+                    icon = Icons.Default.AutoAwesome,
+                    text = stringResource(R.string.language_ai_notice),
+                    tint = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
             }
-        }
+    }
+}
+
+// Flat tonal inline notice - replaces the old nested info Cards inside settings
+// cards (card-in-card looked heavy and inconsistent with the section style).
+@Composable
+private fun SettingsInfoRow(
+    icon: ImageVector,
+    text: String,
+    modifier: Modifier = Modifier,
+    tint: Color = MaterialTheme.colorScheme.primary
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(tint.copy(alpha = 0.08f), RoundedCornerShape(12.dp))
+            .padding(horizontal = 12.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            modifier = Modifier.size(16.dp),
+            tint = tint
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+        )
     }
 }
 
@@ -1197,23 +1115,13 @@ fun SecuritySettingsCard(
     onPasswordToggle: (Boolean) -> Unit,
     isBiometricAvailable: Boolean
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.security_title),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(bottom = 12.dp)
+    SectionCard {
+            SectionHeader(
+                icon = Icons.Default.Security,
+                title = stringResource(R.string.security_title)
             )
+
+            Spacer(modifier = Modifier.height(8.dp))
 
             // SMART BIOMETRIC TOGGLE
             Row(
@@ -1300,65 +1208,23 @@ fun SecuritySettingsCard(
 
             // SECURITY STATUS INFO
             if (biometricEnabled || passwordEnabled) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 12.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier.padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Security,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = when {
-                                biometricEnabled -> stringResource(R.string.security_status_biometric)
-                                passwordEnabled -> stringResource(R.string.security_status_password)
-                                else -> stringResource(R.string.security_status_warning)
-                            },
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                        )
-                    }
-                }
+                SettingsInfoRow(
+                    icon = Icons.Default.Security,
+                    text = when {
+                        biometricEnabled -> stringResource(R.string.security_status_biometric)
+                        passwordEnabled -> stringResource(R.string.security_status_password)
+                        else -> stringResource(R.string.security_status_warning)
+                    },
+                    modifier = Modifier.padding(top = 12.dp)
+                )
             } else if (!isBiometricAvailable) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 12.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.3f)
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier.padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Info,
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp),
-                            tint = MaterialTheme.colorScheme.secondary
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = stringResource(R.string.security_tip_biometric),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                        )
-                    }
-                }
+                SettingsInfoRow(
+                    icon = Icons.Default.Info,
+                    text = stringResource(R.string.security_tip_biometric),
+                    tint = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.padding(top = 12.dp)
+                )
             }
-        }
     }
 }
 
@@ -1371,43 +1237,12 @@ fun NoteSwipeSettingsCard(
     onSwipeLeftActionChange: (SwipeAction) -> Unit,
     onSwipeRightActionChange: (SwipeAction) -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.swipe_title),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(bottom = 12.dp)
-            )
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+    SectionCard {
+            SectionHeader(
+                icon = Icons.Default.SwipeLeft,
+                title = stringResource(R.string.swipe_title),
+                subtitle = stringResource(R.string.swipe_enable)
             ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.SwipeLeft,
-                        contentDescription = null,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Text(
-                        text = stringResource(R.string.swipe_enable),
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(start = 12.dp)
-                    )
-                }
                 Switch(
                     checked = noteSwipeEnabled,
                     onCheckedChange = onNoteSwipeToggle
@@ -1443,7 +1278,6 @@ fun NoteSwipeSettingsCard(
                     onActionChange = onSwipeRightActionChange
                 )
             }
-        }
     }
 }
 

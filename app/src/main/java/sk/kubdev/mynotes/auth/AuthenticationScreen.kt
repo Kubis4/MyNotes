@@ -68,7 +68,10 @@ fun AuthenticationScreen(
     ) {
         Card(
             modifier = Modifier.fillMaxWidth(),
-            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            )
         ) {
             Column(
                 modifier = Modifier
@@ -76,11 +79,9 @@ fun AuthenticationScreen(
                     .padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Icon(
-                    imageVector = Icons.Default.Lock,
-                    contentDescription = null,
-                    modifier = Modifier.size(64.dp),
-                    tint = MaterialTheme.colorScheme.primary
+                sk.kubdev.mynotes.ui.components.SectionIconCircle(
+                    icon = Icons.Default.Lock,
+                    size = 72.dp
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -204,6 +205,23 @@ fun AuthenticationScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(stringResource(R.string.auth_use_biometric))
+                    }
+
+                    // Fallback when fingerprint/face repeatedly isn't recognized and no
+                    // app password is set up: hand off to the device's own PIN/pattern/password.
+                    if (!isPasswordEnabled && authManager.canAuthenticateWithDeviceCredential()) {
+                        TextButton(
+                            onClick = {
+                                authManager.authenticateWithDeviceCredential(
+                                    activity = activity,
+                                    onSuccess = onAuthenticated,
+                                    onError = { error -> errorMessage = error }
+                                )
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(stringResource(R.string.auth_use_device_credential))
+                        }
                     }
                 }
 

@@ -45,13 +45,13 @@ fun PendingInvitationsScreen(
             GradientTopAppBar(
                 title = {
                     Text(
-                        text = "Invitations",
-                        fontWeight = FontWeight.Bold
+                        text = stringResource(R.string.nav_invitations),
+                        style = MaterialTheme.typography.headlineSmall
                     )
                 },
                 navigationIcon = {
                     IconButton(onClick = { navController.navigateUp() }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 }
             )
@@ -78,12 +78,12 @@ fun PendingInvitationsScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "Sign In Required",
+                        text = stringResource(R.string.inv_sign_in_required),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "You need to sign in to view and manage invitations",
+                        text = stringResource(R.string.inv_sign_in_message),
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
@@ -94,7 +94,7 @@ fun PendingInvitationsScreen(
                     ) {
                         Icon(Icons.AutoMirrored.Filled.Login, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Sign In")
+                        Text(stringResource(R.string.sign_in_title))
                     }
                 }
             } else if (pendingInvites.isEmpty()) {
@@ -113,12 +113,12 @@ fun PendingInvitationsScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "No Invitations",
+                        text = stringResource(R.string.inv_none_title),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "You don't have any pending invitations at the moment",
+                        text = stringResource(R.string.inv_none_message),
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
@@ -179,10 +179,9 @@ private fun InvitationCard(
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(20.dp)
     ) {
         Column(
             modifier = Modifier.padding(16.dp)
@@ -201,7 +200,7 @@ private fun InvitationCard(
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "From: ${invite.senderDisplayName ?: invite.senderEmail}",
+                        text = stringResource(R.string.collab_from, invite.senderDisplayName ?: invite.senderEmail),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
@@ -285,7 +284,7 @@ private fun InvitationCard(
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Decline")
+                        Text(stringResource(R.string.action_decline))
                     }
                 }
 
@@ -310,7 +309,7 @@ private fun InvitationCard(
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Accept")
+                        Text(stringResource(R.string.action_accept))
                     }
                 }
             }

@@ -19,6 +19,7 @@
     <string name="action_restore">Obnoviť</string>
     <string name="action_ok">OK</string>
     <string name="action_close">Zavrieť</string>
+    <string name="action_view">Zobraziť</string>
 
     <!-- Note Management -->
     <string name="archive_empty_message">Žiadne archivované poznámky</string>
@@ -64,6 +65,7 @@
     <string name="settings_language">Jazyk</string>
     <string name="settings_security">Zabezpečenie</string>
     <string name="settings_note_interactions">Interakcie s poznámkami</string>
+    <string name="settings_collaboration">Spolupráca</string>
 
     <!-- Theme Settings -->
     <string name="theme_title">Téma</string>
@@ -147,6 +149,7 @@
     <string name="auth_unlock">Odomknúť</string>
     <string name="auth_or">alebo</string>
     <string name="auth_use_biometric">Použiť biometriku</string>
+    <string name="auth_use_device_credential">Použiť PIN alebo heslo zariadenia</string>
 
     <!-- Backup Screen -->
 
@@ -157,8 +160,8 @@
     <string name="about_description">MyNotes vám pomáha zapisovať si poznámky a úlohy — s farbami, gestami potiahnutím, spoluprácou v reálnom čase a automatickou zálohou v cloude.</string>
     <string name="about_features_title">Kľúčové funkcie</string>
     <string name="about_support_title">Podporte MyNotes</string>
-    <string name="about_support_description">MyNotes je úplne zadarmo a bez reklám. Ak sa vám páči, môžete mi kúpiť kávu a pomôcť tak, aby to tak aj zostalo.</string>
-    <string name="about_coffee_button">Kúpte mi kávu</string>
+    <string name="about_support_description">MyNotes je úplne zadarmo a bez reklám. Ak sa vám páči, môžete mi kúpiť pivo — príspevky sú dobrovoľné a pomôžu, aby to tak aj zostalo.</string>
+    <string name="about_coffee_button">Kúpte mi pivo</string>
     <string name="about_support_message">Vaša podpora pomáha udržať MyNotes zadarmo.</string>
     <string name="about_contact_title">Spojte sa a poskytnite spätnú väzbu</string>
     <string name="about_contact_send">Poslať spätnú väzbu</string>
@@ -458,6 +461,19 @@
     <string name="todo_new">Nový zoznam</string>
     <string name="todo_edit">Upraviť zoznam</string>
     <string name="collab_members_count">Zdieľané • %d členov</string>
+    <string name="collab_new_invite">%1$s vás pozval(a) do \"%2$s\"</string>
+    <string name="import_supported_formats">Podporované formáty</string>
+    <string name="import_format_evernote_title">Evernote</string>
+    <string name="import_format_evernote_desc">Exportujte zošit ako .enex z Evernote a potom tu vyberte tento súbor.</string>
+    <string name="import_format_keep_title">Google Keep</string>
+    <string name="import_format_keep_desc">Exportujte svoje dáta pomocou Google Takeout (iba Keep) a vyberte výsledný .zip alebo jeden súbor .json.</string>
+    <string name="import_format_plaintext_title">Obyčajný text / Markdown</string>
+    <string name="import_format_plaintext_desc">Každý súbor .txt alebo .md sa stane jednou poznámkou. Markdown zaškrtávacie políčka (\"- [ ] \" / \"- [x] \") sa importujú ako položky zoznamu.</string>
+    <string name="changelog_title">Čo je nové</string>
+    <string name="changelog_1_0_note_1">Prvé stabilné vydanie</string>
+    <string name="changelog_1_0_note_2">Kolaborácia na poznámkach a úlohách v reálnom čase cez Google prihlásenie</string>
+    <string name="changelog_1_0_note_3">Automatická záloha do vlastného Google Drive</string>
+    <string name="changelog_1_0_note_4">Import z obyčajného textu, Google Keep a Evernote exportov</string>
     <string name="fab_todo_list">Zoznam úloh</string>
     <string name="fab_note">Poznámka</string>
     <string name="fab_new_category">Nová kategória</string>
@@ -486,4 +502,86 @@
     <string name="leave_note">Opustiť poznámku</string>
     <string name="section_shared_notes">Zdieľané poznámky</string>
     <string name="collaborators_count">Spolupracovníci: %d</string>
+
+    <!-- Backup screen -->
+    <string name="backup_screen_title">Zálohovanie a obnova</string>
+    <string name="backup_google_drive">Google Drive</string>
+    <string name="backup_signin_desc">Zálohujte si poznámky do cloudu</string>
+    <string name="backup_connected">Pripojené</string>
+    <string name="backup_signin_button">Prihlásiť sa do Google Drive</string>
+    <string name="backup_auto_title">Automatická záloha</string>
+    <string name="backup_auto_desc">Automaticky zálohuje vaše poznámky</string>
+    <string name="backup_schedule_daily">Denne o %1$s</string>
+    <string name="backup_schedule_weekly">Týždenne v %1$s o %2$s</string>
+    <string name="backup_schedule_monthly">Mesačne %1$d. deň o %2$s</string>
+    <string name="backup_stat_active">Aktívne</string>
+    <string name="backup_stat_archived">Archivované</string>
+    <string name="backup_stat_total">Spolu</string>
+    <string name="backup_create_new">Vytvoriť novú zálohu</string>
+    <string name="backup_all_notes">Zálohovať všetky poznámky</string>
+    <string name="backup_active_only">Zálohovať len aktívne poznámky</string>
+    <string name="backup_existing">Existujúce zálohy</string>
+    <string name="backup_none_found">Nenašli sa žiadne zálohy</string>
+    <string name="backup_show_all">Zobraziť všetky (%1$d)</string>
+    <string name="backup_delete_title">Vymazať zálohu</string>
+    <string name="backup_delete_message">Naozaj chcete vymazať túto zálohu? Táto akcia sa nedá vrátiť späť.</string>
+    <string name="backup_tips_title">Tipy k zálohovaniu</string>
+    <string name="backup_tips_text">• Všetky poznámky vrátane archivovaných sa zálohujú do vášho Google Drive\n• Vyberte si dennú, týždennú alebo mesačnú automatickú zálohu — beží aj keď je appka zavretá\n• Kedykoľvek môžete obnoviť ľubovoľnú staršiu zálohu\n• Staré zálohy sa automaticky premazávajú (ponecháva sa posledných 10)</string>
+    <string name="backup_schedule_title">Plán zálohovania</string>
+    <string name="backup_frequency">Frekvencia</string>
+    <string name="backup_freq_daily">Denne</string>
+    <string name="backup_freq_weekly">Týždenne</string>
+    <string name="backup_freq_monthly">Mesačne</string>
+    <string name="backup_time">Čas</string>
+    <string name="backup_day_of_week">Deň v týždni</string>
+    <string name="backup_day_of_month">Deň v mesiaci (1–28)</string>
+    <string name="backup_select_time">Vyberte čas</string>
+    <string name="action_set">Nastaviť</string>
+    <string name="backup_name_title">Názov zálohy</string>
+    <string name="backup_name_desc">Zadajte vlastný názov zálohy (voliteľné)</string>
+    <string name="backup_name_label">Vlastný názov</string>
+    <string name="backup_name_preview">Náhľad: %1$s</string>
+    <string name="notif_enable_title">Povoliť upozornenia</string>
+    <string name="notif_enable_message">Zapnite si upozornenia pre MyNotes, aby ste vedeli, kedy sa záloha dokončí.</string>
+    <string name="notif_open_settings">Otvoriť nastavenia</string>
+    <string name="notif_not_now">Teraz nie</string>
+
+    <!-- Import screen -->
+    <string name="import_from_other_title">Import z inej aplikácie</string>
+    <string name="import_from_other_desc">Vyberte exportovaný súbor a jeho obsah sa pridá ako nové poznámky. Každá poznámka zostane oddelená od vašich existujúcich.</string>
+    <string name="import_importing">Importuje sa…</string>
+    <string name="import_choose_file">Vybrať súbor na import</string>
+
+    <!-- Collaboration dialogs -->
+    <string name="collab_start_title">Začnite spolupracovať</string>
+    <string name="collab_start_desc">Pracujte na tomto zozname úloh spoločne s ostatnými v reálnom čase</string>
+    <string name="collab_make_collaborative">Sprístupniť na spoluprácu</string>
+    <string name="collab_view_invitations">Zobraziť pozvánky</string>
+    <string name="collab_invite_title">Pozvať spolupracovníkov</string>
+    <string name="collab_pending_title">Čakajúce pozvánky</string>
+    <string name="collab_send_invite_tab">Poslať pozvánku</string>
+    <string name="collab_pending_tab">Čakajúce (%1$d)</string>
+    <string name="collab_email_label">E-mailová adresa</string>
+    <string name="collab_send_invitation">Odoslať pozvánku</string>
+    <string name="collab_no_pending">Žiadne čakajúce pozvánky</string>
+    <string name="collab_from">Od: %1$s</string>
+    <string name="collab_collaborators">Spolupracovníci (%1$d)</string>
+    <string name="collab_no_collaborators">Zatiaľ žiadni spolupracovníci</string>
+    <string name="action_accept">Prijať</string>
+    <string name="action_decline">Odmietnuť</string>
+
+    <!-- Invitations screen -->
+    <string name="inv_sign_in_required">Vyžaduje sa prihlásenie</string>
+    <string name="inv_sign_in_message">Na zobrazenie a správu pozvánok sa musíte prihlásiť</string>
+    <string name="inv_none_title">Žiadne pozvánky</string>
+    <string name="inv_none_message">Momentálne nemáte žiadne čakajúce pozvánky</string>
+
+    <!-- To-do screen -->
+    <string name="todo_progress">Priebeh</string>
+    <string name="todo_active_count">Aktívne (%1$d)</string>
+    <string name="todo_completed_count">Dokončené (%1$d)</string>
+
+    <!-- Misc -->
+    <string name="format_clear_color">Zrušiť farbu</string>
+    <string name="notes_none_in_category">V tejto kategórii nie sú žiadne poznámky</string>
 </resources>

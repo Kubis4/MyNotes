@@ -3,6 +3,8 @@ package sk.kubdev.mynotes.ui.screens
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -10,11 +12,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import sk.kubdev.mynotes.NoteViewModel
+import sk.kubdev.mynotes.R
 import sk.kubdev.mynotes.ui.components.GradientTopAppBar
+import sk.kubdev.mynotes.ui.components.SectionCard
+import sk.kubdev.mynotes.ui.components.SectionHeader
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,17 +40,12 @@ fun ImportScreen(
         }
     }
 
+    // Import result has no undo to offer, so no snackbar - just clear the loading state.
     LaunchedEffect(Unit) {
         noteViewModel.uiEvent.collect { event ->
             when (event) {
-                is NoteViewModel.UiEvent.ShowMessage -> {
-                    isImporting = false
-                    snackbarHostState.showSnackbar(event.message)
-                }
-                is NoteViewModel.UiEvent.ShowError -> {
-                    isImporting = false
-                    snackbarHostState.showSnackbar(event.error)
-                }
+                is NoteViewModel.UiEvent.ShowMessage -> isImporting = false
+                is NoteViewModel.UiEvent.ShowError -> isImporting = false
                 else -> Unit
             }
         }
@@ -54,7 +55,12 @@ fun ImportScreen(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         topBar = {
             GradientTopAppBar(
-                title = { Text("Import Notes") },
+                title = {
+                    Text(
+                        text = stringResource(R.string.nav_import),
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = {
                         if (!navController.popBackStack()) {
@@ -64,7 +70,7 @@ fun ImportScreen(
                             }
                         }
                     }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
                     }
                 }
             )
@@ -73,90 +79,78 @@ fun ImportScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(paddingValues)
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "Import from another app",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Pick an exported file and it'll be added as new notes here. " +
-                                "Each note stays separate from your existing ones.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
+            SectionCard {
+                SectionHeader(
+                    icon = Icons.Default.FileOpen,
+                    title = stringResource(R.string.import_from_other_title)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.import_from_other_desc),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                    Button(
-                        onClick = { pickFileLauncher.launch("*/*") },
-                        enabled = !isImporting,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        if (isImporting) {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(18.dp),
-                                color = MaterialTheme.colorScheme.onPrimary
-                            )
-                        } else {
-                            Icon(Icons.Default.FileOpen, contentDescription = null, modifier = Modifier.size(18.dp))
-                        }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(if (isImporting) "Importing..." else "Choose file to import")
+                Button(
+                    onClick = { pickFileLauncher.launch("*/*") },
+                    enabled = !isImporting,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    if (isImporting) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(18.dp),
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        Icon(Icons.Default.FileOpen, contentDescription = null, modifier = Modifier.size(18.dp))
                     }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        if (isImporting) stringResource(R.string.import_importing)
+                        else stringResource(R.string.import_choose_file)
+                    )
                 }
             }
 
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+            SectionCard {
+                SectionHeader(
+                    icon = Icons.Default.Article,
+                    title = stringResource(R.string.import_supported_formats)
                 )
-            ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "Supported formats",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(12.dp))
 
-                    ImportFormatRow(
-                        icon = Icons.Default.Article,
-                        title = "Evernote",
-                        description = "Export a notebook as .enex from Evernote, then pick that file here."
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    ImportFormatRow(
-                        icon = Icons.Default.Checklist,
-                        title = "Google Keep",
-                        description = "Export your data with Google Takeout (Keep only) and pick the " +
-                                "resulting .zip, or a single note .json file."
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-                    ImportFormatRow(
-                        icon = Icons.Default.Note,
-                        title = "Plain text / Markdown",
-                        description = "Any .txt or .md file becomes one note. Markdown checkboxes " +
-                                "(\"- [ ] \" / \"- [x] \") are imported as checklist items."
-                    )
-                }
+                ImportFormatRow(
+                    icon = Icons.Default.Article,
+                    title = stringResource(R.string.import_format_evernote_title),
+                    description = stringResource(R.string.import_format_evernote_desc)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                ImportFormatRow(
+                    icon = Icons.Default.Checklist,
+                    title = stringResource(R.string.import_format_keep_title),
+                    description = stringResource(R.string.import_format_keep_desc)
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                ImportFormatRow(
+                    icon = Icons.Default.Note,
+                    title = stringResource(R.string.import_format_plaintext_title),
+                    description = stringResource(R.string.import_format_plaintext_desc)
+                )
             }
         }
     }
 }
 
 @Composable
-private fun ImportFormatRow(
+internal fun ImportFormatRow(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     title: String,
     description: String

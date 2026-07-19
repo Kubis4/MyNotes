@@ -269,6 +269,46 @@ class AuthenticationManager(private val context: Context) {
         biometricPrompt.authenticate(promptInfo)
     }
 
+    // Fallback for when fingerprint/face repeatedly fails: hands off to the
+    // device's own PIN/pattern/password screen instead of the app's biometric.
+    // Requires a device credential to be set - callers should hide this option
+    // otherwise (canAuthenticateWithDeviceCredential()).
+    fun canAuthenticateWithDeviceCredential(): Boolean {
+        val biometricManager = BiometricManager.from(context)
+        return biometricManager.canAuthenticate(BiometricManager.Authenticators.DEVICE_CREDENTIAL) ==
+            BiometricManager.BIOMETRIC_SUCCESS
+    }
+
+    fun authenticateWithDeviceCredential(
+        activity: FragmentActivity,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit
+    ) {
+        val executor = ContextCompat.getMainExecutor(context)
+        val biometricPrompt = BiometricPrompt(activity, executor, object : BiometricPrompt.AuthenticationCallback() {
+            override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                super.onAuthenticationError(errorCode, errString)
+                onError(errString.toString())
+            }
+
+            override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                super.onAuthenticationSucceeded(result)
+                _isAuthenticated.value = true
+                appBackgroundTime = 0L
+                storeLastAuthTime()
+                onSuccess()
+            }
+        })
+
+        val promptInfo = BiometricPrompt.PromptInfo.Builder()
+            .setTitle(context.getString(R.string.auth_biometric_prompt_title))
+            .setSubtitle(context.getString(R.string.auth_use_device_credential))
+            .setAllowedAuthenticators(BiometricManager.Authenticators.DEVICE_CREDENTIAL)
+            .build()
+
+        biometricPrompt.authenticate(promptInfo)
+    }
+
     fun isPasswordEnabled(): Boolean {
         return prefs.getBoolean(PASSWORD_ENABLED_KEY, false)
     }

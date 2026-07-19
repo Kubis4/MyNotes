@@ -34,6 +34,9 @@ import sk.kubdev.mynotes.backup.BackupViewModel
 import sk.kubdev.mynotes.settings.ColorSchemeSettingCard
 import sk.kubdev.mynotes.settings.PasswordSetupDialog
 import sk.kubdev.mynotes.settings.SettingsViewModel
+import sk.kubdev.mynotes.ui.components.SectionCard
+import sk.kubdev.mynotes.ui.components.SectionHeader
+import sk.kubdev.mynotes.ui.components.SectionIconCircle
 
 private enum class OnboardingStep(@androidx.annotation.StringRes val nextLabelRes: Int) {
     WELCOME(R.string.onb_get_started),
@@ -137,16 +140,20 @@ private fun OnboardingBottomBar(
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
         ) {
+            // Active step is an elongated pill, matching the app's rounded look.
             repeat(stepCount) { i ->
+                val isActive = i == stepIndex
                 Box(
                     modifier = Modifier
                         .padding(horizontal = 4.dp)
-                        .size(8.dp)
+                        .height(8.dp)
+                        .width(if (isActive) 24.dp else 8.dp)
                         .clip(CircleShape)
                         .background(
-                            if (i == stepIndex) MaterialTheme.colorScheme.primary
+                            if (isActive) MaterialTheme.colorScheme.primary
                             else MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
                         )
                 )
@@ -173,12 +180,7 @@ private fun OnboardingBottomBar(
 
 @Composable
 private fun StepHeader(icon: ImageVector, title: String, description: String) {
-    Icon(
-        imageVector = icon,
-        contentDescription = null,
-        modifier = Modifier.size(72.dp),
-        tint = MaterialTheme.colorScheme.primary
-    )
+    SectionIconCircle(icon = icon, size = 88.dp)
     Spacer(modifier = Modifier.height(24.dp))
     Text(
         text = title,
@@ -218,11 +220,44 @@ private fun StepContainer(
 
 @Composable
 private fun WelcomeStep() {
-    StepContainer(
-        icon = Icons.Default.EditNote,
-        title = stringResource(R.string.onb_welcome_title),
-        description = stringResource(R.string.onb_welcome_desc)
-    ) {}
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        // Brand-gradient hero circle, echoing the About screen's header.
+        Box(
+            modifier = Modifier
+                .size(112.dp)
+                .clip(CircleShape)
+                .background(sk.kubdev.mynotes.ui.components.gradientHeaderBrush()),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.EditNote,
+                contentDescription = null,
+                modifier = Modifier.size(56.dp),
+                tint = androidx.compose.ui.graphics.Color.White
+            )
+        }
+        Spacer(modifier = Modifier.height(24.dp))
+        Text(
+            text = stringResource(R.string.onb_welcome_title),
+            style = MaterialTheme.typography.headlineSmall,
+            fontWeight = FontWeight.Bold,
+            textAlign = TextAlign.Center
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = stringResource(R.string.onb_welcome_desc),
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+        )
+    }
 }
 
 @Composable
@@ -345,8 +380,8 @@ private fun BackupStep(noteViewModel: NoteViewModel) {
     if (showNotificationPermissionDialog) {
         AlertDialog(
             onDismissRequest = { showNotificationPermissionDialog = false },
-            title = { Text("Enable Notifications") },
-            text = { Text("Turn on notifications for MyNotes so you're told when a backup finishes.") },
+            title = { Text(stringResource(R.string.notif_enable_title)) },
+            text = { Text(stringResource(R.string.notif_enable_message)) },
             confirmButton = {
                 TextButton(onClick = {
                     showNotificationPermissionDialog = false
@@ -356,12 +391,12 @@ private fun BackupStep(noteViewModel: NoteViewModel) {
                         }
                     )
                 }) {
-                    Text("Open Settings")
+                    Text(stringResource(R.string.notif_open_settings))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showNotificationPermissionDialog = false }) {
-                    Text("Not Now")
+                    Text(stringResource(R.string.notif_not_now))
                 }
             }
         )
@@ -426,6 +461,34 @@ private fun ImportStep(noteViewModel: NoteViewModel) {
             }
             Text(stringResource(R.string.onb_import_button))
         }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        SectionCard {
+            SectionHeader(
+                icon = Icons.Default.Article,
+                title = stringResource(R.string.import_supported_formats)
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+
+            ImportFormatRow(
+                icon = Icons.Default.Article,
+                title = stringResource(R.string.import_format_evernote_title),
+                description = stringResource(R.string.import_format_evernote_desc)
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            ImportFormatRow(
+                icon = Icons.Default.Checklist,
+                title = stringResource(R.string.import_format_keep_title),
+                description = stringResource(R.string.import_format_keep_desc)
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            ImportFormatRow(
+                icon = Icons.Default.Note,
+                title = stringResource(R.string.import_format_plaintext_title),
+                description = stringResource(R.string.import_format_plaintext_desc)
+            )
+        }
     }
 }
 
@@ -442,7 +505,13 @@ private fun SecurityStep(settingsViewModel: SettingsViewModel) {
         description = stringResource(R.string.onb_security_desc)
     ) {
         if (hasLock) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(
+                modifier = Modifier
+                    .clip(androidx.compose.foundation.shape.RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.08f))
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Icon(
                     Icons.Default.CheckCircle,
                     contentDescription = null,
@@ -495,12 +564,7 @@ private fun DoneStep(onFinish: () -> Unit) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Icon(
-            imageVector = Icons.Default.Done,
-            contentDescription = null,
-            modifier = Modifier.size(88.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
+        SectionIconCircle(icon = Icons.Default.Done, size = 96.dp)
         Spacer(modifier = Modifier.height(24.dp))
         Text(
             text = stringResource(R.string.onb_done_title),

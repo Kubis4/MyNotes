@@ -122,16 +122,19 @@ fun NoteItem(
         }
     }
 
-    ElevatedCard(
+    Card(
         modifier = modifier
             .fillMaxWidth()
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick
             ),
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.elevatedCardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.elevatedCardColors(
+        shape = RoundedCornerShape(20.dp),
+        border = androidx.compose.foundation.BorderStroke(
+            0.5.dp,
+            MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+        ),
+        colors = CardDefaults.cardColors(
             containerColor = cardColor
         )
     ) {

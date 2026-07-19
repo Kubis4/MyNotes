@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.relocation.BringIntoViewRequester
+import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -40,6 +42,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
@@ -171,7 +174,7 @@ fun cleanupOverlappingSpans(spans: List<SerializableSpanStyle>): List<Serializab
     return result.sortedBy { it.start }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 fun ToDoListScreen(
     noteIdArg: Int,
@@ -188,6 +191,9 @@ fun ToDoListScreen(
     // entry as their card in the list); collaborative notes have no colorIndex.
     var noteColorIndex by remember { mutableStateOf(-1) }
     var notePatternIndex by remember { mutableStateOf(0) }
+    // Room entity of the loaded LOCAL note - needed to persist color/pattern picks
+    // (collaborative notes store them device-locally via CollabLocalPrefs instead).
+    var loadedNote by remember { mutableStateOf<sk.kubdev.mynotes.data.remote.local.entities.Note?>(null) }
 
     // Simple list of lines
     val lines = remember { mutableStateListOf<NoteLine>() }
@@ -201,7 +207,6 @@ fun ToDoListScreen(
 
     // Get collaboration data
     val pendingInvites by viewModel.pendingInvites.collectAsStateWithLifecycle()
-    val collaborationError by viewModel.collaborationError.collectAsStateWithLifecycle()
 
     // FAB menu state
     var fabMenuExpanded by remember { mutableStateOf(false) }
@@ -856,6 +861,7 @@ fun ToDoListScreen(
         if (noteIdArg != 0 && !isCollaborative) {
             viewModel.getNoteById(noteIdArg).collectLatest { note ->
                 if (note != null) {
+                    loadedNote = note
                     // CRITICAL: Only update if user is NOT editing
                     if (!isUserEditing) {
                         noteColorIndex = note.colorIndex
@@ -949,10 +955,8 @@ fun ToDoListScreen(
                     }
                 }
                 result.onFailure { error ->
-                    // Handle error - maybe show a snackbar
-                    coroutineScope.launch {
-                        snackbarHostState.showSnackbar("Failed to load collaborative note: ${error.message}")
-                    }
+                    // No undo to offer here, so no snackbar - just log for diagnostics.
+                    android.util.Log.e("ToDoListScreen", "Failed to load collaborative note", error)
                 }
             }
         }
@@ -1083,19 +1087,28 @@ fun ToDoListScreen(
         )
     }
 
-    if (showCollabColorPicker && collaborativeNoteId != null) {
+    if (showCollabColorPicker) {
         sk.kubdev.mynotes.ui.components.ColorPickerDialog(
             currentColorIndex = noteColorIndex.coerceAtLeast(0),
             onColorSelected = { picked ->
                 noteColorIndex = picked
-                sk.kubdev.mynotes.CollabLocalPrefs.setColorIndex(context, collaborativeNoteId, picked)
+                if (collaborativeNoteId != null) {
+                    // Personal, device-local color - each collaborator picks their own
+                    sk.kubdev.mynotes.CollabLocalPrefs.setColorIndex(context, collaborativeNoteId, picked)
+                } else {
+                    loadedNote?.let { viewModel.updateNoteColor(it, picked) }
+                }
                 showCollabColorPicker = false
             },
             onDismiss = { showCollabColorPicker = false },
             currentPatternIndex = notePatternIndex,
             onPatternSelected = { picked ->
                 notePatternIndex = picked
-                sk.kubdev.mynotes.CollabLocalPrefs.setPatternIndex(context, collaborativeNoteId, picked)
+                if (collaborativeNoteId != null) {
+                    sk.kubdev.mynotes.CollabLocalPrefs.setPatternIndex(context, collaborativeNoteId, picked)
+                } else {
+                    loadedNote?.let { viewModel.updateNotePattern(it, picked) }
+                }
             }
         )
     }
@@ -1109,16 +1122,6 @@ fun ToDoListScreen(
                 // supported by the collaboration backend (only self-removal).
             }
         )
-    }
-
-    // Show collaboration error
-    LaunchedEffect(collaborationError) {
-        collaborationError?.let { error ->
-            snackbarHostState.showSnackbar(
-                message = error,
-                duration = SnackbarDuration.Short
-            )
-        }
     }
 
     Scaffold(
@@ -1163,12 +1166,6 @@ fun ToDoListScreen(
                                     color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
                                 )
                             }
-                        } else {
-                            Text(
-                                text = if (noteIdArg == 0) stringResource(R.string.todo_new) else stringResource(R.string.todo_edit),
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
-                            )
                         }
 
                         Box(
@@ -1231,20 +1228,6 @@ fun ToDoListScreen(
                         )
                     }
 
-                    // Delete note (only for non-collaborative or if owner)
-                    if (noteId != 0 && !isCollaborative) {
-                        IconButton(onClick = {
-                            viewModel.deleteNoteById(noteId)
-                            navController.navigateUp()
-                        }) {
-                            Icon(
-                                Icons.Default.Delete,
-                                "Delete",
-                                tint = MaterialTheme.colorScheme.onPrimary
-                            )
-                        }
-                    }
-
                     // Save and exit
                     IconButton(onClick = {
                         coroutineScope.launch {
@@ -1265,6 +1248,49 @@ fun ToDoListScreen(
                             "Save",
                             tint = MaterialTheme.colorScheme.onPrimary
                         )
+                    }
+
+                    // Overflow menu (color + delete), matching the text-note editor's
+                    // three-dot menu layout.
+                    if (!isCollaborative && (loadedNote != null || noteId != 0)) {
+                        var showOverflowMenu by remember { mutableStateOf(false) }
+                        Box {
+                            IconButton(onClick = { showOverflowMenu = true }) {
+                                Icon(
+                                    Icons.Default.MoreVert,
+                                    contentDescription = stringResource(R.string.more_options),
+                                    tint = MaterialTheme.colorScheme.onPrimary
+                                )
+                            }
+                            DropdownMenu(
+                                expanded = showOverflowMenu,
+                                onDismissRequest = { showOverflowMenu = false }
+                            ) {
+                                if (loadedNote != null) {
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.note_color)) },
+                                        leadingIcon = { Icon(Icons.Default.Palette, null) },
+                                        onClick = {
+                                            showOverflowMenu = false
+                                            showCollabColorPicker = true
+                                        }
+                                    )
+                                }
+                                if (noteId != 0) {
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(R.string.action_delete)) },
+                                        leadingIcon = {
+                                            Icon(Icons.Default.Delete, null, tint = MaterialTheme.colorScheme.error)
+                                        },
+                                        onClick = {
+                                            showOverflowMenu = false
+                                            viewModel.deleteNoteById(noteId)
+                                            navController.navigateUp()
+                                        }
+                                    )
+                                }
+                            }
+                        }
                     }
                 },
                 bottomContent = {
@@ -1375,13 +1401,13 @@ fun ToDoListScreen(
                                             val localTitle = "$title (Local Copy)"
                                             val contentJson = lines.toList().toJson()
 
+                                            // No undo to offer here (the copy is a separate
+                                            // note the user can just delete), so no snackbar.
                                             viewModel.createNoteWithRandomColor(
                                                 title = localTitle,
                                                 content = contentJson,
                                                 type = NoteType.CHECKLIST
                                             )
-
-                                            snackbarHostState.showSnackbar("Created local copy of the note")
                                         }
                                         fabMenuExpanded = false
                                     },
@@ -1582,7 +1608,7 @@ fun ToDoListScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Progress",
+                                text = stringResource(R.string.todo_progress),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                             )
@@ -1609,9 +1635,15 @@ fun ToDoListScreen(
                 LazyColumn(
                     modifier = Modifier.weight(1f),
                     state = lazyListState,
+                    // While the IME is up, a line near the very end of the list has nothing
+                    // left below it to scroll into - bringIntoView() can't create clearance
+                    // above the keyboard that the list itself has no room to provide, so it
+                    // stays pinned flush against it. Reserving real runway below the content
+                    // whenever the keyboard is visible fixes that; 80.dp the rest of the time
+                    // is just FAB clearance.
                     contentPadding = PaddingValues(
                         top = 8.dp,
-                        bottom = 80.dp // Extra padding for FAB
+                        bottom = if (WindowInsets.isImeVisible) 320.dp else 80.dp
                     )
                 ) {
                     // Active items section
@@ -1619,7 +1651,7 @@ fun ToDoListScreen(
                         item(key = "active_header") {
                             if (completedItems.isNotEmpty()) {
                                 Text(
-                                    text = "Active ($activeTaskCount)",
+                                    text = stringResource(R.string.todo_active_count, activeTaskCount),
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.SemiBold,
                                     color = MaterialTheme.colorScheme.primary,
@@ -1735,6 +1767,17 @@ fun ToDoListScreen(
                                                     coroutineScope.launch {
                                                         delay(100)
                                                         editingLineId = newLine.id
+
+                                                        // Scroll the new line into the LazyColumn's composed
+                                                        // window BEFORE requesting focus - a focus target whose
+                                                        // item hasn't been laid out yet (e.g. inserted below the
+                                                        // visible area) isn't attached to anything, so
+                                                        // requestFocus() on it silently does nothing.
+                                                        val newItemIndex = activeItems.indexOfFirst { it.id == newLine.id }
+                                                        if (newItemIndex >= 0) {
+                                                            lazyListState.animateScrollToItem(newItemIndex + 1)
+                                                        }
+
                                                         val newFocusRequester = lineFocusRequesters.getOrPut(newLine.id) { RichTextFieldController() }
                                                         delay(50)
                                                         try {
@@ -1742,11 +1785,6 @@ fun ToDoListScreen(
                                                         } catch (e: Exception) {
                                                             delay(100)
                                                             newFocusRequester.requestFocus()
-                                                        }
-
-                                                        val newItemIndex = activeItems.indexOfFirst { it.id == newLine.id }
-                                                        if (newItemIndex >= 0) {
-                                                            lazyListState.animateScrollToItem(newItemIndex + 1)
                                                         }
                                                     }
                                                 }
@@ -1885,7 +1923,7 @@ fun ToDoListScreen(
                     if (completedItems.isNotEmpty()) {
                         item(key = "completed_header") {
                             Text(
-                                text = "Completed (${completedItems.size})",
+                                text = stringResource(R.string.todo_completed_count, completedItems.size),
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.SemiBold,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
@@ -2132,7 +2170,7 @@ fun CompletedToDoItem(
         }
     }
 }
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 fun SeparatorItem(
     text: String,
@@ -2160,6 +2198,28 @@ fun SeparatorItem(
     LaunchedEffect(text) {
         if (!isFocused) {
             textFieldValue = TextFieldValue(text = text.ifEmpty { dividerPlaceholder })
+        }
+    }
+
+    // Same keyboard-avoidance as the checklist line fields (RichTextField): without this,
+    // a divider near the bottom of the list stays hidden behind the IME once it opens.
+    val dividerBringIntoViewRequester = remember { BringIntoViewRequester() }
+    val dividerImeVisible = WindowInsets.isImeVisible
+    val dividerExtraRect = with(LocalDensity.current) {
+        // Fixed card height (64.dp) plus breathing room below it - see RichTextField's
+        // matching comment: bringIntoView() with no rect only scrolls the minimum needed
+        // to touch the field's own bounds, leaving it flush against the keyboard edge.
+        androidx.compose.ui.geometry.Rect(0f, 0f, 1000f, (64.dp + 64.dp).toPx())
+    }
+    LaunchedEffect(dividerImeVisible, isFocused) {
+        if (dividerImeVisible && isFocused) {
+            // isImeVisible flips true as the show animation starts, not once it's
+            // finished, so wait it out (and re-check once more) instead of scrolling
+            // into view mid-animation.
+            delay(300)
+            dividerBringIntoViewRequester.bringIntoView(dividerExtraRect)
+            delay(150)
+            dividerBringIntoViewRequester.bringIntoView(dividerExtraRect)
         }
     }
 
@@ -2259,6 +2319,7 @@ fun SeparatorItem(
                         modifier = Modifier
                             .fillMaxWidth()
                             .focusRequester(focusRequester)
+                            .bringIntoViewRequester(dividerBringIntoViewRequester)
                             .onFocusChanged { focusState ->
                                 if (focusState.isFocused && !isFocused) {
                                     // Select all text when gaining focus
