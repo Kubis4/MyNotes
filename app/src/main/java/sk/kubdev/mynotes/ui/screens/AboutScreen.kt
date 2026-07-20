@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Article
 import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.SportsBar
@@ -40,6 +41,24 @@ import sk.kubdev.mynotes.ui.components.gradientHeaderBrush
 // first) with each future release alongside the versionName bump in build.gradle.kts.
 private data class ChangelogEntry(val version: String, val notesRes: List<Int>)
 
+// Hand-maintained open-source licence list - keep in sync with the dependency
+// blocks in app/build.gradle.kts when adding/removing libraries.
+private data class LicenseEntry(val library: String, val license: String)
+
+private val openSourceLicenses = listOf(
+    LicenseEntry("AndroidX / Jetpack Compose", "Apache License 2.0"),
+    LicenseEntry("Material Components & Icons", "Apache License 2.0"),
+    LicenseEntry("Kotlin & kotlinx.coroutines", "Apache License 2.0"),
+    LicenseEntry("kotlinx.serialization", "Apache License 2.0"),
+    LicenseEntry("Room", "Apache License 2.0"),
+    LicenseEntry("Hilt / Dagger", "Apache License 2.0"),
+    LicenseEntry("Firebase Android SDK", "Apache License 2.0"),
+    LicenseEntry("Google Play Services & API Client", "Apache License 2.0"),
+    LicenseEntry("WorkManager", "Apache License 2.0"),
+    LicenseEntry("Coil", "Apache License 2.0"),
+    LicenseEntry("Gson", "Apache License 2.0")
+)
+
 private val changelog = listOf(
     ChangelogEntry(
         version = "1.0",
@@ -58,6 +77,7 @@ fun AboutScreen(
 ) {
     val context = LocalContext.current
     var showChangelog by remember { mutableStateOf(false) }
+    var showLicenses by remember { mutableStateOf(false) }
 
     // No Scaffold/top bar: the whole header IS the branded surface - a full-bleed
     // gradient hero (extending under the status bar) with the back button overlaid,
@@ -191,6 +211,15 @@ fun AboutScreen(
                 onClick = { sendFeedbackEmail(context) }
             )
 
+            Spacer(modifier = Modifier.height(12.dp))
+
+            AboutActionCard(
+                icon = Icons.AutoMirrored.Filled.Article,
+                label = stringResource(R.string.about_licenses),
+                description = stringResource(R.string.about_licenses_subtitle),
+                onClick = { showLicenses = true }
+            )
+
             Spacer(modifier = Modifier.height(48.dp))
 
             Text(
@@ -206,6 +235,44 @@ fun AboutScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
         }
+    }
+
+    if (showLicenses) {
+        AlertDialog(
+            onDismissRequest = { showLicenses = false },
+            title = { Text(stringResource(R.string.about_licenses)) },
+            text = {
+                Column(
+                    modifier = Modifier.verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    openSourceLicenses.forEach { entry ->
+                        Column {
+                            Text(
+                                text = entry.library,
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                            Text(
+                                text = entry.license,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                            )
+                        }
+                    }
+                    Text(
+                        text = stringResource(R.string.about_licenses_footer),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showLicenses = false }) {
+                    Text(stringResource(R.string.action_close))
+                }
+            }
+        )
     }
 
     if (showChangelog) {

@@ -289,7 +289,6 @@ fun NoteListScreen(
     var showCategoryMenu by remember { mutableStateOf<Pair<Category, Note?>?>(null) }
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var selectedNoteForOptions by remember { mutableStateOf<Note?>(null) }
-    var showInvitationDialog by remember { mutableStateOf(false) }
 
     // Filter and color picker states
     var showFilterMenu by remember { mutableStateOf(false) }
@@ -634,17 +633,6 @@ fun NoteListScreen(
         )
     }
 
-    // Invitation dialog
-    if (showInvitationDialog) {
-        NoInvitationsDialog(
-            onDismiss = { showInvitationDialog = false },
-            onSignIn = {
-                showInvitationDialog = false
-                navController.navigate("sign_in")
-            }
-        )
-    }
-
     // Bottom sheet handling
     if (selectedNoteForOptions != null) {
         val currentNote by remember(selectedNoteForOptions) {
@@ -788,57 +776,35 @@ fun NoteListScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onOpenDrawer) {
-                        Icon(
-                            imageVector = Icons.Default.Menu,
-                            contentDescription = "Open Menu"
-                        )
+                        // Pending invites are reachable via the drawer's Invitations item,
+                        // so the count badge lives on the hamburger instead of a dedicated
+                        // mail icon in the bar.
+                        if (isUserSignedIn && pendingInvites.isNotEmpty()) {
+                            BadgedBox(
+                                badge = {
+                                    Badge(containerColor = MaterialTheme.colorScheme.error) {
+                                        Text(
+                                            text = pendingInvites.size.toString(),
+                                            color = MaterialTheme.colorScheme.onError,
+                                            style = MaterialTheme.typography.labelSmall
+                                        )
+                                    }
+                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Menu,
+                                    contentDescription = "Open Menu"
+                                )
+                            }
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.Menu,
+                                contentDescription = "Open Menu"
+                            )
+                        }
                     }
                 },
                 actions = {
-                    // Invitations button (only if signed in)
-                    if (isUserSignedIn) {
-                        IconButton(
-                            onClick = {
-                                if (pendingInvites.isNotEmpty()) {
-                                    navController.navigate("pending_invitations")
-                                } else {
-                                    showInvitationDialog = true
-                                }
-                            }
-                        ) {
-                            if (pendingInvites.isNotEmpty()) {
-                                BadgedBox(
-                                    badge = {
-                                        Badge(
-                                            containerColor = MaterialTheme.colorScheme.error
-                                        ) {
-                                            Text(
-                                                text = pendingInvites.size.toString(),
-                                                color = MaterialTheme.colorScheme.onError,
-                                                style = MaterialTheme.typography.labelSmall
-                                            )
-                                        }
-                                    }
-                                ) {
-                                    Icon(
-                                        Icons.Default.Mail,
-                                        contentDescription = "Invitations",
-                                        // onPrimary like every other bar icon (was secondary,
-                                        // which stood out as a different color); the badge
-                                        // already signals the pending invites.
-                                        tint = MaterialTheme.colorScheme.onPrimary
-                                    )
-                                }
-                            } else {
-                                Icon(
-                                    Icons.Default.MailOutline,
-                                    contentDescription = "No Invitations",
-                                    tint = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.6f)
-                                )
-                            }
-                        }
-                    }
-
                     // Filter button
                     Box {
                         IconButton(onClick = { showFilterMenu = true }) {
@@ -1103,7 +1069,23 @@ fun NoteListScreen(
                                                         }
                                                     }
                                                 },
-                                                onDelete = { viewModel.triggerDelete(note) },
+                                                onDelete = {
+                                                    // Same branch as the bottom sheet's delete: a swiped
+                                                    // shared card must go through the collaboration flow
+                                                    // (owner deletes for everyone, member only leaves) -
+                                                    // triggerDelete would just insert a ghost row into the
+                                                    // local bin while the note lives on in Firestore.
+                                                    val collabId = note.collaborativeNoteId
+                                                    if (collabId != null) {
+                                                        if (unifiedNote?.isOwner == true) {
+                                                            viewModel.deleteCollaborativeNote(collabId)
+                                                        } else {
+                                                            viewModel.leaveCollaborativeNote(collabId)
+                                                        }
+                                                    } else {
+                                                        viewModel.triggerDelete(note)
+                                                    }
+                                                },
                                                 onArchive = { viewModel.triggerArchive(note) },
                                                 onLongClick = {
                                                     hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -1550,30 +1532,6 @@ fun GridNoteItem(
             }
         }
     }
-}
-
-@Composable
-fun NoInvitationsDialog(
-    onDismiss: () -> Unit,
-    onSignIn: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(R.string.no_invitations_title)) },
-        text = {
-            Text(stringResource(R.string.no_invitations_message))
-        },
-        confirmButton = {
-            Button(onClick = onSignIn) {
-                Text(stringResource(R.string.sign_in_title))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.action_cancel))
-            }
-        }
-    )
 }
 
 @Composable

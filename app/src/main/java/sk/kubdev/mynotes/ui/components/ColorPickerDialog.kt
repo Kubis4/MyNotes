@@ -142,6 +142,8 @@ private fun patternNameRes(index: Int): Int = when (index) {
     4 -> R.string.pattern_waves
     5 -> R.string.pattern_rings
     6 -> R.string.pattern_zigzag
+    7 -> R.string.pattern_diamonds
+    8 -> R.string.pattern_crosses
     else -> R.string.pattern_none
 }
 

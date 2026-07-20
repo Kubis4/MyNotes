@@ -24,12 +24,12 @@ val keystoreProperties = Properties().apply {
 
 android {
     namespace = "sk.kubdev.mynotes"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "sk.kubdev.mynotes"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -133,6 +133,13 @@ dependencies {
     implementation("com.google.firebase:firebase-auth") // Add for authentication
     implementation("com.google.firebase:firebase-firestore") // Add for Firestore
     implementation("com.google.firebase:firebase-crashlytics")
+    // App Check: only genuine Play-installed builds get Firestore/Auth access once
+    // enforcement is turned on in the Firebase console (blocks scripted abuse with
+    // the API key extracted from the APK). Debug builds use the debug provider.
+    implementation("com.google.firebase:firebase-appcheck-playintegrity")
+    // implementation (not debugImplementation) so release still compiles; the
+    // BuildConfig.DEBUG branch selecting it is stripped from release by R8.
+    implementation("com.google.firebase:firebase-appcheck-debug")
 
     // Coroutines support for Firebase
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3")
@@ -140,7 +147,10 @@ dependencies {
     // Settings dependencies
     implementation("androidx.datastore:datastore-preferences:1.0.0")
     implementation("androidx.biometric:biometric:1.1.0")
-    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.7.0")
+    // Must match the lifecycle version in libs.versions.toml: mixing 2.7 and 2.8
+    // artifacts crashed release builds ("LocalLifecycleOwner not present" - 2.8
+    // moved that CompositionLocal into lifecycle-runtime-compose).
+    implementation(libs.androidx.lifecycle.runtime.compose)
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("io.coil-kt:coil-compose:2.4.0")
 

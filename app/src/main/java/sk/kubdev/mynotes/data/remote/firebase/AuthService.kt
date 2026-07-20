@@ -83,7 +83,8 @@ class AuthService @Inject constructor(
             saveUserProfile(
                 userId = user.uid,
                 email = user.email ?: "",
-                displayName = user.displayName ?: ""
+                displayName = user.displayName ?: "",
+                photoUrl = user.photoUrl?.toString()
             )
 
             Log.d(TAG, "Google Sign-In successful")
@@ -129,11 +130,17 @@ class AuthService @Inject constructor(
     }
 
     // Save user profile
-    private suspend fun saveUserProfile(userId: String, email: String, displayName: String) {
+    private suspend fun saveUserProfile(
+        userId: String,
+        email: String,
+        displayName: String,
+        photoUrl: String? = null
+    ) {
         val userProfile = UserProfile(
             userId = userId,
             email = email,
-            displayName = displayName
+            displayName = displayName,
+            photoUrl = photoUrl
         )
         usersCollection.document(userId).set(userProfile).await()
     }

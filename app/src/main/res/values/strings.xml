@@ -172,6 +172,9 @@
     <string name="about_contact_message">I read every email — thanks for helping improve MyNotes.</string>
     <string name="about_developer">Created by kub1sDev</string>
     <string name="about_copyright">© 2026 MyNotes. All rights reserved.</string>
+    <string name="about_licenses">Open Source Licences</string>
+    <string name="about_licenses_subtitle">Libraries that make MyNotes possible</string>
+    <string name="about_licenses_footer">Full licence texts are available on each project\'s website.</string>
 
     <!-- Features -->
     <string name="feature_colors_title">Customizable Colors</string>
@@ -365,7 +368,6 @@
     <string name="item_deleted">Item deleted</string>
     <string name="undo">Undo</string>
 
-    <string name="language_instant_change">Language changes instantly</string>
     <string name="language_quick_restart">Language will update with a quick refresh</string>
 
     <string name="language_ai_translated">%1$s (AI translated)</string>
@@ -430,6 +432,8 @@
     <string name="pattern_waves">Waves</string>
     <string name="pattern_rings">Rings</string>
     <string name="pattern_zigzag">Zigzag</string>
+    <string name="pattern_diamonds">Diamonds</string>
+    <string name="pattern_crosses">Crosses</string>
     <string name="words_count">%d words</string>
     <string name="more_options">More options</string>
     <string name="collaborative_note_label">Collaborative Note</string>

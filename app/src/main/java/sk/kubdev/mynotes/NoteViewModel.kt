@@ -176,7 +176,10 @@ class NoteViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             try {
-                val content = lines.toJson()
+                // Image lines hold device-local file:// URIs that no other collaborator
+                // could ever load, so they're dropped when a note goes collaborative
+                // (the editor also hides the image-insert option in shared notes).
+                val content = lines.filter { it.type != LineType.IMAGE }.toJson()
                 val result = collaborationService.createCollaborativeNote(title, content, noteType.name)
                 result.onSuccess { noteId ->
                     onSuccess(noteId)
@@ -429,6 +432,18 @@ class NoteViewModel @Inject constructor(
     fun isUserSignedIn(): Boolean = authService.isUserSignedIn()
     fun getCurrentUserId(): String? = authService.getCurrentUserId()
     fun getCurrentUserEmail(): String? = authService.getCurrentUserEmail()
+
+    // Loads the profiles (photo URLs) for a collaborative note's members, so shared
+    // checklist lines can show who edited each one.
+    fun loadCollaboratorProfiles(
+        userIds: List<String>,
+        onResult: (Map<String, sk.kubdev.mynotes.data.remote.models.UserProfile>) -> Unit
+    ) {
+        viewModelScope.launch {
+            val profiles = collaborationService.getUserProfiles(userIds)
+            onResult(profiles)
+        }
+    }
 
     // ✅ Create test collaborative note - FIXED
     fun createTestCollaborativeNote(callback: (String) -> Unit) {

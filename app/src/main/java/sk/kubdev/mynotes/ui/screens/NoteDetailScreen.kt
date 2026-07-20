@@ -48,6 +48,7 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
@@ -58,7 +59,14 @@ import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import androidx.compose.ui.input.pointer.positionChange
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import sk.kubdev.mynotes.CollaborationDialog
+import sk.kubdev.mynotes.CollaboratorsDialog
 import sk.kubdev.mynotes.FormattingToolbar
+import sk.kubdev.mynotes.InviteManagementDialog
+import sk.kubdev.mynotes.data.remote.models.CollaboratorInfo
+import sk.kubdev.mynotes.data.remote.models.CollaboratorRole
+import sk.kubdev.mynotes.data.remote.models.InviteStatus
 import sk.kubdev.mynotes.LineType
 import sk.kubdev.mynotes.NoteLine
 import sk.kubdev.mynotes.NoteViewModel
@@ -102,6 +110,14 @@ fun NoteDetailScreen(
     val lines = remember { mutableStateListOf<NoteLine>() }
     var isOwner by remember { mutableStateOf(false) }
 
+    // Collaboration: invite/members live in the overflow menu (the FAB stays the
+    // content-insertion menu), mirroring the shared checklist editor's dialogs.
+    var showInviteDialog by remember { mutableStateOf(false) }
+    var showCollaboratorsDialog by remember { mutableStateOf(false) }
+    var showCollaborationDialog by remember { mutableStateOf(false) }
+    var collaborators by remember { mutableStateOf<List<CollaboratorInfo>>(emptyList()) }
+    val pendingInvites by viewModel.pendingInvites.collectAsStateWithLifecycle()
+
     // The note's color tints the editor background too (same palette entry as its
     // card in the list), and can be changed from the overflow menu right here.
     var noteColorIndex by remember { mutableIntStateOf(-1) }
@@ -127,6 +143,12 @@ fun NoteDetailScreen(
 
     var selectedLineId by remember { mutableStateOf<String?>(null) }
     var selectedTextRange by remember { mutableStateOf<TextRange?>(null) }
+
+    // Which tap-to-reveal object (divider/image - things without a focusable text
+    // field) currently shows its delete X. Held at screen level so revealing one
+    // automatically hides the previously revealed one, matching how focus-based
+    // rows (checklist/bullet) naturally behave.
+    var revealedDeleteId by remember { mutableStateOf<String?>(null) }
 
     // Drag-to-reorder state, same scheme as ToDoListScreen's.
     var draggedItemId by remember { mutableStateOf<String?>(null) }
@@ -599,6 +621,25 @@ fun NoteDetailScreen(
     }
 
     fun addLine(afterId: String? = null, type: LineType = LineType.TEXT) {
+        // Inserting onto an empty paragraph converts that line in place - otherwise
+        // the new item lands one row below and leaves a stray blank line above it
+        // (most visible on a brand-new note whose only line is the empty seed).
+        val currentIndex = afterId?.let { lines.indexOfFirst { l -> l.id == it } } ?: -1
+        val current = lines.getOrNull(currentIndex)
+        if (current != null && type != LineType.TEXT &&
+            current.type == LineType.TEXT && current.content.isEmpty()
+        ) {
+            lines[currentIndex] = current.copy(type = type)
+            triggerImmediateAutoSave()
+            coroutineScope.launch {
+                delay(100)
+                editingLineId = current.id
+                lazyListState.animateScrollToItem(currentIndex)
+                lineFocusRequesters.getOrPut(current.id) { RichTextFieldController() }.requestFocus()
+            }
+            return
+        }
+
         val newLine = NoteLine(type = type, content = "")
         val insertIndex = afterId?.let { lines.indexOfFirst { l -> l.id == it } + 1 } ?: lines.size
         lines.add(insertIndex.coerceIn(0, lines.size), newLine)
@@ -662,6 +703,26 @@ fun NoteDetailScreen(
         }
     }
 
+    // Same placeholder identity scheme as ToDoListScreen: the backend only stores
+    // collaborator userIds, so everyone but the signed-in user gets a generic label.
+    fun mapCollaborators(note: sk.kubdev.mynotes.data.remote.models.CollaborativeNote): List<CollaboratorInfo> {
+        val currentUser = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
+        return note.collaborators.mapIndexed { index, userId ->
+            CollaboratorInfo(
+                userId = userId,
+                email = if (userId == currentUser?.uid) {
+                    currentUser?.email ?: "user@email.com"
+                } else {
+                    "User ${index + 1}"
+                },
+                displayName = if (userId == note.ownerId) "Owner" else "Collaborator ${index + 1}",
+                role = if (userId == note.ownerId) CollaboratorRole.OWNER else CollaboratorRole.EDITOR,
+                invitedAt = note.createdAt,
+                status = InviteStatus.ACCEPTED
+            )
+        }
+    }
+
     // Collaborative: initial load, then live sync - the same replaceAllSmart
     // technique as the shared checklist editor, so a Firestore echo of your own
     // keystroke only recomposes the line that actually changed.
@@ -674,6 +735,7 @@ fun NoteDetailScreen(
                     if (note != null) {
                         title = note.title
                         isOwner = note.ownerId == com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
+                        collaborators = mapCollaborators(note)
                         val loadedLines = note.content.toNoteLines().mergeConsecutiveTextLines()
                         lines.clear()
                         if (loadedLines.isNotEmpty()) {
@@ -705,6 +767,7 @@ fun NoteDetailScreen(
                         isOwner = note.ownerId == com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
                         lines.replaceAllSmart(newLines)
                     }
+                    collaborators = mapCollaborators(note)
                 }
             }
         }
@@ -741,6 +804,13 @@ fun NoteDetailScreen(
                 title = {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Box(modifier = Modifier.fillMaxWidth()) {
+                            // Long titles shrink and may wrap to a second line instead of
+                            // being clipped at the bar's edge.
+                            val titleFontSize = when {
+                                title.length > 45 -> 14.sp
+                                title.length > 28 -> 17.sp
+                                else -> MaterialTheme.typography.titleLarge.fontSize
+                            }
                             BasicTextField(
                                 value = title,
                                 onValueChange = { title = it; triggerDebouncedAutoSave() },
@@ -750,13 +820,14 @@ fun NoteDetailScreen(
                                     .onFocusChanged { isTitleFocused = it.isFocused },
                                 textStyle = MaterialTheme.typography.titleLarge.copy(
                                     fontWeight = FontWeight.Bold,
+                                    fontSize = titleFontSize,
                                     color = MaterialTheme.colorScheme.onPrimary
                                 ),
                                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                                 keyboardActions = KeyboardActions(onNext = {
                                     lineFocusRequesters[lines.firstOrNull()?.id]?.requestFocus()
                                 }),
-                                singleLine = true,
+                                maxLines = 2,
                                 cursorBrush = SolidColor(MaterialTheme.colorScheme.onPrimary)
                             )
                             if (title.isEmpty() && !isTitleFocused) {
@@ -838,6 +909,16 @@ fun NoteDetailScreen(
                                     context.startActivity(Intent.createChooser(intent, null))
                                 }
                             )
+                            if (!isCollaborative) {
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.collab_make_collaborative)) },
+                                    leadingIcon = { Icon(Icons.Default.Group, null) },
+                                    onClick = {
+                                        showOverflowMenu = false
+                                        showCollaborationDialog = true
+                                    }
+                                )
+                            }
                             if (loadedNote != null || isCollaborative) {
                                 DropdownMenuItem(
                                     text = { Text(stringResource(R.string.note_color)) },
@@ -849,6 +930,22 @@ fun NoteDetailScreen(
                                 )
                             }
                             if (isCollaborative && collaborativeNoteId != null) {
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.collab_invite)) },
+                                    leadingIcon = { Icon(Icons.Default.PersonAdd, null) },
+                                    onClick = {
+                                        showOverflowMenu = false
+                                        showInviteDialog = true
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.collab_members)) },
+                                    leadingIcon = { Icon(Icons.Default.People, null) },
+                                    onClick = {
+                                        showOverflowMenu = false
+                                        showCollaboratorsDialog = true
+                                    }
+                                )
                                 DropdownMenuItem(
                                     text = {
                                         Text(
@@ -919,9 +1016,7 @@ fun NoteDetailScreen(
                                 }
                             },
                             onAddSeparator = {
-                                val insertIndex = lastActiveLineId?.let { id -> lines.indexOfFirst { it.id == id } + 1 } ?: lines.size
-                                lines.add(insertIndex.coerceIn(0, lines.size), NoteLine(type = LineType.DIVIDER, content = ""))
-                                triggerImmediateAutoSave()
+                                addLine(lastActiveLineId, LineType.DIVIDER)
                             },
                             showSeparatorButton = false,
                             drawOwnBackground = false
@@ -937,33 +1032,108 @@ fun NoteDetailScreen(
                 // Rides above the keyboard, so inserting a checklist/image mid-typing
                 // doesn't require closing the IME first.
                 modifier = Modifier.imePadding(),
-                items = listOf(
-                    FabButtonItem(Icons.Default.Subject, "Paragraph") {
+                items = buildList {
+                    add(FabButtonItem(Icons.Default.Subject, "Paragraph") {
                         addLine(lastActiveLineId, LineType.TEXT)
                         isFabExpanded = false
-                    },
-                    FabButtonItem(Icons.Default.List, "Bullet list") {
+                    })
+                    add(FabButtonItem(Icons.Default.List, "Bullet list") {
                         addLine(lastActiveLineId, LineType.BULLET)
                         isFabExpanded = false
-                    },
-                    FabButtonItem(Icons.Default.CheckBox, "Checklist") {
+                    })
+                    add(FabButtonItem(Icons.Default.CheckBox, "Checklist") {
                         addLine(lastActiveLineId, LineType.CHECKLIST)
                         isFabExpanded = false
-                    },
-                    FabButtonItem(Icons.Default.HorizontalRule, "Divider") {
-                        val insertIndex = lastActiveLineId?.let { id -> lines.indexOfFirst { it.id == id } + 1 } ?: lines.size
-                        lines.add(insertIndex.coerceIn(0, lines.size), NoteLine(type = LineType.DIVIDER, content = ""))
-                        triggerImmediateAutoSave()
+                    })
+                    add(FabButtonItem(Icons.Default.HorizontalRule, "Divider") {
+                        addLine(lastActiveLineId, LineType.DIVIDER)
                         isFabExpanded = false
-                    },
-                    FabButtonItem(Icons.Default.Image, "Image") {
-                        imagePickerLauncher.launch("image/*")
-                        isFabExpanded = false
+                    })
+                    // Images are stored as device-local files (only their file:// URI
+                    // syncs through Firestore), so other collaborators could never see
+                    // them - hide the option in shared notes until images get real
+                    // cloud storage.
+                    if (!isCollaborative) {
+                        add(FabButtonItem(Icons.Default.Image, "Image") {
+                            imagePickerLauncher.launch("image/*")
+                            isFabExpanded = false
+                        })
                     }
-                )
+                }
             )
         }
     ) { paddingValues ->
+        if (showCollaborationDialog) {
+            CollaborationDialog(
+                onDismiss = { showCollaborationDialog = false },
+                onCreateCollaborative = {
+                    coroutineScope.launch {
+                        val currentTitle = title.ifBlank { "Collaborative Note" }
+                        val currentLines = lines.toList()
+                        // Cancel any in-flight autosave so the local copy can't be
+                        // recreated after we delete it below.
+                        autoSaveJob?.cancel()
+                        if (noteId != 0) {
+                            viewModel.deleteNoteById(noteId)
+                        }
+                        viewModel.createCollaborativeNote(
+                            title = currentTitle,
+                            lines = currentLines,
+                            noteType = NoteType.TEXT
+                        ) { newCollaborativeId ->
+                            navController.navigate("collaborative_todo/$newCollaborativeId") {
+                                popUpTo(navController.graph.id) { inclusive = false }
+                            }
+                        }
+                    }
+                    showCollaborationDialog = false
+                },
+                onJoinExisting = {
+                    showInviteDialog = true
+                    showCollaborationDialog = false
+                }
+            )
+        }
+
+        if (showInviteDialog) {
+            InviteManagementDialog(
+                collaborativeNoteId = collaborativeNoteId,
+                pendingInvites = pendingInvites,
+                onDismiss = { showInviteDialog = false },
+                onSendInvite = { email ->
+                    if (collaborativeNoteId != null) {
+                        viewModel.sendCollaborationInvite(collaborativeNoteId, email) { _ ->
+                            // Result surfaces through the invite's own state
+                        }
+                    }
+                },
+                onAcceptInvite = { inviteId ->
+                    viewModel.acceptInvitation(inviteId) { success ->
+                        if (success) {
+                            showInviteDialog = false
+                            viewModel.startCollaborativeSync()
+                        }
+                    }
+                },
+                onDeclineInvite = { inviteId ->
+                    viewModel.declineInvitation(inviteId) { _ ->
+                        // Nothing to update locally
+                    }
+                }
+            )
+        }
+
+        if (showCollaboratorsDialog) {
+            CollaboratorsDialog(
+                collaborators = collaborators,
+                onDismiss = { showCollaboratorsDialog = false },
+                onRemoveCollaborator = { _ ->
+                    // Owner-side removal of a specific collaborator is not yet
+                    // supported by the collaboration backend (only self-removal).
+                }
+            )
+        }
+
         if (showColorPicker) {
             ColorPickerDialog(
                 currentColorIndex = noteColorIndex.coerceAtLeast(0),
@@ -1123,6 +1293,10 @@ fun NoteDetailScreen(
                                 showDragHandle = false
                             )
                             LineType.DIVIDER -> DividerLineItem(
+                                showDelete = revealedDeleteId == line.id,
+                                onToggleDelete = {
+                                    revealedDeleteId = if (revealedDeleteId == line.id) null else line.id
+                                },
                                 onDelete = { deleteLineWithUndo(line) },
                                 onDragStart = ::onLineDragStart,
                                 onDragOffset = ::onLineDragOffset,
@@ -1130,6 +1304,10 @@ fun NoteDetailScreen(
                             )
                             LineType.IMAGE -> NoteImageRow(
                                 line = line,
+                                showDelete = revealedDeleteId == line.id,
+                                onToggleDelete = {
+                                    revealedDeleteId = if (revealedDeleteId == line.id) null else line.id
+                                },
                                 onScaleChange = { zoomDelta ->
                                     val index = lines.indexOf(line)
                                     if (index != -1) {
@@ -1168,6 +1346,9 @@ fun NoteDetailScreen(
                                     editingLineId = if (hasFocus) line.id else null
                                     if (hasFocus) {
                                         lastActiveLineId = line.id
+                                        // Focusing a text row dismisses any tap-revealed
+                                        // delete X on dividers/images.
+                                        revealedDeleteId = null
                                     } else {
                                         selectedLineId = null
                                         selectedTextRange = null
@@ -1278,6 +1459,9 @@ private fun NoteLineEditRow(
     val displayMetrics = LocalContext.current.resources.displayMetrics
     val baseFontSizeSp = 16f
     val checkedState = rememberUpdatedState(line.isChecked)
+    // The delete X stays hidden until the line is actually being edited - keeps the
+    // note visually clean and prevents accidental deletes while scrolling.
+    var isRowFocused by remember(line.id) { mutableStateOf(false) }
 
     Row(
         modifier = modifier
@@ -1420,6 +1604,7 @@ private fun NoteLineEditRow(
             onTextChange = { text, cursorPos -> onTextChange(text, cursorPos) },
             onSelectionChange = { start, end -> onSelectionChange(line.id, TextRange(start, end)) },
             onFocusChange = { hasFocus ->
+                isRowFocused = hasFocus
                 onFocusChange(hasFocus)
                 if (!hasFocus && line.content.isNotEmpty()) onImmediateSave()
             },
@@ -1433,8 +1618,9 @@ private fun NoteLineEditRow(
 
         // A plain paragraph doesn't need its own delete button - clearing the text and
         // backspacing removes it, same as any normal notepad. Checklist/bullet items keep
-        // one since they're discrete list entries, not free-flowing prose.
-        if (line.type != LineType.TEXT) {
+        // one since they're discrete list entries, not free-flowing prose - but only
+        // while the line is focused (see isRowFocused above).
+        if (line.type != LineType.TEXT && isRowFocused) {
             IconButton(onClick = onDelete, modifier = Modifier.size(32.dp).padding(start = 4.dp)) {
                 Icon(
                     Icons.Default.Close,
@@ -1452,6 +1638,11 @@ private fun NoteLineEditRow(
 // section-divider card the to-do list uses.
 @Composable
 private fun DividerLineItem(
+    // No text field to focus here, so the delete X is revealed by tapping the
+    // divider itself. The reveal state is hoisted so only one object on the
+    // screen shows its X at a time.
+    showDelete: Boolean,
+    onToggleDelete: () -> Unit,
     onDelete: () -> Unit,
     onDragStart: () -> Unit = {},
     onDragOffset: (Float) -> Unit = {},
@@ -1469,6 +1660,9 @@ private fun DividerLineItem(
                     onDragCancel = { onDragEnd() },
                     onDrag = { _, dragAmount -> onDragOffset(dragAmount.y) }
                 )
+            }
+            .pointerInput("divider_tap") {
+                detectTapGestures { onToggleDelete() }
             },
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -1477,13 +1671,15 @@ private fun DividerLineItem(
             thickness = 1.dp,
             color = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f)
         )
-        IconButton(onClick = onDelete, modifier = Modifier.size(32.dp).padding(start = 4.dp)) {
-            Icon(
-                Icons.Default.Close,
-                contentDescription = "Delete divider",
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                modifier = Modifier.size(16.dp)
-            )
+        if (showDelete) {
+            IconButton(onClick = onDelete, modifier = Modifier.size(32.dp).padding(start = 4.dp)) {
+                Icon(
+                    Icons.Default.Close,
+                    contentDescription = "Delete divider",
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    modifier = Modifier.size(16.dp)
+                )
+            }
         }
     }
 }
@@ -1491,6 +1687,11 @@ private fun DividerLineItem(
 @Composable
 private fun NoteImageRow(
     line: NoteLine,
+    // The delete X only appears after tapping the image once (tap again to hide),
+    // so it doesn't permanently cover the photo's corner. Hoisted so only one
+    // object on the screen shows its X at a time.
+    showDelete: Boolean,
+    onToggleDelete: () -> Unit,
     onScaleChange: (Float) -> Unit,
     onScaleReset: () -> Unit,
     onDelete: () -> Unit,
@@ -1523,6 +1724,10 @@ private fun NoteImageRow(
                             onDrag = { _, dragAmount -> onDragOffset(dragAmount.y) }
                         )
                     }
+                    // Single tap toggles the delete X overlay (see showDelete above).
+                    .pointerInput("tap_${line.id}") {
+                        detectTapGestures { onToggleDelete() }
+                    }
                     // Only reacts to genuine two-finger pinches (checks changes.size >= 2
                     // before consuming anything) so a normal single-finger drag over the
                     // image still scrolls the note as usual instead of getting swallowed here.
@@ -1554,14 +1759,16 @@ private fun NoteImageRow(
                     Icon(Icons.Default.RestartAlt, contentDescription = "Reset zoom", tint = Color.White, modifier = Modifier.size(20.dp))
                 }
             }
-            IconButton(
-                onClick = onDelete,
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(4.dp)
-                    .background(Color.Black.copy(alpha = 0.4f), CircleShape)
-            ) {
-                Icon(Icons.Default.Close, contentDescription = "Delete image", tint = Color.White, modifier = Modifier.size(20.dp))
+            if (showDelete) {
+                IconButton(
+                    onClick = onDelete,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(4.dp)
+                        .background(Color.Black.copy(alpha = 0.4f), CircleShape)
+                ) {
+                    Icon(Icons.Default.Close, contentDescription = "Delete image", tint = Color.White, modifier = Modifier.size(20.dp))
+                }
             }
         }
     }

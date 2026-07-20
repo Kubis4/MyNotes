@@ -9,6 +9,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -32,6 +33,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import coil.compose.AsyncImage
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
@@ -204,6 +206,9 @@ fun ToDoListScreen(
     var showInviteDialog by remember { mutableStateOf(false) }
     var showCollaboratorsDialog by remember { mutableStateOf(false) }
     var collaborators by remember { mutableStateOf<List<CollaboratorInfo>>(emptyList()) }
+    // uid -> Google account photo URL, for the per-line "who edited this" avatar.
+    var collaboratorPhotos by remember { mutableStateOf<Map<String, String?>>(emptyMap()) }
+    val currentUserId = remember { viewModel.getCurrentUserId() }
 
     // Get collaboration data
     val pendingInvites by viewModel.pendingInvites.collectAsStateWithLifecycle()
@@ -226,6 +231,10 @@ fun ToDoListScreen(
     // Selection tracking
     var selectedLineId by remember { mutableStateOf<String?>(null) }
     var selectedTextRange by remember { mutableStateOf<TextRange?>(null) }
+
+    // Which tap-to-reveal row (completed items have no focusable field) currently
+    // shows its delete X - hoisted so revealing one hides the previous one.
+    var revealedDeleteId by remember { mutableStateOf<String?>(null) }
 
     // Track cursor position for active formatting
     var currentCursorPosition by remember { mutableStateOf(0) }
@@ -588,7 +597,10 @@ fun ToDoListScreen(
         // Update the line
         lines[lineIndex] = line.copy(
             content = newText,
-            spanStyles = cleanupOverlappingSpans(mergeAdjacentSpans(existingSpans))
+            spanStyles = cleanupOverlappingSpans(mergeAdjacentSpans(existingSpans)),
+            // Tag the line with its editor so shared checklists show whose change it
+            // was (only meaningful for collaborative notes; harmless otherwise).
+            editorId = if (isCollaborative) currentUserId ?: line.editorId else line.editorId
         )
 
         triggerDebouncedAutoSave()
@@ -832,11 +844,14 @@ fun ToDoListScreen(
     }
 
     // Memoized checkbox handler with immediate save
-    val handleCheckChange = remember<(NoteLine, Boolean) -> Unit> {
+    val handleCheckChange = remember<(NoteLine, Boolean) -> Unit>(isCollaborative, currentUserId) {
         { line, isChecked ->
             val index = lines.indexOf(line)
             if (index != -1) {
-                lines[index] = line.copy(isChecked = isChecked)
+                lines[index] = line.copy(
+                    isChecked = isChecked,
+                    editorId = if (isCollaborative) currentUserId ?: line.editorId else line.editorId
+                )
 
                 // Immediate save for structural changes
                 triggerImmediateAutoSave()
@@ -1016,6 +1031,17 @@ fun ToDoListScreen(
         }
     }
 
+    // Load member photos whenever the collaborator set changes (initial load + when
+    // someone joins), so each line can show its editor's Google avatar.
+    val collaboratorIds = collaborators.map { it.userId }
+    LaunchedEffect(collaboratorIds) {
+        if (isCollaborative && collaboratorIds.isNotEmpty()) {
+            viewModel.loadCollaboratorProfiles(collaboratorIds) { profiles ->
+                collaboratorPhotos = profiles.mapValues { it.value.photoUrl }
+            }
+        }
+    }
+
     // Collaboration dialogs
     if (showCollaborationDialog) {
         CollaborationDialog(
@@ -1171,6 +1197,13 @@ fun ToDoListScreen(
                         Box(
                             modifier = Modifier.fillMaxWidth()
                         ) {
+                            // Long titles shrink and may wrap to a second line instead of
+                            // being clipped at the bar's edge.
+                            val titleFontSize = when {
+                                title.length > 45 -> 14.sp
+                                title.length > 28 -> 17.sp
+                                else -> MaterialTheme.typography.titleLarge.fontSize
+                            }
                             BasicTextField(
                                 value = title,
                                 onValueChange = {
@@ -1183,13 +1216,14 @@ fun ToDoListScreen(
                                     .onFocusChanged { isTitleFocused = it.isFocused },
                                 textStyle = MaterialTheme.typography.titleLarge.copy(
                                     fontWeight = FontWeight.Bold,
+                                    fontSize = titleFontSize,
                                     color = MaterialTheme.colorScheme.onPrimary
                                 ),
                                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                                 keyboardActions = KeyboardActions(onNext = {
                                     lineFocusRequesters[lines.firstOrNull()?.id]?.requestFocus()
                                 }),
-                                singleLine = true,
+                                maxLines = 2,
                                 cursorBrush = SolidColor(MaterialTheme.colorScheme.onPrimary)
                             )
                             if (title.isEmpty()) {
@@ -1250,9 +1284,9 @@ fun ToDoListScreen(
                         )
                     }
 
-                    // Overflow menu (color + delete), matching the text-note editor's
-                    // three-dot menu layout.
-                    if (!isCollaborative && (loadedNote != null || noteId != 0)) {
+                    // Overflow menu (make collaborative + color + delete), matching the
+                    // text-note editor's three-dot menu layout.
+                    if (!isCollaborative) {
                         var showOverflowMenu by remember { mutableStateOf(false) }
                         Box {
                             IconButton(onClick = { showOverflowMenu = true }) {
@@ -1266,6 +1300,14 @@ fun ToDoListScreen(
                                 expanded = showOverflowMenu,
                                 onDismissRequest = { showOverflowMenu = false }
                             ) {
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.collab_make_collaborative)) },
+                                    leadingIcon = { Icon(Icons.Default.Group, null) },
+                                    onClick = {
+                                        showOverflowMenu = false
+                                        showCollaborationDialog = true
+                                    }
+                                )
                                 if (loadedNote != null) {
                                     DropdownMenuItem(
                                         text = { Text(stringResource(R.string.note_color)) },
@@ -1330,20 +1372,32 @@ fun ToDoListScreen(
                                 // read well on short checklist rows.
                             },
                             onAddSeparator = {
-                                val separatorLine = NoteLine(
-                                    type = LineType.SEPARATOR,
-                                    content = sectionDividerText
-                                )
-                                // Insert right after wherever the cursor last was; only fall back to
-                                // "before the completed section" when nothing has been focused yet.
-                                val insertIndex = lastActiveLineId
+                                // If the cursor sits on an empty item, convert that row in
+                                // place - same as the notes editor - instead of leaving a
+                                // stray blank row above the new divider.
+                                val currentIndex = lastActiveLineId
                                     ?.let { id -> lines.indexOfFirst { it.id == id } }
-                                    ?.takeIf { it >= 0 }
-                                    ?.let { it + 1 }
-                                    ?: lines.indexOfFirst { it.isChecked && it.type != LineType.SEPARATOR }
-                                        .takeIf { it >= 0 }
-                                    ?: lines.size
-                                lines.add(insertIndex.coerceIn(0, lines.size), separatorLine)
+                                    ?.takeIf { it >= 0 } ?: -1
+                                val current = lines.getOrNull(currentIndex)
+                                if (current != null && current.type != LineType.SEPARATOR && current.content.isEmpty()) {
+                                    lines[currentIndex] = current.copy(
+                                        type = LineType.SEPARATOR,
+                                        content = sectionDividerText,
+                                        isChecked = false
+                                    )
+                                } else {
+                                    val separatorLine = NoteLine(
+                                        type = LineType.SEPARATOR,
+                                        content = sectionDividerText
+                                    )
+                                    // Insert right after wherever the cursor last was; only fall back to
+                                    // "before the completed section" when nothing has been focused yet.
+                                    val insertIndex = (currentIndex.takeIf { it >= 0 }?.let { it + 1 })
+                                        ?: lines.indexOfFirst { it.isChecked && it.type != LineType.SEPARATOR }
+                                            .takeIf { it >= 0 }
+                                        ?: lines.size
+                                    lines.add(insertIndex.coerceIn(0, lines.size), separatorLine)
+                                }
                                 triggerImmediateAutoSave()
                             },
                             drawOwnBackground = false
@@ -1353,16 +1407,10 @@ fun ToDoListScreen(
             )
         },
         floatingActionButton = {
-            // FAB for non-collaborative or collaborative with menu
-            if (!isCollaborative) {
-                // Single FAB for starting collaboration
-                sk.kubdev.mynotes.ui.components.BrandFloatingActionButton(
-                    onClick = { showCollaborationDialog = true },
-                    modifier = Modifier.imePadding()
-                ) {
-                    Icon(Icons.Default.Group, contentDescription = "Start Collaboration")
-                }
-            } else if (collaborativeNoteId != null) {
+            // Only collaborative sessions need a FAB (member/invite/leave menu); the
+            // non-collaborative editor keeps the screen clean - "make collaborative"
+            // lives in the top bar's overflow menu, dividers on the toolbar icon.
+            if (isCollaborative && collaborativeNoteId != null) {
                 // Expandable FAB menu for collaborative features
                 Column(
                     horizontalAlignment = Alignment.End,
@@ -1635,16 +1683,12 @@ fun ToDoListScreen(
                 LazyColumn(
                     modifier = Modifier.weight(1f),
                     state = lazyListState,
-                    // While the IME is up, a line near the very end of the list has nothing
-                    // left below it to scroll into - bringIntoView() can't create clearance
-                    // above the keyboard that the list itself has no room to provide, so it
-                    // stays pinned flush against it. Reserving real runway below the content
-                    // whenever the keyboard is visible fixes that; 80.dp the rest of the time
-                    // is just FAB clearance.
-                    contentPadding = PaddingValues(
-                        top = 8.dp,
-                        bottom = if (WindowInsets.isImeVisible) 320.dp else 80.dp
-                    )
+                    // Same proven setup as the notes editor: a fixed bottom runway is all
+                    // bringIntoView() needs, since it targets the cursor's line plus a
+                    // 64.dp margin (not the whole field). The old IME-conditional 320.dp
+                    // just left a huge empty gap while the keyboard was up and still didn't
+                    // lift the last task reliably. 96.dp doubles as FAB clearance.
+                    contentPadding = PaddingValues(top = 8.dp, bottom = 96.dp)
                 ) {
                     // Active items section
                     if (activeItems.isNotEmpty()) {
@@ -1736,6 +1780,7 @@ fun ToDoListScreen(
                                             isEditing = editingLineId == line.id,
                                             lineFocusRequesters = lineFocusRequesters,
                                             isCollaborative = isCollaborative,
+                                            editorPhotoUrl = line.editorId?.let { collaboratorPhotos[it] },
                                             onTextChange = { newText, cursorPos ->
                                                 handleTextChange(line.id, newText, cursorPos)
                                             },
@@ -1747,6 +1792,9 @@ fun ToDoListScreen(
                                                 editingLineId = if (hasFocus) line.id else null
                                                 if (hasFocus) {
                                                     lastActiveLineId = line.id
+                                                    // Focusing an active row dismisses any
+                                                    // tap-revealed X on completed rows.
+                                                    revealedDeleteId = null
                                                 } else {
                                                     selectedLineId = null
                                                     selectedTextRange = null
@@ -1939,6 +1987,11 @@ fun ToDoListScreen(
                                 modifier = Modifier.animateItemPlacement(),
                                 line = line,
                                 isCollaborative = isCollaborative,
+                                editorPhotoUrl = line.editorId?.let { collaboratorPhotos[it] },
+                                showDelete = revealedDeleteId == line.id,
+                                onToggleDelete = {
+                                    revealedDeleteId = if (revealedDeleteId == line.id) null else line.id
+                                },
                                 onCheckChange = { isChecked ->
                                     handleCheckChange(line, isChecked)
                                 },
@@ -1952,12 +2005,44 @@ fun ToDoListScreen(
     }
 }
 
+// Small round avatar for the member who last edited a shared checklist line. Falls
+// back to a neutral person glyph when the photo URL is missing or hasn't loaded.
+@Composable
+private fun EditorAvatar(photoUrl: String?) {
+    val ringColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f)
+    Box(
+        modifier = Modifier
+            .size(20.dp)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.surfaceVariant),
+        contentAlignment = Alignment.Center
+    ) {
+        if (!photoUrl.isNullOrBlank()) {
+            AsyncImage(
+                model = photoUrl,
+                contentDescription = "Editor",
+                modifier = Modifier
+                    .size(20.dp)
+                    .clip(CircleShape)
+            )
+        } else {
+            Icon(
+                Icons.Default.Person,
+                contentDescription = "Editor",
+                modifier = Modifier.size(13.dp),
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+            )
+        }
+    }
+}
+
 @Composable
 fun PlainTextToDoItem(
     line: NoteLine,
     isEditing: Boolean,
     lineFocusRequesters: MutableMap<String, RichTextFieldController>,
     isCollaborative: Boolean = false,
+    editorPhotoUrl: String? = null,
     onTextChange: (String, Int) -> Unit,
     onCheckChange: (Boolean) -> Unit,
     onDelete: () -> Unit,
@@ -1975,6 +2060,9 @@ fun PlainTextToDoItem(
     val controller = remember(line.id) { lineFocusRequesters.getOrPut(line.id) { RichTextFieldController() } }
     val cursorColor = if (isCollaborative) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.primary
     val displayMetrics = LocalContext.current.resources.displayMetrics
+    // The delete X stays hidden until the row is actually being edited - keeps the
+    // list visually clean and prevents accidental deletes while scrolling.
+    var isRowFocused by remember(line.id) { mutableStateOf(false) }
 
     Row(
         modifier = modifier
@@ -2047,6 +2135,7 @@ fun PlainTextToDoItem(
             onTextChange = { text, cursorPos -> onTextChange(text, cursorPos) },
             onSelectionChange = { start, end -> onSelectionChange(line.id, TextRange(start, end)) },
             onFocusChange = { hasFocus ->
+                isRowFocused = hasFocus
                 onFocusChange(hasFocus)
                 if (!hasFocus && line.content.isNotEmpty()) onImmediateSave()
             },
@@ -2057,30 +2146,27 @@ fun PlainTextToDoItem(
             modifier = Modifier.weight(1f)
         )
 
-        // Show sync indicator for collaborative items
+        // Editor avatar for collaborative items - shows who last edited this line.
         if (isCollaborative) {
-            Icon(
-                Icons.Default.CloudSync,
-                contentDescription = "Synced",
-                modifier = Modifier.size(16.dp),
-                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.6f)
-            )
+            EditorAvatar(photoUrl = editorPhotoUrl)
             Spacer(modifier = Modifier.width(4.dp))
         }
 
-        // Delete button
-        IconButton(
-            onClick = onDelete,
-            modifier = Modifier
-                .size(32.dp)
-                .padding(start = 4.dp)
-        ) {
-            Icon(
-                Icons.Default.Close,
-                contentDescription = "Delete item",
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                modifier = Modifier.size(16.dp)
-            )
+        // Delete button - only while the row is focused (see isRowFocused above)
+        if (isRowFocused) {
+            IconButton(
+                onClick = onDelete,
+                modifier = Modifier
+                    .size(32.dp)
+                    .padding(start = 4.dp)
+            ) {
+                Icon(
+                    Icons.Default.Close,
+                    contentDescription = "Delete item",
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    modifier = Modifier.size(16.dp)
+                )
+            }
         }
     }
 }
@@ -2089,6 +2175,11 @@ fun PlainTextToDoItem(
 fun CompletedToDoItem(
     line: NoteLine,
     isCollaborative: Boolean = false,
+    editorPhotoUrl: String? = null,
+    // Completed rows have no text field to focus, so the delete X is revealed by
+    // tapping the row itself. Hoisted so only one row shows its X at a time.
+    showDelete: Boolean,
+    onToggleDelete: () -> Unit,
     onCheckChange: (Boolean) -> Unit,
     onDelete: () -> Unit,
     modifier: Modifier = Modifier
@@ -2097,6 +2188,9 @@ fun CompletedToDoItem(
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp, horizontal = 8.dp)
+            .pointerInput(line.id) {
+                detectTapGestures { onToggleDelete() }
+            }
             .then(
                 if (isCollaborative) {
                     Modifier.background(
@@ -2143,30 +2237,27 @@ fun CompletedToDoItem(
             )
         )
 
-        // Show sync indicator for collaborative items
+        // Editor avatar for collaborative items - shows who last edited this line.
         if (isCollaborative) {
-            Icon(
-                Icons.Default.CloudSync,
-                contentDescription = "Synced",
-                modifier = Modifier.size(16.dp),
-                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
-            )
+            EditorAvatar(photoUrl = editorPhotoUrl)
             Spacer(modifier = Modifier.width(4.dp))
         }
 
-        // Delete button
-        IconButton(
-            onClick = onDelete,
-            modifier = Modifier
-                .size(32.dp)
-                .padding(start = 4.dp)
-        ) {
-            Icon(
-                Icons.Default.Close,
-                contentDescription = "Delete item",
-                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                modifier = Modifier.size(16.dp)
-            )
+        // Delete button - revealed by tapping the row (see showDelete above)
+        if (showDelete) {
+            IconButton(
+                onClick = onDelete,
+                modifier = Modifier
+                    .size(32.dp)
+                    .padding(start = 4.dp)
+            ) {
+                Icon(
+                    Icons.Default.Close,
+                    contentDescription = "Delete item",
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    modifier = Modifier.size(16.dp)
+                )
+            }
         }
     }
 }
@@ -2357,17 +2448,23 @@ fun SeparatorItem(
                 )
             }
 
-            // Delete button
-            IconButton(
-                onClick = onDelete,
-                modifier = Modifier.size(32.dp)
-            ) {
-                Icon(
-                    Icons.Default.Close,
-                    contentDescription = "Delete separator",
-                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    modifier = Modifier.size(16.dp)
-                )
+            // Delete button - only while the divider's label field is focused. The
+            // 32.dp slot is always reserved so the centered label doesn't shift
+            // sideways when the X appears/disappears.
+            Box(modifier = Modifier.size(32.dp), contentAlignment = Alignment.Center) {
+                if (isFocused) {
+                    IconButton(
+                        onClick = onDelete,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Close,
+                            contentDescription = "Delete separator",
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
             }
         }
     }

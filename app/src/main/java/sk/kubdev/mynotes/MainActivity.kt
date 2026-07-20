@@ -83,7 +83,21 @@ class MainActivity : FragmentActivity() {
         // Custom exit: fade + scale the icon out instead of the system's default
         // instant cut, so the transition into the app feels intentional.
         splashScreen.setOnExitAnimationListener { splashScreenView ->
-            val iconView = splashScreenView.iconView
+            // On API 31+ the platform view's icon can already be gone by the time
+            // this listener runs (late exit), and the iconView getter then throws
+            // an NPE internally - fall back to dismissing without the animation.
+            val iconView = runCatching { splashScreenView.iconView }.getOrNull()
+            if (iconView == null) {
+                splashScreenView.remove()
+                val theme = lastSystemBarsTheme
+                val color = lastSystemBarsPrimaryColor
+                if (theme != null && color != null) {
+                    updateSystemBars(theme, color)
+                } else {
+                    enableEdgeToEdge()
+                }
+                return@setOnExitAnimationListener
+            }
             val fade = ObjectAnimator.ofFloat(iconView, "alpha", 1f, 0f)
             val scaleX = ObjectAnimator.ofFloat(iconView, "scaleX", 1f, 1.15f)
             val scaleY = ObjectAnimator.ofFloat(iconView, "scaleY", 1f, 1.15f)

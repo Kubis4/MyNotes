@@ -10,10 +10,11 @@ object CollabLocalPrefs {
     private fun prefs(context: Context) =
         context.getSharedPreferences("collab_local_prefs", Context.MODE_PRIVATE)
 
-    // Default 6 = Light Blue, so shared notes are visually distinct from the
-    // Light Yellow default of local notes.
+    // Default 17 = Blue Grey - a neutral tone that keeps shared notes visually
+    // distinct from the Light Yellow default of local notes without pushing a
+    // strong hue on every collaborator.
     fun getColorIndex(context: Context, collaborativeId: String): Int =
-        prefs(context).getInt("color_$collaborativeId", 6)
+        prefs(context).getInt("color_$collaborativeId", 17)
 
     fun setColorIndex(context: Context, collaborativeId: String, colorIndex: Int) {
         prefs(context).edit().putInt("color_$collaborativeId", colorIndex).apply()

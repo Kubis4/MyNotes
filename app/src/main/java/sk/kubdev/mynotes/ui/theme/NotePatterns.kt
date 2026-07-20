@@ -15,7 +15,7 @@ import kotlin.math.sin
 // decoration competing with content. Index 0 = none.
 object NotePatterns {
 
-    val names = listOf("None", "Dots", "Grid", "Stripes", "Waves", "Rings", "Zigzag")
+    val names = listOf("None", "Dots", "Grid", "Stripes", "Waves", "Rings", "Zigzag", "Diamonds", "Crosses")
     val count = names.size
 
     fun getName(index: Int): String = names.getOrElse(index) { names[0] }
@@ -34,6 +34,8 @@ fun Modifier.notePattern(patternIndex: Int, tint: Color): Modifier {
             4 -> drawWaves(color)
             5 -> drawRings(color)
             6 -> drawZigzag(color)
+            7 -> drawDiamonds(color)
+            8 -> drawCrosses(color)
         }
     }
 }
@@ -115,6 +117,47 @@ private fun DrawScope.drawRings(color: Color) {
         var x = if (rowIndex % 2 == 0) step / 2 else step
         while (x < size.width + radius) {
             drawCircle(color, radius = radius, center = Offset(x, y), style = Stroke(width = stroke))
+            x += step
+        }
+        y += step
+        rowIndex++
+    }
+}
+
+private fun DrawScope.drawDiamonds(color: Color) {
+    val step = 48.dp.toPx()
+    val half = 10.dp.toPx()
+    val stroke = 1.5.dp.toPx()
+    var y = step / 2
+    var rowIndex = 0
+    while (y < size.height + half) {
+        var x = if (rowIndex % 2 == 0) step / 2 else step
+        while (x < size.width + half) {
+            val path = Path()
+            path.moveTo(x, y - half)
+            path.lineTo(x + half, y)
+            path.lineTo(x, y + half)
+            path.lineTo(x - half, y)
+            path.close()
+            drawPath(path, color, style = Stroke(width = stroke))
+            x += step
+        }
+        y += step
+        rowIndex++
+    }
+}
+
+private fun DrawScope.drawCrosses(color: Color) {
+    val step = 40.dp.toPx()
+    val arm = 5.dp.toPx()
+    val stroke = 1.5.dp.toPx()
+    var y = step / 2
+    var rowIndex = 0
+    while (y < size.height + arm) {
+        var x = if (rowIndex % 2 == 0) step / 2 else step
+        while (x < size.width + arm) {
+            drawLine(color, Offset(x - arm, y), Offset(x + arm, y), strokeWidth = stroke)
+            drawLine(color, Offset(x, y - arm), Offset(x, y + arm), strokeWidth = stroke)
             x += step
         }
         y += step

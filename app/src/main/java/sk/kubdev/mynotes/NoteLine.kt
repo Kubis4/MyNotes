@@ -43,6 +43,10 @@ data class NoteLine(
     // is only read (and migrated into a span) for notes saved during that window - never
     // written again afterwards.
     val fontSize: Float? = null,
+    // Collaborative notes: uid of the user who last edited this line, so shared
+    // checklists can show WHO wrote each item (their account photo). Null for
+    // local notes and for lines from app versions that predate the field.
+    val editorId: String? = null,
     val imageScale: Float = 1f,
     val imageOffsetX: Float = 0f,
     val imageOffsetY: Float = 0f,
@@ -294,11 +298,16 @@ fun MutableList<NoteLine>.replaceAllSmart(newItems: List<NoteLine>) {
     while (size > newItems.size) removeAt(size - 1)
 }
 
+// Lenient decoder: skips fields this app version doesn't know about, so notes
+// written by a NEWER app version (with extra NoteLine fields) still open here
+// instead of falling into the plain-text fallback below.
+private val noteLineJson = Json { ignoreUnknownKeys = true }
+
 fun String.toNoteLines(): List<NoteLine> {
     if (this.isBlank()) return emptyList()
 
     return try {
-        Json.decodeFromString<List<NoteLine>>(this).mergeConsecutiveTextLines()
+        noteLineJson.decodeFromString<List<NoteLine>>(this).mergeConsecutiveTextLines()
     } catch (e: Exception) {
         // Plain/legacy text (not our JSON format): keep it as a single flowing
         // block instead of splitting into one NoteLine per line.

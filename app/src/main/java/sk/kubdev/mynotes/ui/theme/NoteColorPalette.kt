@@ -6,27 +6,30 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.toArgb
 
 object NoteColorPalette {
+    // One entry per distinct hue family, evenly spread around the color wheel with
+    // varied saturation, so no two picker swatches read as near-duplicates. Existing
+    // notes keep their stored index; only the shade behind it changes.
     val colors = listOf(
-        Color(0xFFFFF9C4), // Light Yellow (new default)
-        Color(0xFFFFE0B2), // Light Orange
-        Color(0xFFFFCDD2), // Light Pink
-        Color(0xFFF8BBD9), // Light Rose
-        Color(0xFFE1BEE7), // Light Purple
-        Color(0xFFD1C4E9), // Light Indigo
-        Color(0xFFBBDEFB), // Light Blue
-        Color(0xFFB3E5FC), // Light Cyan
-        Color(0xFFB2DFDB), // Light Teal
-        Color(0xFFC8E6C9), // Light Green
-        Color(0xFFDCEDC8), // Light Light Green
-        Color(0xFFF0F4C3), // Light Lime
+        Color(0xFFFFF9C4), // Light Yellow (default)
         Color(0xFFFFE082), // Amber
-        Color(0xFFFFCC80), // Deep Orange Light
-        Color(0xFFD7CCC8), // Brown Light
-        Color(0xFFF5F5F5), // Grey Light
-        Color(0xFFE8F5E8), // Mint Green
-        Color(0xFFFFE5CC), // Peach
-        Color(0xFFE5E5FF), // Lavender
-        Color(0xFFFFE5F1)  // Blush Pink
+        Color(0xFFFFCC80), // Orange
+        Color(0xFFFFAB91), // Coral
+        Color(0xFFEF9A9A), // Red
+        Color(0xFFF48FB1), // Pink
+        Color(0xFFCE93D8), // Purple
+        Color(0xFFB39DDB), // Deep Purple
+        Color(0xFF9FA8DA), // Indigo
+        Color(0xFF90CAF9), // Blue
+        Color(0xFF81D4FA), // Sky Blue
+        Color(0xFF80DEEA), // Cyan
+        Color(0xFF80CBC4), // Teal
+        Color(0xFFA5D6A7), // Green
+        Color(0xFFC5E1A5), // Light Green
+        Color(0xFFE6EE9C), // Lime
+        Color(0xFFBCAAA4), // Mocha
+        Color(0xFFB0BEC5), // Blue Grey
+        Color(0xFFEEEEEE), // Grey
+        Color(0xFFF0E1D2)  // Sand
     )
 
     fun getColorByIndex(index: Int): Color {
@@ -77,11 +80,11 @@ object NoteColorPalette {
     // Helper function to get color name for accessibility
     fun getColorName(index: Int): String {
         val colorNames = listOf(
-            "Light Yellow", "Light Orange", "Light Pink", "Light Rose",
-            "Light Purple", "Light Indigo", "Light Blue", "Light Cyan",
-            "Light Teal", "Light Green", "Light Lime Green", "Lime",
-            "Amber", "Deep Orange", "Brown", "Grey",
-            "Mint Green", "Peach", "Lavender", "Blush Pink"
+            "Light Yellow", "Amber", "Orange", "Coral",
+            "Red", "Pink", "Purple", "Deep Purple",
+            "Indigo", "Blue", "Sky Blue", "Cyan",
+            "Teal", "Green", "Light Green", "Lime",
+            "Mocha", "Blue Grey", "Grey", "Sand"
         )
         return if (index >= 0 && index < colorNames.size) {
             colorNames[index]

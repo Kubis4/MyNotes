@@ -27,6 +27,23 @@ class CollaborationService @Inject constructor(
     fun getCurrentUserId(): String? = auth.currentUser?.uid
     fun getCurrentUserEmail(): String? = auth.currentUser?.email
 
+    // Fetch the profiles (for photo URLs / display names) of the given user ids.
+    // Missing/unreadable profiles are simply skipped, so a partial result never
+    // fails the whole load. Returns a uid -> profile map.
+    suspend fun getUserProfiles(userIds: List<String>): Map<String, UserProfile> {
+        val result = mutableMapOf<String, UserProfile>()
+        for (uid in userIds.distinct()) {
+            try {
+                val profile = usersCollection.document(uid).get().await()
+                    .toObject(UserProfile::class.java)
+                if (profile != null) result[uid] = profile.copy(userId = uid)
+            } catch (e: Exception) {
+                Log.w(TAG, "Could not load profile for $uid", e)
+            }
+        }
+        return result
+    }
+
     // Create collaborative note
     suspend fun createCollaborativeNote(
         title: String,
@@ -299,23 +316,42 @@ class CollaborationService @Inject constructor(
 
             Log.d(TAG, "✅ Validation passed, updating documents...")
 
-            // Use a transaction to ensure consistency
-            firestore.runTransaction { transaction ->
-                // Update invitation status
-                transaction.update(inviteRef, mapOf(
-                    "status" to InviteStatus.ACCEPTED.name,
-                    "acceptedAt" to System.currentTimeMillis()
-                ))
+            try {
+                // Use a transaction to ensure consistency
+                firestore.runTransaction { transaction ->
+                    // Update invitation status
+                    transaction.update(inviteRef, mapOf(
+                        "status" to InviteStatus.ACCEPTED.name,
+                        "acceptedAt" to System.currentTimeMillis()
+                    ))
 
-                // Add user to collaborative note using arrayUnion
-                val noteRef = notesCollection.document(invite.noteId)
-                transaction.update(noteRef,
-                    "collaborators",
-                    com.google.firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
-                )
+                    // Add user to collaborative note using arrayUnion
+                    val noteRef = notesCollection.document(invite.noteId)
+                    transaction.update(noteRef,
+                        "collaborators",
+                        com.google.firebase.firestore.FieldValue.arrayUnion(currentUser.uid)
+                    )
 
-                Log.d(TAG, "✅ Transaction will add user ${currentUser.uid} to collaborators")
-            }.await()
+                    Log.d(TAG, "✅ Transaction will add user ${currentUser.uid} to collaborators")
+                }.await()
+            } catch (e: com.google.firebase.firestore.FirebaseFirestoreException) {
+                // The note was deleted after this invite was sent (the recipient can't
+                // read the note doc pre-accept, so a dead invite only surfaces here as
+                // NOT_FOUND / PERMISSION_DENIED). Expire the orphaned invite so it
+                // disappears from the pending list instead of failing forever.
+                if (e.code == com.google.firebase.firestore.FirebaseFirestoreException.Code.NOT_FOUND ||
+                    e.code == com.google.firebase.firestore.FirebaseFirestoreException.Code.PERMISSION_DENIED
+                ) {
+                    Log.w(TAG, "Invite $inviteId points at a deleted note - expiring it")
+                    try {
+                        inviteRef.update("status", InviteStatus.EXPIRED.name).await()
+                    } catch (expireError: Exception) {
+                        Log.e(TAG, "Failed to expire orphaned invite", expireError)
+                    }
+                    return Result.failure(Exception("This note no longer exists"))
+                }
+                throw e
+            }
 
             Log.d(TAG, "=== Successfully accepted invitation ===")
             Result.success(Unit)

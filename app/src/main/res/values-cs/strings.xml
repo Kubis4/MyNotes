@@ -177,6 +177,9 @@
     <string name="about_contact_message">Čtu každý email a vážím si veškeré zpětné vazby! Váš vstup pomáhá dělat MyNotes lepším pro všechny.</string>
     <string name="about_developer">Vytvořil kub1sDev</string>
     <string name="about_copyright">© 2026 MyNotes. Všechna práva vyhrazena.</string>
+    <string name="about_licenses">Licence open source</string>
+    <string name="about_licenses_subtitle">Knihovny, díky kterým MyNotes funguje</string>
+    <string name="about_licenses_footer">Úplná znění licencí najdete na stránkách jednotlivých projektů.</string>
 
     <!-- Features -->
     <string name="feature_colors_title">Přizpůsobitelné barvy</string>
@@ -372,7 +375,6 @@
     <string name="enter_title_hint">Zadejte název…</string>
     <string name="item_deleted">Položka smazána</string>
     <string name="undo">Zpět</string>
-    <string name="language_instant_change">Jazyk se změní okamžitě</string>
     <string name="language_quick_restart">Jazyk se aktualizuje rychlým obnovením</string>
 
     <!-- Onboarding tour -->
@@ -420,6 +422,8 @@
     <string name="pattern_waves">Vlny</string>
     <string name="pattern_rings">Kroužky</string>
     <string name="pattern_zigzag">Cikcak</string>
+    <string name="pattern_diamonds">Diamanty</string>
+    <string name="pattern_crosses">Křížky</string>
     <string name="words_count">%d slov</string>
     <string name="more_options">Více možností</string>
     <string name="collaborative_note_label">Sdílená poznámka</string>

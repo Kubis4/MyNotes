@@ -34,9 +34,12 @@ data class UserProfile(
     var userId: String = "",
     var email: String = "",
     var displayName: String = "",
+    // Google account photo, captured at sign-in - shown next to collaborative
+    // checklist lines so members can see who edited what.
+    var photoUrl: String? = null,
     var createdAt: Long = System.currentTimeMillis()
 ) {
-    constructor() : this("", "", "", 0L)
+    constructor() : this("", "", "", null, 0L)
 }
 
 // ✅ ADD THESE MISSING ENUMS

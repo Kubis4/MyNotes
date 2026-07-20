@@ -1049,19 +1049,13 @@ fun LanguageSettingCard(
                 }
             }
 
-            SettingsInfoRow(
-                icon = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    Icons.Default.Check
-                } else {
-                    Icons.Default.Info
-                },
-                text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                    stringResource(R.string.language_instant_change)
-                } else {
-                    stringResource(R.string.language_quick_restart)
-                },
-                modifier = Modifier.padding(top = 12.dp)
-            )
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+                SettingsInfoRow(
+                    icon = Icons.Default.Info,
+                    text = stringResource(R.string.language_quick_restart),
+                    modifier = Modifier.padding(top = 12.dp)
+                )
+            }
 
             if (AppLanguage.entries.any { it.isAITranslated }) {
                 SettingsInfoRow(

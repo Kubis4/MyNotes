@@ -177,6 +177,9 @@
     <string name="about_contact_message">Je lis chaque email et apprécie tous les commentaires ! Votre contribution aide à améliorer MyNotes pour tout le monde.</string>
     <string name="about_developer">Créé par kub1sDev</string>
     <string name="about_copyright">© 2026 MyNotes. Tous droits réservés.</string>
+    <string name="about_licenses">Licences open source</string>
+    <string name="about_licenses_subtitle">Bibliothèques qui rendent MyNotes possible</string>
+    <string name="about_licenses_footer">Les textes complets des licences sont disponibles sur les sites des projets.</string>
 
     <!-- Features -->
     <string name="feature_colors_title">Couleurs personnalisables</string>
@@ -369,7 +372,6 @@
     <string name="enter_title_hint">Saisissez un titre…</string>
     <string name="item_deleted">Élément supprimé</string>
     <string name="undo">Annuler</string>
-    <string name="language_instant_change">La langue change instantanément</string>
     <string name="language_quick_restart">La langue sera mise à jour après un bref rafraîchissement</string>
     <string name="language_ai_translated">%1$s (traduit par IA)</string>
     <string name="language_ai_notice">Les langues marquées IA ont été traduites automatiquement et peuvent contenir des imprécisions</string>
@@ -419,6 +421,8 @@
     <string name="pattern_waves">Vagues</string>
     <string name="pattern_rings">Anneaux</string>
     <string name="pattern_zigzag">Zigzag</string>
+    <string name="pattern_diamonds">Losanges</string>
+    <string name="pattern_crosses">Croix</string>
     <string name="words_count">%d mots</string>
     <string name="more_options">Plus d\'options</string>
     <string name="collaborative_note_label">Note collaborative</string>
