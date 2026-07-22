@@ -34,3 +34,8 @@ local.properties
 # Build outputs, in case one is ever copied outside app/build/
 *.apk
 *.aab
+
+# Firebase config: contains project-specific keys/IDs. Kept local only - each
+# developer downloads their own from the Firebase console. Never commit it to
+# a public repo.
+google-services.json

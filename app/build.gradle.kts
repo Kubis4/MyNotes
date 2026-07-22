@@ -24,13 +24,13 @@ val keystoreProperties = Properties().apply {
 
 android {
     namespace = "sk.kubisdev.mynotes"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "sk.kubisdev.mynotes"
         minSdk = 26
-        targetSdk = 35
-        versionCode = 5
+        targetSdk = 36
+        versionCode = 7
         versionName = "1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

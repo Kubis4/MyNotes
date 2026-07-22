@@ -1297,6 +1297,9 @@ class NoteViewModel @Inject constructor(
             noteDao.insertOrUpdate(restoredNote)
             true
         } catch (e: Exception) {
+            // Log rather than swallow: a silent `false` here made a restore that
+            // dropped every note look like a no-op with an empty logcat.
+            Log.e("NoteViewModel", "Failed to insert restored note (title=${note.title})", e)
             false
         }
     }
