@@ -1,0 +1,628 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Name -->
+    <string name="app_name">MyNotes</string>
+
+    <!-- Main Navigation -->
+    <string name="nav_notes">Poznámky</string>
+    <string name="nav_archive">Archiv</string>
+    <string name="nav_bin">Koš</string>
+    <string name="nav_settings">Nastavení</string>
+    <string name="nav_backup">Záloha</string>
+    <string name="nav_about">O aplikaci</string>
+
+    <!-- Common Actions -->
+    <string name="action_back">Zpět</string>
+    <string name="action_save">Uložit</string>
+    <string name="action_cancel">Zrušit</string>
+    <string name="action_delete">Smazat</string>
+    <string name="action_restore">Obnovit</string>
+    <string name="action_ok">OK</string>
+    <string name="action_close">Zavřít</string>
+    <string name="action_view">Zobrazit</string>
+
+    <!-- Note Management -->
+    <string name="archive_empty_message">Žádné archivované poznámky</string>
+    <string name="bin_empty_message">Koš je prázdný</string>
+
+    <!-- Archive Screen -->
+    <string name="archive_title">Archiv</string>
+    <string name="archive_empty_hint">Poznámky, které archivujete, se zobrazí zde</string>
+    <string name="archive_restore_all">Obnovit vše</string>
+    <string name="archive_all_restored">Všechny poznámky byly obnoveny</string>
+
+    <!-- Bin Screen -->
+    <string name="bin_title">Koš</string>
+    <string name="bin_empty_hint">Smazané poznámky se zobrazí zde</string>
+    <string name="bin_auto_delete_info">Poznámky se automaticky smažou po 30 dnech</string>
+    <string name="bin_empty_action">Vyprázdnit koš</string>
+    <string name="bin_restore_all">Obnovit vše</string>
+    <string name="bin_all_restored">Všechny poznámky byly obnoveny</string>
+    <string name="bin_empty_dialog_title">Vyprázdnit koš</string>
+    <string name="bin_empty_dialog_message">Opravdu chcete trvale smazat všechny poznámky v koši? Tuto akci nelze vrátit zpět.</string>
+    <string name="bin_delete_all">Smazat vše</string>
+    <string name="bin_emptied">Koš vyprázdněn</string>
+    <string name="bin_restore_all_dialog_title">Obnovit všechny poznámky</string>
+    <string name="bin_restore_all_dialog_message">Opravdu chcete obnovit všechny poznámky z koše?</string>
+    <string name="bin_expired_status">Prošlá - bude automaticky smazána</string>
+    <string name="bin_expires_today">Vyprší dnes</string>
+    <string name="bin_expires_days">Vyprší za %d dní</string>
+    <string name="bin_deleted_time">Smazáno %s</string>
+
+    <!-- Time Format -->
+    <string name="time_just_now">právě teď</string>
+    <string name="time_just_now_capitalized">Právě teď</string>
+    <string name="time_minutes_ago">před %d min</string>
+    <string name="time_hours_ago">před %d hodinami</string>
+    <string name="time_days_ago">před %d dny</string>
+
+    <!-- Date Format -->
+    <string name="date_format_full">d. MMM yyyy</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_title">Nastavení</string>
+    <string name="settings_appearance">Vzhled</string>
+    <string name="settings_language">Jazyk</string>
+    <string name="settings_security">Zabezpečení</string>
+    <string name="settings_note_interactions">Interakce s poznámkami</string>
+    <string name="settings_collaboration">Spolupráce</string>
+
+    <!-- Theme Settings -->
+    <string name="theme_title">Motiv</string>
+    <string name="theme_light">Světlý</string>
+    <string name="theme_dark">Tmavý</string>
+    <string name="theme_system">Výchozí systémový</string>
+
+    <!-- Color Settings -->
+    <string name="color_title">Barevné schéma</string>
+    <string name="color_view_all">Zobrazit všechny barvy</string>
+    <string name="color_choose_title">Vyberte barvu</string>
+    <string name="color_selected">Vybraná: %s</string>
+
+    <!-- Language Settings -->
+    <string name="language_title">Jazyk</string>
+    <string name="language_english">Angličtina</string>
+    <string name="language_slovak">Slovenština</string>
+    <string name="language_french">Francouzština</string>
+    <string name="language_german">Němčina</string>
+    <string name="language_italian">Italština</string>
+    <string name="language_spanish">Španělština</string>
+    <string name="language_czech">Čeština</string>
+    <string name="language_system">Výchozí systémový</string>
+    <string name="language_system_description">Použít jazyk zařízení</string>
+    <string name="language_changed_title">Jazyk změněn</string>
+    <string name="language_changed_message">Jazyk byl úspěšně změněn. Prosím, restartujte aplikaci pro úplné aplikování změn.</string>
+
+    <!-- Security Settings -->
+    <string name="security_title">Zámek aplikace</string>
+    <string name="security_biometric">Biometrický zámek</string>
+    <string name="security_password">Zámek heslem</string>
+    <string name="security_biometric_unavailable">Není dostupné na tomto zařízení</string>
+    <string name="security_password_recommended">Doporučeno pro toto zařízení</string>
+    <string name="security_status_biometric">🔒 Aplikace chráněná biometrickou autentizací</string>
+    <string name="security_status_password">🔒 Aplikace chráněná autentizací heslem</string>
+    <string name="security_status_warning">⚠️ Aplikace bude vyžadovat autentizaci při otevření</string>
+    <string name="security_tip_biometric">💡 Biometrická autentizace není dostupná. Použijte heslo pro zabezpečení.</string>
+
+    <!-- Swipe Settings -->
+    <string name="swipe_title">Akce přejetím</string>
+    <string name="swipe_enable">Povolit akce přejetím</string>
+    <string name="swipe_left_action">Přejetí doleva</string>
+    <string name="swipe_right_action">Přejetí doprava</string>
+    <string name="swipe_action_delete">Smazat</string>
+    <string name="swipe_action_delete_desc">Přesunout poznámku do koše</string>
+    <string name="swipe_action_archive">Archivovat</string>
+    <string name="swipe_action_archive_desc">Archivovat poznámku na později</string>
+    <string name="swipe_action_none">Žádná</string>
+    <string name="swipe_action_none_desc">Žádná akce</string>
+
+    <!-- Password Dialog -->
+    <string name="password_setup_title">Nastavit heslo</string>
+    <string name="password_hint">Heslo</string>
+    <string name="password_confirm_hint">Potvrdit heslo</string>
+    <string name="password_mismatch">Hesla se neshodují</string>
+    <string name="password_set">Nastavit heslo</string>
+
+    <!-- Auth Change Dialogs -->
+    <string name="auth_switch_to_biometric_title">Přepnout na biometriku</string>
+    <string name="auth_switch_to_biometric_message">Zadejte své aktuální heslo pro přepnutí na biometrickou autentizaci:</string>
+    <string name="auth_switch_to_biometric_button">Přepnout na biometriku</string>
+    <string name="auth_switch_to_password_title">Přepnout na heslo</string>
+    <string name="auth_switch_to_password_message">Použijte otisk prstu pro potvrzení přepnutí na autentizaci heslem:</string>
+    <string name="auth_disable_biometric_title">Vypnout biometrický zámek</string>
+    <string name="auth_disable_biometric_message">Použijte otisk prstu pro potvrzení vypnutí biometrické autentizace:</string>
+    <string name="auth_disable_password_title">Vypnout zámek heslem</string>
+    <string name="auth_disable_password_message">Zadejte své aktuální heslo pro vypnutí autentizace heslem:</string>
+    <string name="auth_current_password">Aktuální heslo</string>
+    <string name="auth_verify_and_switch">Ověřit a přepnout</string>
+    <string name="auth_verify_and_disable">Ověřit a vypnout</string>
+    <string name="auth_show_password">Zobrazit heslo</string>
+    <string name="auth_hide_password">Skrýt heslo</string>
+
+    <!-- Authentication -->
+    <string name="auth_title">MyNotes</string>
+    <string name="auth_subtitle">Ověřte se pro přístup k vašim poznámkám</string>
+    <string name="auth_biometric_not_available">Biometrická autentizace není dostupná</string>
+    <string name="auth_password_required_for_setup">Pro autentizaci heslem je vyžadováno heslo</string>
+    <string name="auth_biometric_verification_failed">Biometrické ověření selhalo</string>
+    <string name="auth_invalid_password">Neplatné heslo</string>
+    <string name="auth_password_required">Vyžadováno heslo</string>
+    <string name="auth_biometric_prompt_title">Ověřte se pro přístup k MyNotes</string>
+    <string name="auth_biometric_prompt_subtitle">Použijte své biometrické údaje pro odemčení aplikace</string>
+    <string name="auth_authentication_failed">Autentizace selhala</string>
+    <string name="auth_password_label">Heslo</string>
+    <string name="auth_unlock">Odemknout</string>
+    <string name="auth_or">nebo</string>
+    <string name="auth_use_biometric">Použít biometriku</string>
+    <string name="auth_use_device_credential">Použít PIN nebo heslo zařízení</string>
+
+    <!-- Backup Screen -->
+
+    <!-- About Screen -->
+    <string name="about_title">O aplikaci</string>
+    <string name="about_subtitle">Váš osobní společník pro psaní poznámek</string>
+    <string name="about_version">Verze %s</string>
+    <string name="about_description">MyNotes je výkonná, intuitivní aplikace pro psaní poznámek navržená tak, aby vám pomohla zachytit, organizovat a spravovat vaše myšlenky, nápady a úkoly bez námahy. S funkcemi jako přizpůsobitelné barvy, akce přejetím a automatická organizace, MyNotes dělá psaní poznámek příjemným zážitkem.</string>
+    <string name="about_features_title">Klíčové funkce</string>
+    <string name="about_support_title">Podpořte MyNotes</string>
+    <string name="about_support_description">MyNotes je zcela zdarma a bez reklam. Pokud se vám líbí, můžete mi koupit pivo — příspěvky jsou dobrovolné a pomohou, aby to tak zůstalo.</string>
+    <string name="about_coffee_button">Kupte mi pivo</string>
+    <string name="about_support_message">Vaše podpora pomáhá udržet MyNotes zdarma a motivuje k dalšímu vývoji!</string>
+    <string name="about_contact_title">Spojte se a poskytněte zpětnou vazbu</string>
+    <string name="about_contact_send">Poslat zpětnou vazbu</string>
+    <string name="about_feedback_subtitle">Máte nápad nebo jste našli chybu? Rád si to přečtu.</string>
+    <string name="about_contact_email">kubisdev1@gmail.com</string>
+    <string name="about_feedback_tips">💡 Co zahrnout do vaší zpětné vazby:</string>
+    <string name="about_feedback_content">• Hlášení chyb s kroky k reprodukci\n• Požadavky na funkce a návrhy\n• Obecnou zpětnou vazbu o vaší zkušenosti\n• Otázky o funkcionalitě aplikace</string>
+    <string name="about_contact_message">Čtu každý email a vážím si veškeré zpětné vazby! Váš vstup pomáhá dělat MyNotes lepším pro všechny.</string>
+    <string name="about_developer">Vytvořil kub1sDev</string>
+    <string name="about_copyright">© 2026 MyNotes. Všechna práva vyhrazena.</string>
+    <string name="about_licenses">Licence open source</string>
+    <string name="about_licenses_subtitle">Knihovny, díky kterým MyNotes funguje</string>
+    <string name="about_licenses_footer">Úplná znění licencí najdete na stránkách jednotlivých projektů.</string>
+
+    <!-- Features -->
+    <string name="feature_colors_title">Přizpůsobitelné barvy</string>
+    <string name="feature_colors_desc">Personalizujte své poznámky s krásnými barevnými schématy</string>
+    <string name="feature_swipe_title">Akce přejetím</string>
+    <string name="feature_swipe_desc">Rychlé archivování a mazání s přizpůsobitelnými gesty přejetí</string>
+    <string name="feature_security_title">Bezpečný přístup</string>
+    <string name="feature_security_desc">Chraňte své poznámky biometrickou a heslovou autentizací</string>
+    <string name="feature_organization_title">Inteligentní organizace</string>
+    <string name="feature_organization_desc">Automatické archivování a 30denní uchovávání v koši</string>
+    <string name="feature_search_title">Výkonné vyhledávání</string>
+    <string name="feature_search_desc">Najděte své poznámky rychle s pokročilým vyhledáváním</string>
+    <string name="feature_themes_title">Adaptivní motivy</string>
+    <string name="feature_themes_desc">Světlé, tmavé a systémové motivy s dynamickými barvami</string>
+    <string name="feature_collaboration_title">Spolupráce v reálném čase</string>
+    <string name="feature_collaboration_desc">Sdílejte poznámky a seznamy úkolů, které se synchronizují živě</string>
+    <string name="feature_backup_title">Záloha v cloudu</string>
+    <string name="feature_backup_desc">Automatické zálohy na Google Drive, kdykoliv obnovitelné</string>
+
+    <!-- Error Messages -->
+
+    <!-- Success Messages -->
+
+    <!-- Accessibility -->
+    <string name="selected_indicator">Vybráno</string>
+
+    <!-- Note Detail Screen -->
+    <string name="note_new_title">Nová poznámka</string>
+    <string name="note_edit_title">Upravit poznámku</string>
+
+    <!-- Note Image -->
+    <string name="note_image">Obrázek poznámky</string>
+
+    <!-- Note Formatting -->
+
+    <!-- Note Item -->
+
+    <!-- Note List Screen -->
+
+    <!-- Filter Menu -->
+
+    <!-- Sort Menu -->
+
+    <!-- FAB Items -->
+
+    <!-- Empty States -->
+
+    <!-- Sections -->
+
+    <!-- Snackbar Messages -->
+
+    <!-- Note Options Bottom Sheet -->
+    <string name="untitled_note">Poznámka bez názvu</string>
+
+    <!-- Section Header -->
+
+    <!-- Category Dialog -->
+
+    <!-- ViewModel Messages -->
+    <string name="untitled_todo">Úkol bez názvu</string>
+
+    <!-- Cleanup Messages -->
+    <string name="msg_expired_notes_deleted">%d prošlých poznámek automaticky smazáno</string>
+
+    <!-- Note Operation Messages -->
+    <string name="msg_note_color_updated">Barva poznámky aktualizována</string>
+    <string name="msg_notes_color_updated">Barva %d poznámek aktualizována</string>
+    <string name="msg_note_restored_from_archive">Poznámka obnovena z archivu</string>
+    <string name="msg_note_permanently_deleted">Poznámka trvale smazána</string>
+    <string name="msg_note_restored">Poznámka obnovena</string>
+    <string name="msg_note_pinned">Poznámka připnuta</string>
+    <string name="msg_note_unpinned">Poznámka odepnuta</string>
+
+    <!-- Category Messages -->
+    <string name="msg_category_created">Kategorie \'%s\' vytvořena</string>
+    <string name="msg_category_updated">Kategorie aktualizována</string>
+    <string name="msg_category_deleted">Kategorie smazána</string>
+    <string name="msg_note_moved_to_category">Poznámka přesunuta do \'%s\' a odepnuta</string>
+    <string name="msg_note_moved_to_uncategorized">Poznámka přesunuta do nekategorizovaných</string>
+
+    <!-- Import/Export Messages -->
+
+    <!-- Note Copy Suffix -->
+
+    <!-- Validation Messages -->
+
+    <!-- ToDo List Screen -->
+    <string name="todo_section_divider">Oddělovač sekce</string>
+
+    <!-- Backup ViewModel -->
+    <string name="backup_sign_in_failed">Přihlášení selhalo: %s</string>
+    <string name="backup_sign_in_error">Chyba přihlášení: %s</string>
+    <string name="backup_starting">Spouštění zálohy…</string>
+    <string name="backup_failed">Záloha selhala: %s</string>
+    <string name="backup_error">Chyba zálohy: %s</string>
+    <string name="backup_load_failed">Načítání záloh selhalo: %s</string>
+    <string name="backup_restore_starting">Spouštění obnovení…</string>
+    <string name="backup_restore_success">Úspěšně obnoveno %d poznámek</string>
+    <string name="backup_restore_partial">Obnoveno %1$d z %2$d poznámek - některé poznámky se nepodařilo obnovit</string>
+    <string name="backup_restore_success_with_duplicates">Obnoveno %1$d poznámek (%2$d již existovalo a bylo přeskočeno)</string>
+    <string name="backup_restore_choice_title">Obnovit poznámky</string>
+    <string name="backup_restore_choice_description">Jak se má tato záloha obnovit?</string>
+    <string name="backup_restore_merge_title">Sloučit</string>
+    <string name="backup_restore_merge_description">Ponechat aktuální poznámky a přidat vše nové ze zálohy. Již obnovené poznámky se nezdvojí.</string>
+    <string name="backup_restore_replace_title">Nahradit</string>
+    <string name="backup_restore_replace_description">Smazat všechny aktuální poznámky a skupiny a obnovit pouze to, co je v této záloze.</string>
+    <string name="backup_restore_failed">Obnovení selhalo: %s</string>
+    <string name="backup_delete_failed">Smazání selhalo: %s</string>
+    <string name="backup_auto_disabled">Automatická záloha vypnuta</string>
+    <string name="backup_manual_scheduled">Manuální záloha naplánována</string>
+
+    <!-- Backup Frequency -->
+    <string name="backup_frequency_daily">denně</string>
+    <string name="backup_frequency_weekly">týdně v %s</string>
+    <string name="backup_frequency_monthly">měsíčně %d. den</string>
+    <string name="backup_auto_enabled">Automatická záloha povolena %1$s v %2$s</string>
+
+    <!-- Days of Week -->
+    <string name="day_sunday">neděle</string>
+    <string name="day_monday">pondělí</string>
+    <string name="day_tuesday">úterý</string>
+    <string name="day_wednesday">středa</string>
+    <string name="day_thursday">čtvrtek</string>
+    <string name="day_friday">pátek</string>
+    <string name="day_saturday">sobota</string>
+
+    <!-- Backup Worker Notifications -->
+    <string name="backup_notification_channel_name">Notifikace zálohování</string>
+    <string name="backup_notification_channel_description">Notifikace pro stav automatického zálohování</string>
+    <string name="backup_notification_backing_up">Zálohování poznámek</string>
+    <string name="backup_notification_in_progress">Vaše poznámky se zálohují na Google Drive…</string>
+    <string name="backup_notification_skipped">Záloha přeskočena</string>
+    <string name="backup_notification_sign_in_required">Přihlaste se do Google Drive pro povolení záloh</string>
+    <string name="backup_notification_backing_up_count">Zálohování %d poznámek…</string>
+    <string name="backup_notification_success">Záloha úspěšná</string>
+    <string name="backup_notification_success_message">Úspěšně zálohováno %d poznámek na Google Drive</string>
+    <string name="backup_notification_failed">Záloha selhala</string>
+    <string name="backup_notification_failed_message">Zálohování poznámek selhalo: %s</string>
+    <string name="backup_notification_error">Chyba zálohy</string>
+    <string name="backup_notification_error_message">Při zálohování nastala chyba: %s</string>
+
+    <!-- Google Drive Manager -->
+    <string name="drive_sign_in_cancelled">Přihlášení bylo zrušeno</string>
+    <string name="drive_failed_get_account">Nepodařilo se získat účet</string>
+    <string name="drive_sign_in_success">Úspěšně přihlášen jako %s</string>
+    <string name="drive_sign_in_failed">Přihlášení selhalo: %s</string>
+    <string name="drive_sign_out_success">Úspěšně odhlášen</string>
+    <string name="drive_not_signed_in">Nejste přihlášen do Google Drive</string>
+    <string name="drive_service_not_initialized">Služba Drive není inicializována</string>
+
+    <!-- Google Drive Progress Messages -->
+    <string name="drive_preparing_backup">Příprava dat k zálohování…</string>
+    <string name="drive_creating_backup_file">Vytváření souboru zálohy…</string>
+    <string name="drive_uploading_to_drive">Nahrávání na Google Drive…</string>
+    <string name="drive_backup_completed">Záloha úspěšně dokončena!</string>
+    <string name="drive_backup_created_success">Záloha úspěšně vytvořena: %s</string>
+    <string name="drive_downloading_backup">Stahování souboru zálohy…</string>
+    <string name="drive_processing_backup">Zpracování dat zálohy…</string>
+    <string name="drive_restore_completed">Obnovení úspěšně dokončeno!</string>
+    <string name="drive_backup_deleted_success">Záloha úspěšně smazána</string>
+
+    <!-- Google Drive Cleanup Messages -->
+    <string name="drive_no_backups_to_clean">Žádné zálohy k vyčištění</string>
+    <string name="drive_deleted_old_backups">Smazáno %d starých záloh</string>
+    <string name="drive_no_old_backups">Žádné staré zálohy ke smazání</string>
+    <string name="drive_failed_list_backups">Nepodařilo se načíst zálohy</string>
+
+    <!-- File Size Formatting -->
+    <string name="file_size_bytes">%d B</string>
+    <string name="file_size_kb">%d KB</string>
+    <string name="file_size_mb">%d MB</string>
+
+    <!-- Backup Date Format -->
+    <string name="backup_date_format">d. MMM yyyy HH:mm</string>
+
+    <!-- Color Picker Dialog -->
+    <string name="color_picker_title">Vybrat barvu</string>
+    <string name="color_picker_current">Aktuální: %s</string>
+    <string name="color_picker_random">Náhodná</string>
+    <string name="color_picker_selected_desc">Vybraná %s</string>
+
+    <string name="language_ai_translated">%1$s (přeloženo AI)</string>
+    <string name="language_ai_notice">Jazyky označené AI byly strojově přeloženy a mohou obsahovat nepřesnosti</string>
+    <!-- Sign In Screen -->
+    <string name="sign_in_title">Přihlášení</string>
+    <string name="sign_in_headline">Přihlaste se pro spolupráci</string>
+    <string name="sign_in_subtitle">Přihlaste se přes Google a sdílejte poznámky, zvěte spolupracovníky a synchronizujte seznamy úkolů mezi zařízeními.</string>
+    <string name="sign_in_signed_in_as">Jste přihlášeni</string>
+    <string name="sign_in_with_google">Přihlásit se přes Google</string>
+    <string name="sign_in_sign_out">Odhlásit se</string>
+
+    <!-- Previously missing keys -->
+    <string name="enter_title_hint">Zadejte název…</string>
+    <string name="item_deleted">Položka smazána</string>
+    <string name="undo">Zpět</string>
+    <string name="language_quick_restart">Jazyk se aktualizuje rychlým obnovením</string>
+
+    <!-- Onboarding tour -->
+    <string name="onb_skip">Přeskočit</string>
+    <string name="onb_next">Další</string>
+    <string name="onb_get_started">Začít</string>
+    <string name="onb_finish">Dokončit</string>
+    <string name="onb_welcome_title">Vítejte v MyNotes</string>
+    <string name="onb_welcome_desc">Pojďme nastavit pár věcí, aby aplikace fungovala podle vašich představ. Zabere to jen minutu a vše lze později změnit v Nastavení.</string>
+    <string name="onb_appearance_title">Přizpůsobte si ji</string>
+    <string name="onb_appearance_desc">Vyberte si barevné schéma. Světlý, tmavý nebo systémový motiv můžete kdykoli přepnout v Nastavení.</string>
+    <string name="onb_notifications_title">Buďte informováni</string>
+    <string name="onb_notifications_desc">Zapněte si oznámení, abyste věděli, kdy se záloha dokončila nebo selhala.</string>
+    <string name="onb_notifications_enabled">Oznámení zapnuta</string>
+    <string name="onb_enable_notifications">Zapnout oznámení</string>
+    <string name="onb_backup_title">Zálohujte si poznámky</string>
+    <string name="onb_backup_desc">Přihlaste se přes Google a poznámky se budou automaticky zálohovat na Google Drive, případně je obnovte ze stávající zálohy.</string>
+    <string name="onb_import_title">Importujte si poznámky</string>
+    <string name="onb_import_desc">Přeneste si poznámky z Evernote, Google Keep nebo z textového/markdown souboru.</string>
+    <string name="onb_import_button">Vybrat soubor k importu</string>
+    <string name="onb_security_title">Chraňte si poznámky</string>
+    <string name="onb_security_desc">Přidejte si zámek, aby aplikaci otevřeli jen vy. Kdykoli jej lze změnit nebo zrušit v Nastavení.</string>
+    <string name="onb_biometric_lock">Použít biometrický zámek</string>
+    <string name="onb_password_lock">Použít heslo</string>
+    <string name="onb_biometric_enabled">Biometrický zámek zapnut</string>
+    <string name="onb_password_enabled">Zámek heslem zapnut</string>
+    <string name="onb_done_title">Vše je připraveno!</string>
+    <string name="onb_done_desc">Ke všemu, co jste si nyní nastavili, se lze kdykoli vrátit v Nastavení.</string>
+    <string name="onb_done_button">Začít používat MyNotes</string>
+
+    <!-- Drawer -->
+    <string name="drawer_section_collaboration">Spolupráce</string>
+    <string name="drawer_section_more">Více</string>
+    <string name="nav_invitations">Pozvánky</string>
+    <string name="nav_import">Importovat poznámky</string>
+
+    <!-- Editor & list -->
+    <string name="action_share">Sdílet</string>
+    <string name="note_color">Barva poznámky</string>
+    <string name="pattern_label">Vzor</string>
+    <string name="pattern_none">Žádný</string>
+    <string name="pattern_dots">Tečky</string>
+    <string name="pattern_grid">Mřížka</string>
+    <string name="pattern_stripes">Pruhy</string>
+    <string name="pattern_waves">Vlny</string>
+    <string name="pattern_rings">Kroužky</string>
+    <string name="pattern_zigzag">Cikcak</string>
+    <string name="pattern_diamonds">Diamanty</string>
+    <string name="pattern_crosses">Křížky</string>
+    <string name="words_count">%d slov</string>
+    <string name="more_options">Více možností</string>
+    <string name="collaborative_note_label">Sdílená poznámka</string>
+    <string name="collaborative_todo_label">Sdílený seznam úkolů</string>
+    <string name="fab_paragraph">Odstavec</string>
+    <string name="fab_bullet">Odrážky</string>
+    <string name="fab_checklist">Seznam úkolů</string>
+    <string name="fab_image">Obrázek</string>
+    <string name="note_deleted">Poznámka smazána</string>
+    <string name="notes_deleted">Smazané poznámky: %d</string>
+    <string name="note_archived">Poznámka archivována</string>
+    <string name="show_more">Zobrazit více</string>
+    <string name="show_less">Zobrazit méně</string>
+    <string name="search_notes_hint">Hledat poznámky…</string>
+    <string name="type_something_hint">Napište něco…</string>
+    <string name="filter_label">Filtr</string>
+    <string name="sort_label">Řazení</string>
+    <string name="filter_all">Všechny poznámky</string>
+    <string name="filter_text_only">Pouze text</string>
+    <string name="filter_checklist_only">Pouze seznamy úkolů</string>
+    <string name="sort_newest">Nejnovější první</string>
+    <string name="sort_oldest">Nejstarší první</string>
+    <string name="sort_az">A-Z</string>
+    <string name="sort_za">Z-A</string>
+    <string name="gradient_headers_title">Gradientní záhlaví</string>
+    <string name="gradient_headers_desc">Použít gradient na horních lištách, jako v menu</string>
+    <string name="sign_in_to_collaborate">Přihlaste se pro spolupráci</string>
+    <string name="collab_save_copy">Uložit kopii</string>
+    <string name="collab_leave">Odejít</string>
+    <string name="collab_invite">Pozvat</string>
+    <string name="collab_members">Členové</string>
+    <string name="collab_color">Barva</string>
+    <string name="todo_new">Nový seznam</string>
+    <string name="todo_edit">Upravit seznam</string>
+    <string name="collab_members_count">Sdílené • %d členů</string>
+    <string name="collab_new_invite">%1$s vás pozval(a) do \"%2$s\"</string>
+    <string name="import_supported_formats">Podporované formáty</string>
+    <string name="import_format_evernote_title">Evernote</string>
+    <string name="import_format_evernote_desc">Exportujte sešit jako .enex z Evernote a poté zde vyberte tento soubor.</string>
+    <string name="import_format_keep_title">Google Keep</string>
+    <string name="import_format_keep_desc">Exportujte svá data pomocí Google Takeout (pouze Keep) a vyberte výsledný .zip nebo jeden soubor .json.</string>
+    <string name="import_format_plaintext_title">Prostý text / Markdown</string>
+    <string name="import_format_plaintext_desc">Každý soubor .txt nebo .md se stane jednou poznámkou. Markdown zaškrtávací políčka (\"- [ ] \" / \"- [x] \") se importují jako položky seznamu.</string>
+    <string name="changelog_title">Co je nového</string>
+    <string name="changelog_1_0_note_1">První stabilní vydání</string>
+    <string name="changelog_1_0_note_2">Spolupráce na poznámkách a úkolech v reálném čase přes Google přihlášení</string>
+    <string name="changelog_1_0_note_3">Automatická záloha do vlastního Google Drive</string>
+    <string name="changelog_1_0_note_4">Import z prostého textu, Google Keep a Evernote exportů</string>
+    <string name="fab_todo_list">Seznam úkolů</string>
+    <string name="fab_note">Poznámka</string>
+    <string name="fab_new_category">Nová kategorie</string>
+    <string name="section_pinned">Připnuté</string>
+    <string name="section_others">Ostatní</string>
+    <string name="note_title_hint">Název poznámky</string>
+    <string name="category_name_label">Název kategorie</string>
+    <string name="move_to_category">Přesunout do kategorie</string>
+    <string name="change_color">Změnit barvu</string>
+    <string name="no_invitations_title">Žádné pozvánky</string>
+    <string name="no_invitations_message">Nemáte žádné čekající pozvánky. Přihlaste se a začněte spolupracovat s ostatními!</string>
+    <string name="action_edit">Upravit</string>
+    <string name="todo_add_field">Přidat pole</string>
+    <string name="action_pin">Připnout</string>
+    <string name="action_unpin">Odepnout</string>
+    <string name="edit_category">Upravit kategorii</string>
+    <string name="collab_delete_option">Smazat sdílenou poznámku</string>
+    <string name="collab_leave_option">Opustit sdílenou poznámku</string>
+    <string name="dialog_delete_collab_title">Smazat sdílenou poznámku?</string>
+    <string name="dialog_leave_collab_title">Opustit sdílenou poznámku?</string>
+    <string name="dialog_delete_note_title">Smazat poznámku?</string>
+    <string name="dialog_delete_collab_message">Opravdu chcete trvale smazat \"%1$s\"?\n\n• Poznámka bude smazána VŠEM spolupracovníkům\n• Všechna související data budou odstraněna z cloudu\n• Tuto akci nelze vrátit zpět</string>
+    <string name="dialog_leave_collab_message">Opravdu chcete opustit \"%1$s\"?\n\n• Ztratíte přístup k této sdílené poznámce\n• K opětovnému připojení budete potřebovat novou pozvánku\n• Poznámka zůstane dostupná ostatním spolupracovníkům</string>
+    <string name="dialog_delete_note_message">Opravdu chcete smazat \"%1$s\"?\n\nTuto akci nelze vrátit zpět.</string>
+    <string name="delete_everywhere">Smazat všude</string>
+    <string name="leave_note">Opustit poznámku</string>
+    <string name="section_shared_notes">Sdílené poznámky</string>
+    <string name="collaborators_count">Spolupracovníci: %d</string>
+
+    <!-- Backup screen -->
+    <string name="backup_screen_title">Zálohování a obnova</string>
+    <string name="backup_google_drive">Google Drive</string>
+    <string name="backup_signin_desc">Zálohujte si poznámky do cloudu</string>
+    <string name="backup_connected">Připojeno</string>
+    <string name="backup_signin_button">Přihlásit se ke Google Drive</string>
+    <string name="backup_auto_title">Automatická záloha</string>
+    <string name="backup_auto_desc">Automaticky zálohuje vaše poznámky</string>
+    <string name="backup_schedule_daily">Denně v %1$s</string>
+    <string name="backup_schedule_weekly">Týdně v %1$s v %2$s</string>
+    <string name="backup_schedule_monthly">Měsíčně %1$d. den v %2$s</string>
+    <string name="backup_stat_active">Aktivní</string>
+    <string name="backup_stat_archived">Archivované</string>
+    <string name="backup_stat_total">Celkem</string>
+    <string name="backup_create_new">Vytvořit novou zálohu</string>
+    <string name="backup_all_notes">Zálohovat všechny poznámky</string>
+    <string name="backup_active_only">Zálohovat jen aktivní poznámky</string>
+    <string name="backup_existing">Existující zálohy</string>
+    <string name="backup_none_found">Nebyly nalezeny žádné zálohy</string>
+    <string name="backup_show_all">Zobrazit vše (%1$d)</string>
+    <string name="backup_delete_title">Smazat zálohu</string>
+    <string name="backup_delete_message">Opravdu chcete smazat tuto zálohu? Tuto akci nelze vrátit zpět.</string>
+    <string name="backup_tips_title">Tipy k zálohování</string>
+    <string name="backup_tips_text">• Všechny poznámky včetně archivovaných se zálohují na váš Google Drive\n• Vyberte si denní, týdenní nebo měsíční automatickou zálohu — běží i při zavřené aplikaci\n• Kdykoli můžete obnovit libovolnou starší zálohu\n• Staré zálohy se automaticky promazávají (ponechává se posledních 10)</string>
+    <string name="backup_schedule_title">Plán zálohování</string>
+    <string name="backup_frequency">Frekvence</string>
+    <string name="backup_freq_daily">Denně</string>
+    <string name="backup_freq_weekly">Týdně</string>
+    <string name="backup_freq_monthly">Měsíčně</string>
+    <string name="backup_time">Čas</string>
+    <string name="backup_day_of_week">Den v týdnu</string>
+    <string name="backup_day_of_month">Den v měsíci (1–28)</string>
+    <string name="backup_select_time">Vyberte čas</string>
+    <string name="action_set">Nastavit</string>
+    <string name="backup_name_title">Název zálohy</string>
+    <string name="backup_name_desc">Zadejte vlastní název zálohy (volitelné)</string>
+    <string name="backup_name_label">Vlastní název</string>
+    <string name="backup_name_preview">Náhled: %1$s</string>
+    <string name="notif_enable_title">Povolit oznámení</string>
+    <string name="notif_enable_message">Zapněte si oznámení pro MyNotes, abyste věděli, kdy se záloha dokončí.</string>
+    <string name="notif_open_settings">Otevřít nastavení</string>
+    <string name="notif_not_now">Teď ne</string>
+
+    <!-- Import screen -->
+    <string name="import_from_other_title">Import z jiné aplikace</string>
+    <string name="import_from_other_desc">Vyberte exportovaný soubor a jeho obsah se přidá jako nové poznámky. Každá poznámka zůstane oddělená od vašich stávajících.</string>
+    <string name="import_importing">Importuje se…</string>
+    <string name="import_choose_file">Vybrat soubor k importu</string>
+
+    <!-- Collaboration dialogs -->
+    <string name="collab_start_title">Začněte spolupracovat</string>
+    <string name="collab_start_desc">Pracujte na tomto seznamu úkolů společně s ostatními v reálném čase</string>
+    <string name="collab_make_collaborative">Zpřístupnit ke spolupráci</string>
+    <string name="collab_view_invitations">Zobrazit pozvánky</string>
+    <string name="collab_invite_title">Pozvat spolupracovníky</string>
+    <string name="collab_pending_title">Čekající pozvánky</string>
+    <string name="collab_send_invite_tab">Poslat pozvánku</string>
+    <string name="collab_pending_tab">Čekající (%1$d)</string>
+    <string name="collab_email_label">E-mailová adresa</string>
+    <string name="collab_send_invitation">Odeslat pozvánku</string>
+    <string name="collab_no_pending">Žádné čekající pozvánky</string>
+    <string name="collab_from">Od: %1$s</string>
+    <string name="collab_collaborators">Spolupracovníci (%1$d)</string>
+    <string name="collab_no_collaborators">Zatím žádní spolupracovníci</string>
+    <string name="action_accept">Přijmout</string>
+    <string name="action_decline">Odmítnout</string>
+
+    <!-- Invitations screen -->
+    <string name="inv_sign_in_required">Vyžaduje se přihlášení</string>
+    <string name="inv_sign_in_message">Pro zobrazení a správu pozvánek se musíte přihlásit</string>
+    <string name="inv_none_title">Žádné pozvánky</string>
+    <string name="inv_none_message">Momentálně nemáte žádné čekající pozvánky</string>
+
+    <!-- To-do screen -->
+    <string name="todo_progress">Průběh</string>
+    <string name="todo_active_count">Aktivní (%1$d)</string>
+    <string name="todo_completed_count">Dokončené (%1$d)</string>
+
+    <!-- Misc -->
+    <string name="format_clear_color">Zrušit barvu</string>
+    <string name="notes_none_in_category">V této kategorii nejsou žádné poznámky</string>
+    <string name="collab_local_copy_title">%1$s (místní kopie)</string>
+    <string name="collab_local_copy_saved">Místní kopie byla uložena mezi poznámky</string>
+    <string name="backup_shared_notice_title">Sdílené poznámky se nezálohují</string>
+    <string name="backup_shared_notice_text">Sdílené poznámky jsou uloženy v cloudu pod účtem Google, kterým jste přihlášeni, nikoli v této záloze. Zůstávají svázané s tímto účtem: po přihlášení jiným účtem se nezobrazí a když vlastník sdílenou poznámku smaže, zmizí všem. Přes \"Uložit kopii\" ve sdílené poznámce si vytvoříte soukromou místní kopii, která do zálohy patří.</string>
+    <!-- Reminders / import backup / onboarding-skip / first-run tutorial -->
+    <string name="import_backup_title">Obnovit zálohu MyNotes</string>
+    <string name="import_backup_desc">Vyberte soubor zálohy MyNotes (.json), který jste stáhli z Google Disku. Obnoví se barvy, připnutí, skupiny i archivované poznámky. Poznámky, které už v zařízení jsou, se přeskočí.</string>
+    <string name="import_backup_choose_file">Vybrat soubor zálohy</string>
+    <string name="import_backup_success">Obnoveno %1$d poznámek ze zálohy</string>
+    <string name="import_backup_success_with_duplicates">Obnoveno %1$d poznámek, přeskočeno %2$d již existujících</string>
+    <string name="import_backup_failed">Obnovení selhalo: %1$s</string>
+    <string name="import_backup_read_failed">Vybraný soubor se nepodařilo otevřít</string>
+    <string name="import_backup_invalid">Toto nevypadá jako soubor zálohy MyNotes</string>
+    <string name="reminder_channel_name">Připomenutí</string>
+    <string name="reminder_channel_description">Oznámení pro připomenutí poznámek a úkolů</string>
+    <string name="reminder_default_title">Připomenutí</string>
+    <string name="reminder_notification_text">Klepnutím otevřete poznámku</string>
+    <string name="reminder_dialog_title">Připomenutí</string>
+    <string name="reminder_option_later_today">Později dnes</string>
+    <string name="reminder_option_tomorrow">Zítra</string>
+    <string name="reminder_option_next_week">Příští týden</string>
+    <string name="reminder_option_pick">Vybrat datum a čas</string>
+    <string name="reminder_current">Připomenutí nastaveno na %1$s</string>
+    <string name="reminder_remove">Odebrat připomenutí</string>
+    <string name="reminder_menu">Připomenutí</string>
+    <string name="reminder_set_confirmation">Připomenutí nastaveno na %1$s</string>
+    <string name="reminder_removed">Připomenutí odebráno</string>
+    <string name="reminder_past_time_error">Vyberte čas v budoucnosti</string>
+    <string name="reminder_save_note_first">Nejprve uložte poznámku, poté přidejte připomenutí</string>
+    <string name="reminder_inexact_hint">Pro přesná připomenutí povolte aplikaci MyNotes přesné budíky v nastavení systému</string>
+    <string name="onb_skip_dialog_title">Přeskočit nastavení?</string>
+    <string name="onb_skip_dialog_message">Žádný problém — vše lze kdykoli nastavit v Nastavení.</string>
+    <string name="onb_skip_dialog_confirm">Přeskočit</string>
+    <string name="onb_skip_dialog_keep">Pokračovat v nastavení</string>
+    <string name="empty_tutorial_title">Vítejte v MyNotes</string>
+    <string name="empty_tutorial_subtitle">Pár tipů na začátek</string>
+    <string name="empty_tutorial_create_title">Vytvořit poznámku</string>
+    <string name="empty_tutorial_create_desc">Klepnutím na + přidáte poznámku nebo seznam úkolů.</string>
+    <string name="empty_tutorial_drawer_title">Otevřít menu</string>
+    <string name="empty_tutorial_drawer_desc">Kategorie, archiv, koš, zálohování a nastavení najdete v bočním menu.</string>
+    <string name="empty_tutorial_organize_title">Uspořádat a přizpůsobit</string>
+    <string name="empty_tutorial_organize_desc">Podržením poznámky ji připnete, změníte barvu, nastavíte připomenutí nebo přesunete do skupiny.</string>
+    <string name="reminder_toast_in">Připomenutí za %1$s</string>
+</resources>

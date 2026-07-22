@@ -1,0 +1,35 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Note card (kept within the ~33dp safe-zone radius around the 54,54 center
+         so it doesn't get clipped by circular/squircle adaptive icon masks) -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M42,32 L66,32 A6,6 0 0 1 72,38 L72,74 A6,6 0 0 1 66,80 L42,80 A6,6 0 0 1 36,74 L36,38 A6,6 0 0 1 42,32 Z" />
+    <!-- Text lines -->
+    <path
+        android:fillColor="#1976D2"
+        android:fillAlpha="0.35"
+        android:pathData="M42,42 L66,42 L66,46 L42,46 Z" />
+    <path
+        android:fillColor="#1976D2"
+        android:fillAlpha="0.35"
+        android:pathData="M42,50 L66,50 L66,54 L42,54 Z" />
+    <path
+        android:fillColor="#1976D2"
+        android:fillAlpha="0.35"
+        android:pathData="M42,58 L58,58 L58,62 L42,62 Z" />
+    <!-- Completed-task badge -->
+    <path
+        android:fillColor="#FFA726"
+        android:pathData="M59,70 A9,9 0 1 1 77,70 A9,9 0 1 1 59,70 Z" />
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M63,70 L66,74 L75,63" />
+</vector>

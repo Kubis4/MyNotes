@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.MyNotes" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <!-- The note editors host a real AppCompatEditText (RichEditText) inside an
+         AndroidView. AppCompat widgets require an AppCompat theme and log an error
+         otherwise, and the app's own theme is a plain framework Material theme. Rather
+         than re-theming the whole (fully Compose) app, the EditText is constructed with
+         a ContextThemeWrapper around this style. DayNight so the widget's own defaults
+         still follow the system theme. -->
+    <style name="Theme.MyNotes.AppCompatWidget" parent="Theme.AppCompat.DayNight.NoActionBar" />
+
+    <style name="Theme.MyNotes.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#1976D2</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+        <item name="postSplashScreenTheme">@style/Theme.MyNotes</item>
+    </style>
+</resources>
