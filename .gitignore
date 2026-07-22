@@ -16,3 +16,21 @@ local.properties
 /keystore.properties
 *.jks
 *.keystore
+
+# Android Studio / IntelliJ: local IDE + session state. These carry machine-specific
+# paths (emulator AVD paths, usernames) and change constantly, so they don't belong in
+# a public repo. Code style and inspection profiles are real project conventions and
+# stay tracked.
+.idea/*
+!.idea/codeStyles/
+!.idea/inspectionProfiles/
+
+# Kotlin compiler session data
+.kotlin/
+
+# AI assistant working notes (plans, research) - local scratch, not project source
+.artifacts/
+
+# Build outputs, in case one is ever copied outside app/build/
+*.apk
+*.aab
